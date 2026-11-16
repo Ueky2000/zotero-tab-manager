@@ -1,0 +1,47 @@
+{
+  "pluginVersion": "0.5.0",
+  "testDate": "2026-11-16",
+  "sha256": "800ecb198a8d870b1672e54c56964922330e676e269b01799dcc30284ad3deae",
+  "runtimes": [
+    {
+      "zotero": "6.0.36",
+      "platform": "Windows",
+      "xpiChecks": 20,
+      "passed": true
+    },
+    {
+      "zotero": "7.0.32",
+      "platform": "Windows",
+      "xpiChecks": 20,
+      "passed": true
+    },
+    {
+      "zotero": "8.0.4",
+      "platform": "Windows",
+      "xpiChecks": 20,
+      "passed": true
+    },
+    {
+      "zotero": "9.0.6",
+      "platform": "Windows",
+      "xpiChecks": 20,
+      "passed": true
+    },
+    {
+      "zotero": "10.0.8",
+      "platform": "Windows",
+      "xpiChecks": 20,
+      "passed": true
+    }
+  ],
+  "regression": {
+    "zotero": "7.0.32",
+    "checks": 130,
+    "passed": true
+  },
+  "limits": [
+    "macOS and Linux not executed",
+    "Not every patch version executed",
+    "10.0.9 is macOS-only; Windows latest 10.0.8 tested"
+  ]
+}

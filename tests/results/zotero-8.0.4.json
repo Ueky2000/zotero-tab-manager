@@ -1,0 +1,87 @@
+{
+  "version": "8.0.4",
+  "platform": "Windows",
+  "passed": true,
+  "results": [
+    {
+      "name": "Packaged bootstrap starts and mounts UI",
+      "passed": true
+    },
+    {
+      "name": "Plugin installs and is active",
+      "passed": true
+    },
+    {
+      "name": "Disable removes UI",
+      "passed": true
+    },
+    {
+      "name": "Groups render attachment tabs",
+      "passed": true
+    },
+    {
+      "name": "Ungrouped color supported",
+      "passed": true
+    },
+    {
+      "name": "Group collapse hides members",
+      "passed": true
+    },
+    {
+      "name": "Group order updates",
+      "passed": true
+    },
+    {
+      "name": "Bulk display and remarks supported",
+      "passed": true
+    },
+    {
+      "name": "Search matches remarks",
+      "passed": true
+    },
+    {
+      "name": "Remark appears on tab",
+      "passed": true
+    },
+    {
+      "name": "Search panel opens",
+      "passed": true
+    },
+    {
+      "name": "Search cards do not overlap",
+      "passed": true
+    },
+    {
+      "name": "Native tab menu includes remark display actions",
+      "passed": true
+    },
+    {
+      "name": "Settings persist",
+      "passed": true
+    },
+    {
+      "name": "Actual group close closes only its member",
+      "passed": true
+    },
+    {
+      "name": "Close preserves assignment",
+      "passed": true
+    },
+    {
+      "name": "Search-style reveal selects document and expands group",
+      "passed": true
+    },
+    {
+      "name": "Suggestion toolbar label is visible",
+      "passed": true
+    },
+    {
+      "name": "Cleanup removes all controls",
+      "passed": true
+    },
+    {
+      "name": "Packaged plugin re-enables",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+# Changelog
+
+## 0.5.0 — 2026-11-16
+
+- Support one install package for Zotero 6–10.
+- Wait for Zotero 6's main window before initializing the legacy bootstrap.
+- Generate a Firefox 60 compatible module from the shared source.
+- Adapt XUL element creation, window discovery, title formatting and toolbar labels across versions.
+- Use layout spacing and focus selectors available in Firefox 60; keep search cards separated on current versions.
+- Preserve existing plugin identity and local settings.
+- Include reproducible packaging, update metadata, build CI and a compatibility test record.
+
+## 0.4.1
+
+- Set tab label display mode for a whole group.
+- Fix overlapping search results and wrapping of long tab notes.
+
+## Earlier versions
+
+Inline colored tab groups, folding, drag and drop, group ordering, inactivity suggestions, tab notes and open-tab search.

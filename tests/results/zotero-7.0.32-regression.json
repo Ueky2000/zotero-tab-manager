@@ -1,0 +1,525 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "name": "Old groups and document assignments load",
+      "passed": true
+    },
+    {
+      "name": "One-row layout retained",
+      "passed": true
+    },
+    {
+      "name": "Suggestion control is native toolbarbutton at far right",
+      "passed": true
+    },
+    {
+      "name": "Suggestion control is outside scrolling document strip",
+      "passed": true
+    },
+    {
+      "name": "Suggestion button always has an explicit Chinese text label",
+      "passed": true
+    },
+    {
+      "name": "Suggestion text is visibly laid out rather than tooltip-only",
+      "passed": true
+    },
+    {
+      "name": "Suggestion icon uses explicit blue colors instead of context-fill",
+      "passed": true
+    },
+    {
+      "name": "Suggestion control aligns with native controls and right edge",
+      "passed": true
+    },
+    {
+      "name": "Suggestion button stays fixed while document strip scrolls",
+      "passed": true
+    },
+    {
+      "name": "Native toolbar command opens suggestion menu",
+      "passed": true
+    },
+    {
+      "name": "Ungrouped menu contains only applicable options in order",
+      "passed": true
+    },
+    {
+      "name": "Ungrouped has color menu",
+      "passed": true
+    },
+    {
+      "name": "Ungrouped color applies immediately",
+      "passed": true
+    },
+    {
+      "name": "Ungrouped custom color persists",
+      "passed": true
+    },
+    {
+      "name": "Group menu follows requested four-option order",
+      "passed": true
+    },
+    {
+      "name": "All nine colors have a dedicated preview independent of selection",
+      "passed": true
+    },
+    {
+      "name": "All nine preview swatches have visible rendered geometry",
+      "passed": true
+    },
+    {
+      "name": "Selected color uses separate right-side checkmark",
+      "passed": true
+    },
+    {
+      "name": "Invalid colors do not overwrite settings",
+      "passed": true
+    },
+    {
+      "name": "Text contrast follows background",
+      "passed": true
+    },
+    {
+      "name": "Group heading widens as document count rises",
+      "passed": true
+    },
+    {
+      "name": "Heading width is bounded for large groups",
+      "passed": true
+    },
+    {
+      "name": "Custom groups and ungrouped collapse independently",
+      "passed": true
+    },
+    {
+      "name": "Collapsed state serializes for restart",
+      "passed": true
+    },
+    {
+      "name": "Recreated UI restores collapse state",
+      "passed": true
+    },
+    {
+      "name": "Selecting tab preserves drag source DOM",
+      "passed": true
+    },
+    {
+      "name": "Group center gives join marker and explicit label",
+      "passed": true
+    },
+    {
+      "name": "Collapsed group does not open immediately",
+      "passed": true
+    },
+    {
+      "name": "Dwell opens collapsed group without removing source",
+      "passed": true
+    },
+    {
+      "name": "Hover opening is temporary in saved settings",
+      "passed": true
+    },
+    {
+      "name": "Cancelled drag restores collapsed target and clears hints",
+      "passed": true
+    },
+    {
+      "name": "Leaving target cancels delayed expansion",
+      "passed": true
+    },
+    {
+      "name": "Drop joins and persistently opens target group",
+      "passed": true
+    },
+    {
+      "name": "Left edge displays before insertion marker",
+      "passed": true
+    },
+    {
+      "name": "Before drop updates native tab order",
+      "passed": true
+    },
+    {
+      "name": "Right edge displays after insertion marker",
+      "passed": true
+    },
+    {
+      "name": "After drop updates native tab order",
+      "passed": true
+    },
+    {
+      "name": "Document center means join rather than reorder",
+      "passed": true
+    },
+    {
+      "name": "Center drop preserves relative order",
+      "passed": true
+    },
+    {
+      "name": "Dropping onto collapsed ungrouped expands and removes assignment",
+      "passed": true
+    },
+    {
+      "name": "Group drag has a distinct order insertion marker",
+      "passed": true
+    },
+    {
+      "name": "Dragging heading moves entire group before target",
+      "passed": true
+    },
+    {
+      "name": "Ungrouped can also be reordered",
+      "passed": true
+    },
+    {
+      "name": "Group order survives settings reload",
+      "passed": true
+    },
+    {
+      "name": "Group close menu targets only matching document tabs",
+      "passed": true
+    },
+    {
+      "name": "Ungrouped close excludes library and other groups",
+      "passed": true
+    },
+    {
+      "name": "Empty group close is disabled",
+      "passed": true
+    },
+    {
+      "name": "Closing group preserves assignments",
+      "passed": true
+    },
+    {
+      "name": "Suggestion reports exact days for tracked views",
+      "passed": true
+    },
+    {
+      "name": "Currently selected document is excluded from suggestions",
+      "passed": true
+    },
+    {
+      "name": "Unknown prior history is marked as lower bound",
+      "passed": true
+    },
+    {
+      "name": "Old untracked documents are not falsely aged on first install",
+      "passed": true
+    },
+    {
+      "name": "Suggestion menu displays days and has no automatic closure",
+      "passed": true
+    },
+    {
+      "name": "Suggested batch close excludes selected and recent documents",
+      "passed": true
+    },
+    {
+      "name": "Viewing a suggested paper resets its age",
+      "passed": true
+    },
+    {
+      "name": "Suggestion threshold validates and persists",
+      "passed": true
+    },
+    {
+      "name": "Open document set is unchanged by tests",
+      "passed": true
+    },
+    {
+      "name": "Regression: Existing v1 preferences migrated without losing groups",
+      "passed": true
+    },
+    {
+      "name": "Regression: Old independent toolbar absent",
+      "passed": true
+    },
+    {
+      "name": "Regression: Library and groups occupy one row",
+      "passed": true
+    },
+    {
+      "name": "Regression: Pressing background tab preserves DOM for physical drag",
+      "passed": true
+    },
+    {
+      "name": "Regression: Documents appear directly after their group heading",
+      "passed": true
+    },
+    {
+      "name": "Regression: Click collapses only that group",
+      "passed": true
+    },
+    {
+      "name": "Regression: Click expands group",
+      "passed": true
+    },
+    {
+      "name": "Regression: Ungrouped heading collapses its documents independently",
+      "passed": true
+    },
+    {
+      "name": "Regression: Ungrouped heading expands documents",
+      "passed": true
+    },
+    {
+      "name": "Regression: Preset color updates the group immediately",
+      "passed": true
+    },
+    {
+      "name": "Regression: Light colors use dark text and dark colors use white text",
+      "passed": true
+    },
+    {
+      "name": "Regression: Invalid color leaves preferences unchanged",
+      "passed": true
+    },
+    {
+      "name": "Regression: Custom color menu validates and expands shorthand HEX",
+      "passed": true
+    },
+    {
+      "name": "Regression: Cancelling custom color preserves original color",
+      "passed": true
+    },
+    {
+      "name": "Regression: Dragging highlights group drop target",
+      "passed": true
+    },
+    {
+      "name": "Regression: Dropping joins group",
+      "passed": true
+    },
+    {
+      "name": "Regression: Drop into collapsed group expands and joins",
+      "passed": true
+    },
+    {
+      "name": "Regression: Drop on collapsed ungrouped removes assignment and expands it",
+      "passed": true
+    },
+    {
+      "name": "Regression: Native selection reveals collapsed ungrouped",
+      "passed": true
+    },
+    {
+      "name": "Regression: Native right-click menu gains grouping submenu",
+      "passed": true
+    },
+    {
+      "name": "Regression: Right-click joins the clicked background tab",
+      "passed": true
+    },
+    {
+      "name": "Regression: Assignment persists across reload",
+      "passed": true
+    },
+    {
+      "name": "Regression: Custom color persists across reload",
+      "passed": true
+    },
+    {
+      "name": "Regression: Drop on a document joins group and orders before it",
+      "passed": true
+    },
+    {
+      "name": "Regression: Native selection reveals collapsed group",
+      "passed": true
+    },
+    {
+      "name": "Regression: Original open tabs are retained",
+      "passed": true
+    },
+    {
+      "name": "Default remarks are compatible with old settings",
+      "passed": true
+    },
+    {
+      "name": "Original mode shows actual attachment filename",
+      "passed": true
+    },
+    {
+      "name": "Remark-only mode shows literal safe text",
+      "passed": true
+    },
+    {
+      "name": "Combined mode shows original and remark",
+      "passed": true
+    },
+    {
+      "name": "Tooltip retains both names",
+      "passed": true
+    },
+    {
+      "name": "Display settings are per attachment",
+      "passed": true
+    },
+    {
+      "name": "Invalid display mode rejected",
+      "passed": true
+    },
+    {
+      "name": "Overlong remark rejected without overwriting",
+      "passed": true
+    },
+    {
+      "name": "Reopened and duplicate tabs share attachment remark",
+      "passed": true
+    },
+    {
+      "name": "Remark and display mode persist after preferences reload",
+      "passed": true
+    },
+    {
+      "name": "Remark search ignores case",
+      "passed": true
+    },
+    {
+      "name": "Search supports multiple words and Unicode normalization",
+      "passed": true
+    },
+    {
+      "name": "Original filename remains searchable in remark mode",
+      "passed": true
+    },
+    {
+      "name": "Unknown search has no results",
+      "passed": true
+    },
+    {
+      "name": "Empty search lists all open documents, excluding library",
+      "passed": true
+    },
+    {
+      "name": "Native right-click menu has all three display modes",
+      "passed": true
+    },
+    {
+      "name": "Right-click edit affects background tab without switching reader",
+      "passed": true
+    },
+    {
+      "name": "Right-click display mode updates label immediately",
+      "passed": true
+    },
+    {
+      "name": "Remark editor validates maximum length",
+      "passed": true
+    },
+    {
+      "name": "Cancelling editor preserves remark",
+      "passed": true
+    },
+    {
+      "name": "Collapsed documents remain searchable",
+      "passed": true
+    },
+    {
+      "name": "Visible search control opens anchored search panel",
+      "passed": true
+    },
+    {
+      "name": "Live search lists matching remark and original filename",
+      "passed": true
+    },
+    {
+      "name": "Search supports keyboard result navigation",
+      "passed": true
+    },
+    {
+      "name": "Search result opens paper and expands its group",
+      "passed": true
+    },
+    {
+      "name": "Search panel handles no matches",
+      "passed": true
+    },
+    {
+      "name": "Escape dismisses search",
+      "passed": true
+    },
+    {
+      "name": "Clearing remark safely falls back to original name",
+      "passed": true
+    },
+    {
+      "name": "Original item title and filename are unchanged",
+      "passed": true
+    },
+    {
+      "name": "Group menu offers three bulk display modes",
+      "passed": true
+    },
+    {
+      "name": "Group command switches every member to remarks without editing notes",
+      "passed": true
+    },
+    {
+      "name": "Group display does not affect other groups",
+      "passed": true
+    },
+    {
+      "name": "Bulk display also applies while group is collapsed",
+      "passed": true
+    },
+    {
+      "name": "Single document display remains independently adjustable",
+      "passed": true
+    },
+    {
+      "name": "Another group command overrides earlier individual modes",
+      "passed": true
+    },
+    {
+      "name": "Missing note still falls back after bulk change",
+      "passed": true
+    },
+    {
+      "name": "Ungrouped supports bulk display",
+      "passed": true
+    },
+    {
+      "name": "Newly joining document follows configured group mode",
+      "passed": true
+    },
+    {
+      "name": "Group defaults and member settings persist",
+      "passed": true
+    },
+    {
+      "name": "Search results contain multiple test rows",
+      "passed": true
+    },
+    {
+      "name": "Search result cards never overlap",
+      "passed": true
+    },
+    {
+      "name": "Each card contains both lines without overflow",
+      "passed": true
+    },
+    {
+      "name": "Long remarks wrap and expand card height",
+      "passed": true
+    },
+    {
+      "name": "Fixed-height theme cannot collapse search result cards",
+      "passed": true
+    },
+    {
+      "name": "Disable removes inline UI and restores native strip",
+      "passed": true
+    },
+    {
+      "name": "Disable removes search control and panel",
+      "passed": true
+    },
+    {
+      "name": "Original plugin, preferences and tab order restored",
+      "passed": true
+    }
+  ]
+}

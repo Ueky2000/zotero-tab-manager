@@ -1,0 +1,12 @@
+{
+  "name": "zotero-tab-manager",
+  "private": true,
+  "version": "0.5.0",
+  "description": "Your tabs, in order.",
+  "license": "MIT",
+  "scripts": {
+    "build:legacy": "node build-legacy.cjs",
+    "build": "npm run build:legacy && python build.py"
+  },
+  "devDependencies": { "@babel/standalone": "7.26.10" }
+}
