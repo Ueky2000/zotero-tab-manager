@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.1 — 2026-11-17
+
+- Fix many open tabs pushing Zotero's native tab dropdown and Tab Manager's search and suggestions outside the window.
+- Keep overflow inside a horizontally scrollable document strip and reserve space for the right toolbar.
+- Reveal the selected paper when switching to an offscreen tab, including search results.
+- Keep the legacy Zotero 6 action buttons in the tab row.
+- Add regression coverage with 60 additional tabs at 960, 1280 and 1920 pixel widths.
+
 ## 0.5.0 — 2026-11-16
 
 - Support one install package for Zotero 6–10.

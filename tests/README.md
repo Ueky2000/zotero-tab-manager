@@ -17,7 +17,9 @@ Launch the Zotero version to test with these arguments:
 
 Keep the profile and its data directory separate from your normal library. The preparation script refuses an existing profile, disables automatic sync and updates in that profile, and skips automatic Word/LibreOffice integration installation.
 
-The resulting report contains 20 checks. Repeat with a fresh profile for each major version. Successful runtime checks include an actual group-close operation on fixture attachments, native context menus, search result geometry, persisted preferences and enable/disable cleanup.
+The overflow suite opens 60 extra fixture tabs and constrains the tab row to 960, 1280 and 1920 pixels. It verifies fixed toolbar controls and selection of offscreen tabs.
+
+The resulting report contains 34 checks on Zotero 6 and 38 on Zotero 7–10. Repeat with a fresh profile for each major version. Successful runtime checks include an actual group-close operation on fixture attachments, native context menus, search result geometry, persisted preferences and enable/disable cleanup.
 
 `compat-harness.js` is the source; `harness/run-legacy.js` is generated for Firefox 60 by `build-legacy.cjs` alongside the production legacy module.
 

@@ -1,36 +1,36 @@
 {
-  "pluginVersion": "0.5.0",
-  "testDate": "2026-11-16",
-  "sha256": "115c12023589259c440bb8dfc066c4ab283c6f1e08083b1915d6650899b9d7d8",
+  "pluginVersion": "0.5.1",
+  "testDate": "2026-11-17",
+  "sha256": "c101959ee0880348c8bf46000b75c2af4bf913fae4c6d2f0fa08729b7774d198",
   "runtimes": [
     {
       "zotero": "6.0.36",
       "platform": "Windows",
-      "xpiChecks": 20,
+      "xpiChecks": 34,
       "passed": true
     },
     {
       "zotero": "7.0.32",
       "platform": "Windows",
-      "xpiChecks": 20,
+      "xpiChecks": 38,
       "passed": true
     },
     {
       "zotero": "8.0.4",
       "platform": "Windows",
-      "xpiChecks": 20,
+      "xpiChecks": 38,
       "passed": true
     },
     {
       "zotero": "9.0.6",
       "platform": "Windows",
-      "xpiChecks": 20,
+      "xpiChecks": 38,
       "passed": true
     },
     {
       "zotero": "10.0.8",
       "platform": "Windows",
-      "xpiChecks": 20,
+      "xpiChecks": 38,
       "passed": true
     }
   ],
@@ -39,9 +39,18 @@
     "checks": 130,
     "passed": true
   },
+  "overflow": {
+    "extraTabs": 60,
+    "widths": [
+      960,
+      1280,
+      1920
+    ],
+    "baselineFailed": "0.5.0: native dropdown offscreen at 960px",
+    "fixed": true
+  },
   "limits": [
-    "macOS and Linux not executed",
-    "Not every patch version executed",
-    "10.0.9 is macOS-only; Windows latest 10.0.8 tested"
+    "Windows tested; macOS and Linux not executed",
+    "Not every patch version executed"
   ]
 }

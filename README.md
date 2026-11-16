@@ -25,21 +25,25 @@ Tab Manager 就是为了解决这些问题：
 
 ## 安装
 
-下载 [tab-manager-0.5.0.xpi](https://github.com/Ueky2000/zotero-tab-manager/releases/download/v0.5.0/tab-manager-0.5.0.xpi)，在 Zotero「工具 → 插件 → 齿轮 → 从文件安装插件」中选择它。部分版本菜单名称为「附加组件」。可以直接覆盖旧版；必要时重启 Zotero。
+下载 [tab-manager-0.5.1.xpi](https://github.com/Ueky2000/zotero-tab-manager/releases/download/v0.5.1/tab-manager-0.5.1.xpi)，在 Zotero「工具 → 插件 → 齿轮 → 从文件安装插件」中选择它。部分版本菜单名称为「附加组件」。可以直接覆盖旧版；必要时重启 Zotero。
+
+### 0.5.1 修复
+
+修复打开大量文献时，标签栏把右侧原生下拉列表、搜索和“建议关闭”按钮挤出窗口的问题。文献标签现在只在可用区域内横向滚动，鼠标滚轮可左右浏览；切换到溢出的文献时，会自动将对应标签滚入可见区域。分组、备注等已有设置保持不变。
 
 ## 兼容性
 
 同一个 XPI 面向 **Zotero 6.0–10.0.x**，**推荐版本为 Zotero 7**。安装包包含旧版与新版两套安装声明和兼容入口。没有宣称支持未来的大版本。
 
-2026-11-16 在 Windows 上，使用独立配置、独立数据库和实际 XPI 完成以下验证：
+2026-11-17 在 Windows 上，使用独立配置、独立数据库和实际 XPI 完成以下验证：
 
 | Zotero | 安装及核心功能检查 | 状态 |
 | --- | ---: | --- |
-| 6.0.36 | 20 项 | 通过 |
-| 7.0.32 | 20 项，另有 130 项功能回归检查 | 通过 |
-| 8.0.4 | 20 项 | 通过 |
-| 9.0.6 | 20 项 | 通过 |
-| 10.0.8 | 20 项 | 通过 |
+| 6.0.36 | 34 项 | 通过 |
+| 7.0.32 | 38 项，另有 130 项功能回归检查 | 通过 |
+| 8.0.4 | 38 项 | 通过 |
+| 9.0.6 | 38 项 | 通过 |
+| 10.0.8 | 38 项 | 通过 |
 
 最新版 [Zotero 10.0.9](https://www.zotero.org/support/changelog) 仅面向 macOS，Windows 最新版为 10.0.8。macOS、Linux 以及未列出的各补丁版本尚未实机验证；发布范围不等于逐个版本、逐个平台测试过。测试结果见 [COMPATIBILITY.md](COMPATIBILITY.md)。
 
@@ -79,7 +83,7 @@ npm install --ignore-scripts --no-audit --no-fund
 npm run build
 ```
 
-Outputs: `dist/tab-manager-0.5.0.xpi`, `dist/SHA256SUMS`, and `updates.json`. The XPI has deterministic ZIP timestamps. The update manifest supports Zotero 6's Firefox version checks and Zotero 7–10's application version checks.
+Outputs: `dist/tab-manager-0.5.1.xpi`, `dist/SHA256SUMS`, and `updates.json`. The XPI has deterministic ZIP timestamps. The update manifest supports Zotero 6's Firefox version checks and Zotero 7–10's application version checks.
 
 The GitHub build workflow verifies syntax, rebuilds the package, and checks that generated files match the committed files. Runtime tests require Zotero Desktop; see [tests/README.md](tests/README.md). Edit `core.js`, never `core-legacy.js` directly.
 

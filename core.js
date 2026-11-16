@@ -228,6 +228,7 @@ var TabGroups = {
       return n;
     };
     const root = h('div'); root.id = 'ztg-inline'; root.setAttribute('role', 'tablist'); root.setAttribute('aria-label', '文献标签分组');
+    const legacyActions = h('div'); legacyActions.id = 'ztg-actions';
     const suggestions = this.xul(doc, 'toolbarbutton');
     suggestions.id = 'ztg-suggestions'; suggestions.classList.add('zotero-tb-button');
     suggestions.setAttribute('aria-label', '建议关闭的文献');
@@ -254,10 +255,17 @@ var TabGroups = {
     }, { passive: false });
     const style = h('style');
     style.textContent = `
+      /* Bound the entire flex chain: min-width:auto on either ancestor lets
+         the tab contents push Zotero's native toolbar outside the window. */
+      #tab-bar-container[data-ztg-inline] { display:flex !important; min-width:0 !important; overflow:hidden; }
+      #tab-bar-container[data-ztg-inline] > div { min-width:0 !important; width:0; flex:1 1 0% !important; }
+      #tab-bar-container[data-ztg-inline] .tab-bar-inner-container { min-width:0 !important; width:100%; max-width:100%; box-sizing:border-box; }
+      #tab-bar-container[data-ztg-inline] ~ #zotero-tabs-toolbar { flex:0 0 auto; -moz-box-flex:0; }
+      #ztg-actions { display:flex; align-items:center; flex:0 0 auto; -moz-window-dragging:no-drag; }
       #tab-bar-container[data-ztg-inline] .tabs-wrapper,
       #tab-bar-container[data-ztg-inline] .scroll-start-arrow,
       #tab-bar-container[data-ztg-inline] .scroll-end-arrow { display:none !important; }
-      #ztg-inline { display:flex; align-items:center; flex:1; min-width:0; height:38px; overflow-x:auto; overflow-y:hidden; scrollbar-width:thin; -moz-window-dragging:no-drag; font:12px system-ui; }
+      #ztg-inline { display:flex; align-items:center; flex:1 1 0%; width:0; min-width:0; height:38px; overflow-x:auto; overflow-y:hidden; scrollbar-width:thin; -moz-window-dragging:no-drag; font:12px system-ui; }
       #ztg-inline .ztg-section { display:flex; align-items:center; flex:none; height:32px; border-bottom:2px solid var(--ztg-color,transparent); }
       #ztg-inline > * + * { margin-inline-start:5px; }
       #ztg-inline .ztg-section > * + * { margin-inline-start:3px; }
@@ -328,7 +336,9 @@ var TabGroups = {
         const current = host.querySelector('.tab-bar-inner-container');
         if (current && root.parentElement !== current) current.insertBefore(root, current.querySelector('.tabs-wrapper'));
         host.setAttribute('data-ztg-inline', 'true');
-        const toolbar = doc.getElementById('zotero-tabs-toolbar') || host.parentElement;
+        const nativeToolbar = doc.getElementById('zotero-tabs-toolbar');
+        if (!nativeToolbar && current && legacyActions.parentElement !== current) current.append(legacyActions);
+        const toolbar = nativeToolbar || legacyActions;
         if (suggestions.parentElement !== toolbar || toolbar.lastElementChild !== suggestions) toolbar.append(suggestions);
         if (searchButton.parentElement !== toolbar || searchButton.nextElementSibling !== suggestions) toolbar.insertBefore(searchButton, suggestions);
       },
@@ -345,6 +355,7 @@ var TabGroups = {
         this.setCollapsed(this.groupOf(tab), false);
         c.lastSelected = id;
         tabs.select(id); c.refresh();
+        root.querySelector('.ztg-document.selected')?.scrollIntoView({ block:'nearest', inline:'nearest' });
       },
       item: (popup, label, action, attrs = {}) => {
         const n = this.xul(doc, 'menuitem'); n.setAttribute('label', label);
@@ -642,7 +653,7 @@ var TabGroups = {
       for (const popup of popups) { popup.hidePopup(); popup.remove(); }
       doc.querySelectorAll('.ztg-menu').forEach(n => n.remove());
       searchPanel.hidePopup(); searchPanel.remove(); searchButton.remove();
-      host.removeAttribute('data-ztg-inline'); root.remove(); suggestions.remove(); style.remove(); this.windows.delete(win);
+      host.removeAttribute('data-ztg-inline'); root.remove(); suggestions.remove(); legacyActions.remove(); style.remove(); this.windows.delete(win);
     };
     this.windows.set(win, c); c.refresh();
   },

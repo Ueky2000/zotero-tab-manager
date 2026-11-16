@@ -118,6 +118,9 @@ async function runCompatHarness(Zotero, Services, pluginRoot, outputFile, fixtur
     await wait(300);
     check('Search-style reveal selects document and expands group', tabs.selectedID === ta.id && !c.collapsed.has('compat-a'));
     check('Suggestion toolbar label is visible', d.getElementById('ztg-suggestions').getBoundingClientRect().width > 70);
+    const stress = {};
+    Services.scriptloader.loadSubScript(pluginRoot + 'tests/overflow.js', stress, 'UTF-8');
+    await stress.testOverflow(Zotero, p, w, check, wait, a.id);
     p.stop();
     check('Cleanup removes all controls', !d.getElementById('ztg-inline') && !d.getElementById('ztg-search'));
     if (typeof plugin.enable === 'function') await plugin.enable();else plugin.userDisabled = false;

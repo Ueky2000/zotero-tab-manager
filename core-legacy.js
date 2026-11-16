@@ -335,6 +335,8 @@ var TabGroups = {
     root.id = 'ztg-inline';
     root.setAttribute('role', 'tablist');
     root.setAttribute('aria-label', '文献标签分组');
+    const legacyActions = h('div');
+    legacyActions.id = 'ztg-actions';
     const suggestions = this.xul(doc, 'toolbarbutton');
     suggestions.id = 'ztg-suggestions';
     suggestions.classList.add('zotero-tb-button');
@@ -380,10 +382,17 @@ var TabGroups = {
     });
     const style = h('style');
     style.textContent = `
+      /* Bound the entire flex chain: min-width:auto on either ancestor lets
+         the tab contents push Zotero's native toolbar outside the window. */
+      #tab-bar-container[data-ztg-inline] { display:flex !important; min-width:0 !important; overflow:hidden; }
+      #tab-bar-container[data-ztg-inline] > div { min-width:0 !important; width:0; flex:1 1 0% !important; }
+      #tab-bar-container[data-ztg-inline] .tab-bar-inner-container { min-width:0 !important; width:100%; max-width:100%; box-sizing:border-box; }
+      #tab-bar-container[data-ztg-inline] ~ #zotero-tabs-toolbar { flex:0 0 auto; -moz-box-flex:0; }
+      #ztg-actions { display:flex; align-items:center; flex:0 0 auto; -moz-window-dragging:no-drag; }
       #tab-bar-container[data-ztg-inline] .tabs-wrapper,
       #tab-bar-container[data-ztg-inline] .scroll-start-arrow,
       #tab-bar-container[data-ztg-inline] .scroll-end-arrow { display:none !important; }
-      #ztg-inline { display:flex; align-items:center; flex:1; min-width:0; height:38px; overflow-x:auto; overflow-y:hidden; scrollbar-width:thin; -moz-window-dragging:no-drag; font:12px system-ui; }
+      #ztg-inline { display:flex; align-items:center; flex:1 1 0%; width:0; min-width:0; height:38px; overflow-x:auto; overflow-y:hidden; scrollbar-width:thin; -moz-window-dragging:no-drag; font:12px system-ui; }
       #ztg-inline .ztg-section { display:flex; align-items:center; flex:none; height:32px; border-bottom:2px solid var(--ztg-color,transparent); }
       #ztg-inline > * + * { margin-inline-start:5px; }
       #ztg-inline .ztg-section > * + * { margin-inline-start:3px; }
@@ -473,7 +482,9 @@ var TabGroups = {
         const current = host.querySelector('.tab-bar-inner-container');
         if (current && root.parentElement !== current) current.insertBefore(root, current.querySelector('.tabs-wrapper'));
         host.setAttribute('data-ztg-inline', 'true');
-        const toolbar = doc.getElementById('zotero-tabs-toolbar') || host.parentElement;
+        const nativeToolbar = doc.getElementById('zotero-tabs-toolbar');
+        if (!nativeToolbar && current && legacyActions.parentElement !== current) current.append(legacyActions);
+        const toolbar = nativeToolbar || legacyActions;
         if (suggestions.parentElement !== toolbar || toolbar.lastElementChild !== suggestions) toolbar.append(suggestions);
         if (searchButton.parentElement !== toolbar || searchButton.nextElementSibling !== suggestions) toolbar.insertBefore(searchButton, suggestions);
       },
@@ -488,12 +499,17 @@ var TabGroups = {
         this.setCollapsed(id, !c.collapsed.has(id));
       },
       reveal: id => {
+        var _root$querySelector;
         const tab = tabs._tabs.find(t => t.id === id);
         if (!tab) return;
         this.setCollapsed(this.groupOf(tab), false);
         c.lastSelected = id;
         tabs.select(id);
         c.refresh();
+        (_root$querySelector = root.querySelector('.ztg-document.selected')) === null || _root$querySelector === void 0 || _root$querySelector.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest'
+        });
       },
       item: (popup, label, action, attrs = {}) => {
         const n = this.xul(doc, 'menuitem');
@@ -825,7 +841,7 @@ var TabGroups = {
         return n;
       },
       refresh: () => {
-        var _root$querySelector, _root$querySelector2;
+        var _root$querySelector2, _root$querySelector3;
         if (c.disposed) return;
         c.mount();
         c.activitySelectedID = this.track(tabs, c.activitySelectedID);
@@ -849,7 +865,7 @@ var TabGroups = {
         suggestions.setAttribute('tooltiptext', `建议关闭 (${suggested})：${this.state.suggestDays} 天未查看的文献`);
         this.setLabel(suggestions, `建议关闭 (${suggested})`);
         suggestions.setAttribute('aria-label', `建议关闭的文献，${suggested} 篇`);
-        if (selectedChanged) (_root$querySelector = root.querySelector('.ztg-document.selected')) === null || _root$querySelector === void 0 || _root$querySelector.scrollIntoView({
+        if (selectedChanged) (_root$querySelector2 = root.querySelector('.ztg-document.selected')) === null || _root$querySelector2 === void 0 || _root$querySelector2.scrollIntoView({
           block: 'nearest',
           inline: 'nearest'
         });
@@ -935,7 +951,7 @@ var TabGroups = {
             preventScroll: true
           });
         }
-        if (selectedChanged) (_root$querySelector2 = root.querySelector('.ztg-document.selected')) === null || _root$querySelector2 === void 0 || _root$querySelector2.scrollIntoView({
+        if (selectedChanged) (_root$querySelector3 = root.querySelector('.ztg-document.selected')) === null || _root$querySelector3 === void 0 || _root$querySelector3.scrollIntoView({
           block: 'nearest',
           inline: 'nearest'
         });
@@ -1043,6 +1059,7 @@ var TabGroups = {
       host.removeAttribute('data-ztg-inline');
       root.remove();
       suggestions.remove();
+      legacyActions.remove();
       style.remove();
       this.windows.delete(win);
     };

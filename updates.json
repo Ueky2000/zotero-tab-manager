@@ -3,9 +3,9 @@
     "tab-groups@local.zotero": {
       "updates": [
         {
-          "version": "0.5.0",
-          "update_link": "https://raw.githubusercontent.com/Ueky2000/zotero-tab-manager/main/dist/tab-manager-0.5.0.xpi",
-          "update_hash": "sha256:115c12023589259c440bb8dfc066c4ab283c6f1e08083b1915d6650899b9d7d8",
+          "version": "0.5.1",
+          "update_link": "https://raw.githubusercontent.com/Ueky2000/zotero-tab-manager/main/dist/tab-manager-0.5.1.xpi",
+          "update_hash": "sha256:c101959ee0880348c8bf46000b75c2af4bf913fae4c6d2f0fa08729b7774d198",
           "applications": {
             "gecko": {
               "strict_min_version": "60.9",
