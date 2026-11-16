@@ -4,15 +4,32 @@
 
 Your tabs, in order.
 
-Organize Zotero reader tabs into colorful, collapsible groups. Add personal tab notes, find open papers, and revisit tabs you haven't read recently.
+**Tab Manager，让 Zotero 打开的文献井井有条。**
+
+读文献时，我们经常同时打开十几篇甚至几十篇论文：标签挤在顶部，标题显示不全，切换时找不到想看的那篇，也容易忘记每篇论文为什么打开。
+
+Tab Manager 就是为了解决这些问题：
+
+- **按研究主题分组**：把同一课题、方法或阅读任务的文献放在一个分组。完成该部分研究后，可以一键关闭该分组下所有文献。
+- **用颜色和折叠减少干扰**：为不同组设置颜色，暂时不看的组可以折叠。
+- **用自己的话标记论文**：给文献 Tab 添加“重点看实验”“这篇有代码”等备注。
+- **快速找到已打开的文献**：通过备注、文件名或原标题搜索，折叠组里的文献也能找到并跳转。
+- **整理长期挂着的标签**：“建议关闭”会列出长时间没有重新查看的文献，由你决定是否关闭。
+- **延续阅读现场**：保存分组、颜色、组序、备注和折叠状态，重启后继续使用。
+
+拖动文献就能加入分组，右键也能操作；关闭组内标签不会删除文献或附件。
+
+适合经常同时阅读多篇论文、并行推进多个课题，以及习惯把文献一直开着的人。
+
+插件目前面向 **Zotero 6–10** 做了适配性优化，**推荐使用 Zotero 7**。
 
 ## 安装
 
-下载 [tab-manager-0.5.0.xpi](https://raw.githubusercontent.com/Ueky2000/zotero-tab-manager/main/dist/tab-manager-0.5.0.xpi)，在 Zotero「工具 → 插件 → 齿轮 → 从文件安装插件」中选择它。部分版本菜单名称为「附加组件」。可以直接覆盖旧版；必要时重启 Zotero。
+下载 [tab-manager-0.5.0.xpi](https://github.com/Ueky2000/zotero-tab-manager/releases/download/v0.5.0/tab-manager-0.5.0.xpi)，在 Zotero「工具 → 插件 → 齿轮 → 从文件安装插件」中选择它。部分版本菜单名称为「附加组件」。可以直接覆盖旧版；必要时重启 Zotero。
 
 ## 兼容性
 
-同一个 XPI 面向 **Zotero 6.0–10.0.x**，包含旧版与新版两套安装声明和兼容入口。没有宣称支持未来的大版本。
+同一个 XPI 面向 **Zotero 6.0–10.0.x**，**推荐版本为 Zotero 7**。安装包包含旧版与新版两套安装声明和兼容入口。没有宣称支持未来的大版本。
 
 2026-11-16 在 Windows 上，使用独立配置、独立数据库和实际 XPI 完成以下验证：
 

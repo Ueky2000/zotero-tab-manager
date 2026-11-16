@@ -1,0 +1,55 @@
+name: Release
+on:
+  push:
+    branches: [main]
+    paths: [RELEASE_NOTES.md]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify release package
+        run: |
+          python build.py
+          git diff --exit-code -- dist updates.json
+          cd dist
+          sha256sum --check SHA256SUMS
+      - name: Prepare assets
+        run: |
+          version=$(python -c "import json; print(json.load(open('manifest.json'))['version'])")
+          echo "TM_VERSION=$version" >> "$GITHUB_ENV"
+          mkdir -p release-assets
+          cp "dist/tab-manager-$version.xpi" release-assets/
+          git archive --format=zip --prefix=tab-manager/ --output="release-assets/tab-manager-$version-source.zip" HEAD
+          cd release-assets
+          sha256sum *.xpi *.zip > SHA256SUMS
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          tag="v$TM_VERSION"
+          if gh release view "$tag" --repo "$GH_REPO" > /dev/null 2>&1; then
+            echo "Release $tag already exists; leaving it unchanged."
+            exit 0
+          fi
+          gh release create "$tag" release-assets/* \
+            --repo "$GH_REPO" \
+            --target "$GITHUB_SHA" \
+            --title "Tab Manager $TM_VERSION" \
+            --notes-file RELEASE_NOTES.md \
+            --latest
