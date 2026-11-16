@@ -17,6 +17,7 @@ def build():
     with zipfile.ZipFile(xpi,'w',zipfile.ZIP_DEFLATED) as archive:
         for name in sorted(RUNTIME):
             info=zipfile.ZipInfo(name,date_time=(2026,1,1,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED
+            info.create_system=3  # Stable ZIP metadata on Windows, macOS and Linux.
             info.external_attr=0o644<<16;archive.writestr(info,(ROOT/name).read_bytes())
     digest=hashlib.sha256(xpi.read_bytes()).hexdigest()
     # Zotero 6 uses the Firefox platform version in applications.gecko.
@@ -27,8 +28,8 @@ def build():
             'gecko':{'strict_min_version':'60.9','strict_max_version':'60.9'},
             'zotero':{'strict_min_version':'6.999','strict_max_version':app['strict_max_version']}
         }}]}}}
-    (ROOT/'updates.json').write_text(json.dumps(updates,indent=2)+'\n',encoding='utf-8')
-    (destination/'SHA256SUMS').write_text(digest+'  '+xpi.name+'\n',encoding='utf-8')
+    (ROOT/'updates.json').write_bytes((json.dumps(updates,indent=2)+'\n').encode('utf-8'))
+    (destination/'SHA256SUMS').write_bytes((digest+'  '+xpi.name+'\n').encode('utf-8'))
     with zipfile.ZipFile(xpi) as archive:
         assert archive.testzip() is None
         assert set(archive.namelist())==set(RUNTIME)
