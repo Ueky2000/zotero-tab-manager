@@ -14,7 +14,7 @@ async function runCompatHarness(Zotero, Services, pluginRoot, outputFile, fixtur
     if(typeof plugin.disable==='function')await plugin.disable();else {plugin.userDisabled=true;await wait(100);}
     check('Disable removes UI',!w.document.getElementById('ztg-inline'));
     scope={Zotero,Services};
-    Services.scriptloader.loadSubScript(pluginRoot+(major<7?'core-legacy.js':'core.js'),scope,'UTF-8');
+    Services.scriptloader.loadSubScript(pluginRoot+'src/'+(major<7?'core-legacy.js':'core.js'),scope,'UTF-8');
     await scope.startup();
     const p=scope.TabGroups,c=p.windows.get(w),tabs=w.Zotero_Tabs,d=w.document;
     const a=await Zotero.Attachments.linkFromFile({file:fixtureDir+'fixture-a.pdf'});

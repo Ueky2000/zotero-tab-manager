@@ -34,7 +34,7 @@ async function runCompatHarness(Zotero, Services, pluginRoot, outputFile, fixtur
       Zotero,
       Services
     };
-    Services.scriptloader.loadSubScript(pluginRoot + (major < 7 ? 'core-legacy.js' : 'core.js'), scope, 'UTF-8');
+    Services.scriptloader.loadSubScript(pluginRoot + 'src/' + (major < 7 ? 'core-legacy.js' : 'core.js'), scope, 'UTF-8');
     await scope.startup();
     const p = scope.TabGroups,
       c = p.windows.get(w),

@@ -13,10 +13,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: npm install --ignore-scripts --no-audit --no-fund
-      - run: npm run build
-      - run: node --check bootstrap.js && node --check core.js && node --check core-legacy.js
-      - run: git diff --exit-code -- core-legacy.js tests/harness/run-legacy.js updates.json dist
+      - run: npm --prefix scripts install --ignore-scripts --no-audit --no-fund
+      - run: npm --prefix scripts run build
+      - run: node --check src/bootstrap.js && node --check src/core.js && node --check src/core-legacy.js
+      - run: git diff --exit-code -- src/core-legacy.js tests/harness/run-legacy.js updates.json dist
       - uses: actions/upload-artifact@v4
         with:
           name: tab-manager

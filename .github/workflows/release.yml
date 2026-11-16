@@ -2,7 +2,7 @@ name: Release
 on:
   push:
     branches: [main]
-    paths: [RELEASE_NOTES.md]
+    paths: [docs/RELEASE_NOTES.md]
   workflow_dispatch:
 permissions:
   contents: read
@@ -24,13 +24,13 @@ jobs:
           python-version: '3.12'
       - name: Verify release package
         run: |
-          python build.py
+          python scripts/build.py
           git diff --exit-code -- dist updates.json
           cd dist
           sha256sum --check SHA256SUMS
       - name: Prepare assets
         run: |
-          version=$(python -c "import json; print(json.load(open('manifest.json'))['version'])")
+          version=$(python -c "import json; print(json.load(open('src/manifest.json'))['version'])")
           echo "TM_VERSION=$version" >> "$GITHUB_ENV"
           mkdir -p release-assets
           cp "dist/tab-manager-$version.xpi" release-assets/
@@ -51,5 +51,5 @@ jobs:
             --repo "$GH_REPO" \
             --target "$GITHUB_SHA" \
             --title "Tab Manager $TM_VERSION" \
-            --notes-file RELEASE_NOTES.md \
+            --notes-file docs/RELEASE_NOTES.md \
             --latest

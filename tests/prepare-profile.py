@@ -23,7 +23,7 @@ profile.mkdir(parents=True);report.parent.mkdir(parents=True,exist_ok=True)
 data=profile/'data';data.mkdir();extensions=profile/'extensions';extensions.mkdir()
 fixtures=profile/'fixtures';fixtures.mkdir()
 for label in ['a','b']:fixture(fixtures/f'fixture-{label}.pdf',label)
-manifest=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+manifest=json.loads((root/'src/manifest.json').read_text(encoding='utf-8'))
 shutil.copyfile(root/'dist'/f'tab-manager-{manifest["version"]}.xpi',extensions/(manifest['applications']['zotero']['id']+'.xpi'))
 (extensions/'test-harness@tab-manager.local').write_text(str(root/'tests/harness'),encoding='utf-8')
 prefs={'extensions.zotero.dataDir':str(data),'extensions.zotero.useDataDir':True,

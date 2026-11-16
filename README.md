@@ -1,4 +1,4 @@
-<img src="icon-96.png" width="64" alt="Tab Manager icon">
+<img src="src/icons/icon-96.png" width="64" alt="Tab Manager icon">
 
 # Tab Manager
 
@@ -45,7 +45,7 @@ Tab Manager 就是为了解决这些问题：
 | 9.0.6 | 38 项 | 通过 |
 | 10.0.8 | 38 项 | 通过 |
 
-最新版 [Zotero 10.0.9](https://www.zotero.org/support/changelog) 仅面向 macOS，Windows 最新版为 10.0.8。macOS、Linux 以及未列出的各补丁版本尚未实机验证；发布范围不等于逐个版本、逐个平台测试过。测试结果见 [COMPATIBILITY.md](COMPATIBILITY.md)。
+最新版 [Zotero 10.0.9](https://www.zotero.org/support/changelog) 仅面向 macOS，Windows 最新版为 10.0.8。macOS、Linux 以及未列出的各补丁版本尚未实机验证；发布范围不等于逐个版本、逐个平台测试过。测试结果见 [COMPATIBILITY.md](docs/COMPATIBILITY.md)。
 
 ## 使用
 
@@ -66,28 +66,14 @@ Tab Manager 就是为了解决这些问题：
 
 插件 ID `tab-groups@local.zotero` 和配置键 `extensions.tabGroups.state` 保持不变，旧版分组、备注与查看记录可继续使用。查看间隔从插件开始记录时计算，不推测启用之前的历史。
 
-运行功能不上传文献信息；Zotero 自身会按照其插件更新设置访问本仓库托管的更新清单和安装包。若维护者更换仓库，需要同时修改两个安装声明与 `build.py` 中的地址，再重新打包。
+运行功能不上传文献信息；Zotero 自身会按照其插件更新设置访问本仓库托管的更新清单和安装包。若维护者更换仓库，需要同时修改两个安装声明与 `scripts/build.py` 中的地址，再重新打包。
 
-## Build
+## 开发与文档
 
-Requires Node.js and Python 3. The generated legacy module is committed, so packaging alone needs only Python:
-
-```sh
-python build.py
-```
-
-After editing `core.js`, regenerate the Firefox 60 module and package:
-
-```sh
-npm install --ignore-scripts --no-audit --no-fund
-npm run build
-```
-
-Outputs: `dist/tab-manager-0.5.1.xpi`, `dist/SHA256SUMS`, and `updates.json`. The XPI has deterministic ZIP timestamps. The update manifest supports Zotero 6's Firefox version checks and Zotero 7–10's application version checks.
-
-The GitHub build workflow verifies syntax, rebuilds the package, and checks that generated files match the committed files. Runtime tests require Zotero Desktop; see [tests/README.md](tests/README.md). Edit `core.js`, never `core-legacy.js` directly.
+- [更新日志](docs/CHANGELOG.md)
+- [兼容性与测试记录](docs/COMPATIBILITY.md)
+- [构建与目录说明](docs/DEVELOPMENT.md)
 
 ## License
 
 [MIT](LICENSE).
-
