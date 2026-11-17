@@ -26,8 +26,26 @@
   <a href="https://zotero-chinese.com/plugins/"><img src="https://zotero-chinese.com/badges/listed.svg" alt="Zotero 中文社区 · 已收录"></a>
 </p>
 
+<p align="center"><strong>📝 其他语言 / Other Languages</strong></p>
+
 <p align="center">
-  <a href="https://github.com/Ueky2000/zotero-tab-manager/releases/latest"><strong>下载插件</strong></a> ·
+  <a href="docs/i18n/README.en.md">English</a> |
+  <a href="docs/i18n/README.ja.md">日本語</a> |
+  <a href="docs/i18n/README.ko.md">한국어</a> |
+  <a href="docs/i18n/README.it.md">Italiano</a> |
+  <a href="docs/i18n/README.fr.md">Français</a>
+</p>
+
+> **Note:** These translations are AI-generated and may contain inaccuracies. For the authoritative version, please refer to this Chinese README.
+
+<p align="center">
+  <strong>📦 下载最新版本：</strong>
+  <a href="https://github.com/Ueky2000/zotero-tab-manager/releases/latest">Zotero 插件 XPI</a> ·
+  <a href="https://github.com/Ueky2000/zotero-tab-manager/releases">历史版本</a> ·
+  <a href="#使用指南">使用文档</a>
+</p>
+
+<p align="center">
   <a href="#快速开始">快速开始</a> ·
   <a href="#使用指南">使用指南</a> ·
   <a href="docs/CHANGELOG.md">更新日志</a> ·
