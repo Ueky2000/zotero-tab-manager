@@ -8,11 +8,18 @@
 <p align="center"><strong>让 Zotero 打开的文献井井有条。</strong></p>
 
 <p align="center">
-  <a href="https://github.com/Ueky2000/zotero-tab-manager/releases/latest"><img src="https://img.shields.io/github/v/release/Ueky2000/zotero-tab-manager?style=flat&amp;label=Release&amp;color=6366f1" alt="最新发布版本"></a>
-  <a href="#兼容性"><img src="https://img.shields.io/badge/Zotero-6%E2%80%9310-cc2936?style=flat" alt="适配 Zotero 6–10；推荐 Zotero 7"></a>
-  <a href="https://github.com/Ueky2000/zotero-tab-manager/releases"><img src="https://img.shields.io/github/downloads/Ueky2000/zotero-tab-manager/total?style=flat&amp;label=Downloads&amp;color=0d9488" alt="GitHub Release 附件总下载量"></a>
-  <a href="https://github.com/Ueky2000/zotero-tab-manager/actions/workflows/build.yml"><img src="https://github.com/Ueky2000/zotero-tab-manager/actions/workflows/build.yml/badge.svg" alt="构建状态"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-64748b?style=flat" alt="MIT 许可证"></a>
+  <a href="#兼容性"><img src="https://img.shields.io/badge/Zotero-6-e05d66?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 6"></a>
+  <a href="#兼容性"><img src="https://img.shields.io/badge/Zotero-7-ed8b45?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 7"></a>
+  <a href="#兼容性"><img src="https://img.shields.io/badge/Zotero-8-d9ab3c?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 8"></a>
+  <a href="#兼容性"><img src="https://img.shields.io/badge/Zotero-9-6ba753?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 9"></a>
+  <a href="#兼容性"><img src="https://img.shields.io/badge/Zotero-10-24a698?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 10"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Ueky2000/zotero-tab-manager/releases/latest"><img src="https://img.shields.io/github/v/release/Ueky2000/zotero-tab-manager?style=flat-square&amp;logo=github&amp;logoColor=white&amp;label=Release&amp;labelColor=555555&amp;color=7868c9" alt="最新发布版本"></a>
+  <a href="https://github.com/Ueky2000/zotero-tab-manager/releases"><img src="https://img.shields.io/github/downloads/Ueky2000/zotero-tab-manager/total?style=flat-square&amp;label=Downloads&amp;labelColor=555555&amp;color=24a698" alt="GitHub Release 附件总下载量"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-ed8b45?style=flat-square&amp;labelColor=555555" alt="MIT 许可证"></a>
+  <a href="https://github.com/Ueky2000/zotero-tab-manager/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/Ueky2000/zotero-tab-manager/build.yml?branch=main&amp;style=flat-square&amp;logo=githubactions&amp;logoColor=white&amp;label=Build&amp;labelColor=555555&amp;color=6ba753" alt="构建状态"></a>
 </p>
 
 <p align="center">
@@ -51,7 +58,7 @@ Tab Manager 把顶部拥挤的标签，整理成有主题、有颜色、有阅�
 
 适合经常同时阅读多篇论文、并行推进多个课题，以及习惯把文献一直开着的人。
 
-插件目前面向 **Zotero 6–10** 做了适配性优化，**推荐使用 Zotero 7**。
+插件目前面向 **Zotero 6–10** 做了适配性优化。
 
 ## 快速开始
 
@@ -61,7 +68,7 @@ Tab Manager 把顶部拥挤的标签，整理成有主题、有颜色、有阅�
 
 已有旧版可直接覆盖安装；必要时重启 Zotero。
 
-> **推荐使用 Zotero 7。** 同一个安装包面向 Zotero 6–10，具体验证范围见下方兼容性说明。
+> 同一个安装包面向 Zotero 6–10，具体验证范围见下方兼容性说明。
 
 <details>
 <summary>最近更新 · v0.5.1：大量标签也能顺畅切换</summary>
@@ -85,7 +92,7 @@ Tab Manager 把顶部拥挤的标签，整理成有主题、有颜色、有阅�
 
 ## 兼容性
 
-同一个 XPI 面向 **Zotero 6.0–10.0.x**，**推荐版本为 Zotero 7**。
+同一个 XPI 面向 **Zotero 6.0–10.0.x**。
 
 <details>
 <summary>查看已验证版本与测试范围</summary>
@@ -95,7 +102,7 @@ Tab Manager 把顶部拥挤的标签，整理成有主题、有颜色、有阅�
 | Zotero | 安装及核心功能检查 | 状态 |
 | --- | ---: | --- |
 | 6.0.36 | 34 项 | 通过 |
-| **7.0.32（推荐）** | **38 项，另有 130 项功能回归检查** | **通过** |
+| 7.0.32 | 38 项，另有 130 项功能回归检查 | 通过 |
 | 8.0.4 | 38 项 | 通过 |
 | 9.0.6 | 38 项 | 通过 |
 | 10.0.8 | 38 项 | 通过 |
