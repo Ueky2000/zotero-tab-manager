@@ -1,7 +1,7 @@
 <img src="src/icons/icon-96.png" width="64" alt="Tab Manager icon">
 
 # Tab Manager
-
+[![Zotero 中文社区 · 已收录](https://zotero-chinese.com/badges/listed.svg)](https://zotero-chinese.com/plugins/)
 Your tabs, in order.
 
 **Tab Manager，让 Zotero 打开的文献井井有条。**
