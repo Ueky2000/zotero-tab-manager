@@ -54,7 +54,6 @@
 
 <p align="center">
   <img src="docs/assets/tab-manager-overview.svg" width="100%" alt="Tab Manager 功能示意：研究主题分组与文献标签位于同一行，颜色区分分组，备注标记阅读重点，右侧可搜索或查看建议关闭的文献。">
-  <br><sub>功能示意图 · 分组与文献标签在同一行</sub>
 </p>
 
 ## 为什么做 Tab Manager
