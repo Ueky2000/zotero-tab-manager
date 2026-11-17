@@ -23,6 +23,8 @@ Quando apri decine di articoli, le schede si affollano, i titoli vengono troncat
 
 Gruppi e schede dei documenti occupano la stessa riga. Chiudere le schede non elimina documenti o allegati dalla libreria.
 
+Tab Manager è stato adattato per **Zotero 6–10**, con supporto per più versioni.
+
 ## Installazione
 
 1. Scarica il file **`.xpi`** dalla [versione più recente](https://github.com/Ueky2000/zotero-tab-manager/releases/latest).
@@ -34,20 +36,18 @@ Puoi installare sopra una versione precedente mantenendo le impostazioni. Riavvi
 ## Utilizzo
 
 - **Gruppi:** trascina una scheda sul nome del gruppo oppure usa il menu contestuale della scheda. Fai clic sul nome per comprimere o espandere; trascina il nome per cambiare l'ordine dei gruppi.
-- **Trascinamento:** gli indicatori distinguono l'aggiunta a un gruppo dall'inserimento prima o dopo un documento. Sosta circa 600 ms su un gruppo compresso per espanderlo temporaneamente; annullando il trascinamento si ripristina lo stato precedente.
+- **Trascinamento:** gli indicatori distinguono l'aggiunta a un gruppo dall'inserimento prima o dopo un documento.
 - **Colori:** dal menu contestuale del gruppo scegli un colore predefinito o inserisci un valore esadecimale. È possibile anche per le schede senza gruppo.
 - **Promemoria:** impostali dal menu della scheda. Il menu del gruppo permette di uniformare la visualizzazione delle schede attuali e di quelle che verranno aggiunte.
 - **Ricerca:** usa il comando a destra. Selezionando un risultato, il gruppo si espande e il documento diventa attivo.
 - **Chiusure suggerite:** il comando all'estrema destra elenca i documenti inattivi; la soglia predefinita di 7 giorni è modificabile. Non chiude nulla automaticamente. Gli intervalli sono calcolati da quando il plugin inizia a registrare le visite.
-- **Chiudi le schede del gruppo:** il menu contestuale chiude le schede di lettura e conserva le assegnazioni. Sciogliere un gruppo rimuove invece il raggruppamento.
-
-Ordine del menu del gruppo: rinomina, sciogli, colore, visualizzazione delle schede, chiudi tutte le schede del gruppo.
+- **Chiudi le schede del gruppo:** il menu contestuale chiude le schede di lettura e conserva le assegnazioni.
 
 La versione 0.5.1 risolve il problema delle schede numerose che spingevano i comandi fuori dalla finestra. La rotellina permette lo scorrimento orizzontale; attivare una scheda fuori vista la rende visibile automaticamente.
 
 ## Compatibilità
 
-Un unico XPI è destinato a **Zotero 6.0–10.0.x**. Il 2026-11-17, su profili Windows isolati, sono stati superati 34 controlli di installazione e funzionalità principali su 6.0.36 e 38 ciascuno su 7.0.32, 8.0.4, 9.0.6 e 10.0.8. Su 7.0.32 sono passati anche 130 controlli di regressione. macOS, Linux e le altre versioni di manutenzione non sono stati verificati su installazioni reali. Consulta il [registro dei test](../COMPATIBILITY.md).
+Tab Manager è stato adattato per **Zotero 6.0–10.0.x**, con supporto per più versioni. Il 2026-11-17, su profili Windows isolati, sono stati superati 34 controlli di installazione e funzionalità principali su 6.0.36 e 38 ciascuno su 7.0.32, 8.0.4, 9.0.6 e 10.0.8. Su 7.0.32 sono passati anche 130 controlli di regressione. macOS, Linux e le altre versioni di manutenzione non sono stati verificati su installazioni reali. Consulta il [registro dei test](../COMPATIBILITY.md).
 
 ## Dati e aggiornamenti
 

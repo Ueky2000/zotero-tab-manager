@@ -23,6 +23,8 @@ Quand on ouvre des dizaines d'articles, les onglets s'accumulent, les titres son
 
 Les groupes et les onglets des documents partagent la même ligne. Fermer des onglets ne supprime ni les références ni les pièces jointes de la bibliothèque.
 
+Tab Manager a été adapté à **Zotero 6–10** et prend en charge plusieurs versions.
+
 ## Installation
 
 1. Téléchargez le fichier **`.xpi`** depuis la [dernière version](https://github.com/Ueky2000/zotero-tab-manager/releases/latest).
@@ -34,20 +36,18 @@ Vous pouvez installer par-dessus une ancienne version en conservant vos réglage
 ## Utilisation
 
 - **Groupes :** faites glisser un onglet sur le nom d'un groupe ou utilisez son menu contextuel. Cliquez sur le nom pour replier ou déplier le groupe ; faites glisser le nom pour modifier l'ordre des groupes.
-- **Glisser-déposer :** les repères distinguent l'ajout à un groupe de l'insertion avant ou après un document. Survolez un groupe replié pendant environ 600 ms pour le déplier temporairement ; annuler le déplacement rétablit son état.
+- **Glisser-déposer :** les repères distinguent l'ajout à un groupe de l'insertion avant ou après un document.
 - **Couleurs :** dans le menu du groupe, choisissez une couleur prédéfinie ou saisissez une valeur hexadécimale. Cela fonctionne aussi pour les onglets non groupés.
 - **Mémos :** définissez-les dans le menu de l'onglet. Le menu du groupe permet d'uniformiser l'affichage des membres actuels et futurs.
 - **Recherche :** utilisez la commande à droite. Sélectionner un résultat déplie son groupe et active le document.
 - **Suggestions de fermeture :** le bouton tout à droite liste les documents inactifs ; le seuil par défaut de 7 jours est réglable. Rien n'est fermé automatiquement. Le suivi commence lorsque le plugin commence à enregistrer les consultations.
-- **Fermer les onglets d'un groupe :** le menu du groupe ferme les onglets de lecture en conservant leur appartenance au groupe. Dissoudre le groupe supprime plutôt le regroupement.
-
-Ordre du menu du groupe : renommer, dissoudre, couleur, affichage des onglets, fermer tous les onglets du groupe.
+- **Fermer les onglets d'un groupe :** le menu du groupe ferme les onglets de lecture en conservant leur appartenance au groupe.
 
 La version 0.5.1 corrige le débordement des onglets qui masquait les commandes à droite. La molette permet le défilement horizontal et l'activation d'un onglet hors champ le ramène automatiquement dans la zone visible.
 
 ## Compatibilité
 
-Un même XPI vise **Zotero 6.0–10.0.x**. Le 2026-11-17, des profils Windows isolés ont passé 34 vérifications d'installation et de fonctions principales sur 6.0.36, puis 38 chacune sur 7.0.32, 8.0.4, 9.0.6 et 10.0.8. La version 7.0.32 a aussi passé 130 vérifications de non-régression. macOS, Linux et les autres versions correctives n'ont pas été vérifiés sur des installations réelles. Voir le [compte rendu des tests](../COMPATIBILITY.md).
+Tab Manager a été adapté à **Zotero 6.0–10.0.x** et prend en charge plusieurs versions. Le 2026-11-17, des profils Windows isolés ont passé 34 vérifications d'installation et de fonctions principales sur 6.0.36, puis 38 chacune sur 7.0.32, 8.0.4, 9.0.6 et 10.0.8. La version 7.0.32 a aussi passé 130 vérifications de non-régression. macOS, Linux et les autres versions correctives n'ont pas été vérifiés sur des installations réelles. Voir le [compte rendu des tests](../COMPATIBILITY.md).
 
 ## Données et mises à jour
 

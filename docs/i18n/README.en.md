@@ -23,6 +23,8 @@ Reading often means opening dozens of papers at once. Tabs crowd together, title
 
 Groups and paper tabs share one row. Closing tabs never deletes library items or attachments.
 
+Tab Manager has been adapted for **Zotero 6–10**, supporting multiple versions.
+
 ## Installation
 
 1. Open the [latest release](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) and download the **`.xpi`** asset.
@@ -34,20 +36,18 @@ Install over an older version to keep your settings. Restart Zotero if necessary
 ## Usage
 
 - **Groups:** Drag a tab onto a group name, or assign it through the tab's context menu. Click a group name to collapse or expand it. Drag group names to reorder groups.
-- **Drag and drop:** Insertion markers distinguish joining a group from inserting beside another paper. Hover over a collapsed group for about 600 ms to expand it temporarily; cancelling the drag restores its state.
+- **Drag and drop:** Insertion markers distinguish joining a group from inserting beside another paper.
 - **Colors:** Right-click a group to choose a preset or enter a hexadecimal color. This also works for ungrouped tabs.
 - **Remarks:** Right-click a paper tab to set its remark and display mode. Use the group's context menu to apply one display mode to current and future members.
 - **Search:** Use the search control on the right. Selecting a result expands its group and activates the paper.
 - **Suggested closures:** The far-right control lists inactive papers; the default threshold is 7 days and can be changed. It never closes papers automatically. Tracking starts when the plugin begins recording visits.
-- **Close group tabs:** The group's context menu closes its reading tabs and preserves group assignments. Dissolving a group removes the grouping instead.
-
-Group menu order: rename, dissolve, color, tab display, close all group tabs.
+- **Close group tabs:** The group's context menu closes its reading tabs and preserves group assignments.
 
 Version 0.5.1 fixes crowded tabs pushing the toolbar out of view. Tabs scroll horizontally with the mouse wheel, and activating an offscreen tab scrolls it into view.
 
 ## Compatibility
 
-One XPI targets **Zotero 6.0–10.0.x**. On 2026-11-17, isolated Windows profiles passed 34 installation/core checks on 6.0.36 and 38 each on 7.0.32, 8.0.4, 9.0.6, and 10.0.8. Zotero 7.0.32 also passed 130 regression checks. macOS, Linux, and other patch versions have not been tested on actual installations. See the [test record](../COMPATIBILITY.md).
+Tab Manager has been adapted for **Zotero 6.0–10.0.x**, supporting multiple versions. On 2026-11-17, isolated Windows profiles passed 34 installation/core checks on 6.0.36 and 38 each on 7.0.32, 8.0.4, 9.0.6, and 10.0.8. Zotero 7.0.32 also passed 130 regression checks. macOS, Linux, and other patch versions have not been tested on actual installations. See the [test record](../COMPATIBILITY.md).
 
 ## Data and updates
 
