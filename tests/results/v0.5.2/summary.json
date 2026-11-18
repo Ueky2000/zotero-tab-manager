@@ -20,5 +20,7 @@
     }
   ],
   "stateAssertions": 24,
-  "xpiSHA256": "115c4f0c5e56d112ddf51488619c53964d3b28505a5007f1ce6473feb71e2919"
+  "xpiSHA256": "c84d9fd51bde94bf85e1fb908c4e284ea4f0c74c013fbebb284e5305a2837ec4",
+  "runtimeTestXpiSHA256": "115c4f0c5e56d112ddf51488619c53964d3b28505a5007f1ce6473feb71e2919",
+  "packageTextNewlinesNormalizedOnly": true
 }

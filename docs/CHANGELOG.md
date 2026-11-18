@@ -6,6 +6,7 @@
 - Size group headings by their names, with a bounded width that no longer grows with the number of open papers.
 - Keep Zotero's original library tab visible to the left of the grouped strip, independent of native overflow detection, including Zotero 10.0.1.
 - Verify returning to the library after scrolling through many tabs, plus fixed controls at 960, 1280 and 1920 pixel widths.
+- Normalize packaged text line endings so Windows and Linux builds produce the same XPI hash.
 
 ## 0.5.1 — 2026-11-17
 

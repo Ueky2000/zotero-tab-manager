@@ -19,7 +19,13 @@ def build():
         for name in sorted(RUNTIME):
             info=zipfile.ZipInfo(name,date_time=(2026,1,1,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED
             info.create_system=3  # Stable ZIP metadata on Windows, macOS and Linux.
-            info.external_attr=0o644<<16;archive.writestr(info,(ROOT/name if name=='LICENSE' else SRC/'icons'/name if name.startswith('icon') else SRC/name).read_bytes())
+            info.external_attr=0o644<<16
+            content=(ROOT/name if name=='LICENSE' else SRC/'icons'/name if name.startswith('icon') else SRC/name).read_bytes()
+            # A Windows checkout or contents-API upload can change text line endings.
+            # Normalize packaged text so local and CI archives are byte-identical.
+            if not name.startswith('icon'):
+                content=content.replace(b'\r\n',b'\n')
+            archive.writestr(info,content)
     digest=hashlib.sha256(xpi.read_bytes()).hexdigest()
     # Zotero 6 uses the Firefox platform version in applications.gecko.
     # Zotero 7+ uses its own app version in applications.zotero.

@@ -2,7 +2,7 @@
 
 ## Version 0.5.2 — 2026-11-18
 
-The final XPI was tested on Windows in new isolated profiles, reusing only the synthetic test databases created during this run to avoid reinstalling bundled translators. No normal user profile or library was used. The test harness is now packaged as an XPI instead of relying on an extension-directory pointer.
+The runtime-verified XPI was tested on Windows in new isolated profiles, reusing only the synthetic test databases created during this run to avoid reinstalling bundled translators. No normal user profile or library was used. The test harness is now packaged as an XPI instead of relying on an extension-directory pointer.
 
 | Runtime | XPI / UI checks | Result |
 | --- | ---: | --- |
@@ -14,7 +14,9 @@ All three passed original-library-tab visibility at 960, 1280 and 1920px, select
 
 `node tests/layout.cjs` passes 12 assertions for each of the modern and Firefox 60 sources (24 total), including migration of old ungrouped-first settings, retention of assignments/remarks/colors/folding, persistence of subsequent manual reordering, insertion of new groups before ungrouped across restart, and name-based width limits.
 
-Reports: `tests/results/v0.5.2/`. XPI SHA256: `115c4f0c5e56d112ddf51488619c53964d3b28505a5007f1ce6473feb71e2919`.
+Reports: `tests/results/v0.5.2/`. XPI SHA256: `c84d9fd51bde94bf85e1fb908c4e284ea4f0c74c013fbebb284e5305a2837ec4`. Packaged text uses LF newlines to produce the same archive on Windows and Linux.
+
+The 134 successful runtime checks used the pre-normalization package (`115c4f0c5e56d112ddf51488619c53964d3b28505a5007f1ce6473feb71e2919`). All 14 archive members were compared against the published package: icons are byte-identical, and text differs only in CRLF/LF newlines. Both hashes are retained in the summary. Additional hidden-window reruns had intermittent native-popup failures; native popup tests depend on window focus and should be run one instance at a time. These reruns do not replace the successful reports above.
 
 The reported Zotero 10.0.1 native tab component was reviewed at its official source tag. Its official installer URL returned an installer whose internal application version is 10.0.8, so 10.0.1 itself is **not** recorded as a runtime pass. Zotero 8/9 were not rerun for this version; their previous-version results are below. macOS and Linux remain untested on a running desktop.
 

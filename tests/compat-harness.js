@@ -37,7 +37,10 @@ async function runCompatHarness(Zotero, Services, pluginRoot, outputFile, fixtur
     p.setRemark(aTab,'Compatibility remark');p.setGroupDisplay('compat-a','note');check('Bulk display and remarks supported',p.label(aTab)==='Compatibility remark'&&p.remark(bTab).mode==='note');
     check('Search matches remarks',p.search(tabs,'compatibility remark').some(t=>t.id===ta.id));
     const note=d.querySelector('#ztg-inline .ztg-document[data-id="'+ta.id+'"]');check('Remark appears on tab',note&&note.textContent.indexOf('Compatibility remark')!==-1);
-    c.openSearch();await wait(150);const panel=d.getElementById('ztg-search-panel');check('Search panel opens',panel.state==='open');
+    w.focus();await wait(100);c.openSearch();
+    const panel=d.getElementById('ztg-search-panel');
+    for(let i=0;i<30&&panel.state!=='open';i++)await wait(50);
+    check('Search panel opens',panel.state==='open');
     const rows=Array.from(panel.querySelectorAll('.ztg-search-result'));
     check('Search cards do not overlap',rows.length===2&&rows[1].getBoundingClientRect().top>=rows[0].getBoundingClientRect().bottom);
     panel.hidePopup();
