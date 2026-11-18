@@ -1,0 +1,67 @@
+{
+  "version": "6.0.36",
+  "platform": "Windows",
+  "suite": "workspace-native-tabs-20",
+  "passed": true,
+  "restoreResult": {
+    "ok": true,
+    "opened": 20,
+    "alreadyOpen": 0,
+    "missing": 0,
+    "failed": 0,
+    "failures": [],
+    "message": "已恢复 20 篇，0 篇已打开。"
+  },
+  "errors": [
+    {
+      "error": "Error: 附件文件不在本机，请先下载或重新定位附件。",
+      "stack": "restoreWorkspace@resource://gre/modules/addons/XPIProvider.jsm -> jar:file:///E:/Default%20Path/%E6%96%87%E6%A1%A3/ChatGPT/Tab%20Manager/outputs/test-0.6.2-final-6/extensions/tab-groups@local.zotero.xpi!/bootstrap.js -> jar:file:///E:/Default%20Path/%E6%96%87%E6%A1%A3/ChatGPT/Tab%20Manager/outputs/test-0.6.2-final-6/extensions/tab-groups@local.zotero.xpi!/features-legacy.js:257:115\n"
+    }
+  ],
+  "results": [
+    {
+      "name": "Save captures twenty documents",
+      "passed": true
+    },
+    {
+      "name": "Closing all tabs retains the saved snapshot",
+      "passed": true
+    },
+    {
+      "name": "Twenty-document restore reports no failures",
+      "passed": true
+    },
+    {
+      "name": "All twenty distinct saved documents are restored",
+      "passed": true
+    },
+    {
+      "name": "Group assignments, remarks and folding are restored",
+      "passed": true
+    },
+    {
+      "name": "Repeated restore creates no duplicates",
+      "passed": true
+    },
+    {
+      "name": "Partial restore preserves an existing saved paper and a newer paper",
+      "passed": true
+    },
+    {
+      "name": "Partial restore recreates both saved groups",
+      "passed": true
+    },
+    {
+      "name": "Manual saved snapshot is unchanged by every restore",
+      "passed": true
+    },
+    {
+      "name": "Unavailable file reports its reason without blocking other papers",
+      "passed": true
+    },
+    {
+      "name": "Settings show the failed paper and actionable reason",
+      "passed": true
+    }
+  ]
+}

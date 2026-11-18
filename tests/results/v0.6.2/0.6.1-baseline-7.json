@@ -1,0 +1,41 @@
+{
+  "version": "7.0.32",
+  "platform": "Windows",
+  "suite": "workspace-real-pdf-20",
+  "passed": false,
+  "restoreResult": {
+    "ok": true,
+    "opened": 20,
+    "alreadyOpen": 0,
+    "missing": 0,
+    "failed": 0,
+    "message": "已打开 20 篇，0 篇已打开。"
+  },
+  "errors": [],
+  "results": [
+    {
+      "name": "Initial PDF actually renders a page",
+      "passed": true
+    },
+    {
+      "name": "Save captures twenty documents",
+      "passed": true
+    },
+    {
+      "name": "Closing all tabs retains the saved snapshot",
+      "passed": true
+    },
+    {
+      "name": "Twenty-document restore reports no failures",
+      "passed": true
+    },
+    {
+      "name": "All twenty distinct saved documents are restored",
+      "passed": false
+    },
+    {
+      "error": "Error: All twenty distinct saved documents are restored",
+      "stack": "check@jar:file:///E:/Default%20Path/%E6%96%87%E6%A1%A3/ChatGPT/Tab%20Manager/outputs/test-workspace-baseline-7/extensions/test-harness@tab-manager.local.xpi!/run-legacy.js:563:24\nrunWorkspaceHarness@jar:file:///E:/Default%20Path/%E6%96%87%E6%A1%A3/ChatGPT/Tab%20Manager/outputs/test-workspace-baseline-7/extensions/test-harness@tab-manager.local.xpi!/run-legacy.js:647:10\n"
+    }
+  ]
+}

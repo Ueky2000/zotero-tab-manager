@@ -16,7 +16,7 @@ def fixture(path,label):
 
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--profile',required=True);parser.add_argument('--report',required=True)
-parser.add_argument('--suite',choices=['compat','settings','groups'],default='compat')
+parser.add_argument('--suite',choices=['compat','settings','groups','workspace'],default='compat')
 args=parser.parse_args();profile=Path(args.profile).resolve();report=Path(args.report).resolve()
 if profile.exists():raise SystemExit('Refusing an existing profile. Choose a new directory.')
 root=Path(__file__).resolve().parent.parent

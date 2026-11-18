@@ -31,6 +31,8 @@ Use `--suite groups` to test the real native group popup with eight distinct att
 
 The test-only bootstrap removes remote repository `<message>` notices from update responses in these disposable profiles, retaining the update data. Older Zotero versions can otherwise open an unrelated Word-integration notice that steals focus or blocks window timers. The group suite uses an XPCOM timer to avoid background-window throttling. Neither change is shipped in the production plugin.
 
+Use `--suite workspace` for the 20-document recovery regression. Zotero 7/10 load a real PDF before saving, close all 20 tabs, restore, verify the active PDF, then select and parse every other saved PDF. It also checks repeated restoration, existing/newer papers, recreated groups, unchanged snapshots, missing-file handling and the actual failure-details UI. Zotero 6 runs the native-tab and error-handling subset; it does not claim PDF rendering. Native timer waits and isolated synthetic data are used throughout.
+
 `compat-harness.js` is the source; `harness/run-legacy.js` is generated for Firefox 60 by `scripts/build-legacy.cjs` alongside the production legacy module.
 
 `integration.js` contains the broader Zotero 7 regression suite. It is intended for an existing development session with at least two distinct open attachment tabs. Its `runInlineTests(Zotero, Services, coreURL, env)` helper temporarily loads the shared core and restores preferences, selection, tab order and the original installed plugin in `finally`. Pass the URL of `src/core.js` as `coreURL`. The optional `env` supports a host-provided undo hook. It is not shipped in the XPI.

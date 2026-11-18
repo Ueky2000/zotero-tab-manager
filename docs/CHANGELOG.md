@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.2 — 2026-11-18
+
+- Fix unreliable bulk reading-workspace restoration on Zotero 7. Restore native unloaded tabs first, loading each PDF when selected, instead of constructing every reader at once.
+- Load item metadata before restoration, including a Zotero 6 compatibility path. Confirm that each restored document actually has a tab before counting success.
+- Retain existing saved and newer documents, restore groups/order/remarks/folding, and leave the saved snapshot unchanged.
+- Report unavailable files and other failures by paper and reason in an expandable settings section.
+- Add a 20-document regression that verifies every restored PDF loads on Zotero 7 and 10, plus native-tab restoration on Zotero 6.
+
 ## 0.6.1 — 2026-11-18
 
 - Remove the fixed blue focus outline during pointer interaction. Preserve the selected tab's group-colored border and bottom stripe.

@@ -2,9 +2,10 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 async function run(legacy) {
   let pref;
   const items=[1,2,3].map(id=>({id,libraryID:1,key:'ITEM'+id,isAttachment:()=>true,attachmentFilename:'paper'+id+'.pdf'}));
-  const tabs={_tabs:[{id:'zotero-pane',type:'library'}],selectedID:'zotero-pane',select(id){this.selectedID=id;},move(id,index){const before=this._tabs.findIndex(t=>t.id===id);const tab=this._tabs.splice(before,1)[0];this._tabs.splice(before<index?index-1:index,0,tab);}};
+  let readerCalls=0;
+  const tabs={_tabs:[{id:'zotero-pane',type:'library'}],selectedID:'zotero-pane',select(id){this.selectedID=id;},add(options){const tab={id:'restored-'+options.data.itemID,...options};this._tabs.push(tab);return {id:tab.id};},move(id,index){const before=this._tabs.findIndex(t=>t.id===id);const tab=this._tabs.splice(before,1)[0];this._tabs.splice(before<index?index-1:index,0,tab);}};
   const win={Zotero_Tabs:tabs};let p;
-  const sandbox={Zotero:{Prefs:{get:()=>pref,set:(_k,v)=>{pref=v;}},Items:{get:id=>items.find(x=>x.id===id),getByLibraryAndKeyAsync:async(lib,key)=>items.find(x=>x.libraryID===lib&&x.key===key)},Reader:{open:async id=>{tabs._tabs.push({id:'tab-'+id,type:'reader',title:'Paper '+id,data:{itemID:id}});p.syncTabs(win,c);}},Utilities:{Internal:{}},logError:e=>{throw e;}}};
+  const sandbox={Zotero:{Prefs:{get:()=>pref,set:(_k,v)=>{pref=v;}},Items:{get:id=>items.find(x=>x.id===id),getByLibraryAndKeyAsync:async(lib,key)=>items.find(x=>x.libraryID===lib&&x.key===key)},Reader:{open:async()=>{readerCalls++;throw new Error('A closed reader must not be reused');}},Utilities:{Internal:{}},logError(){}}};
   for(const name of ['core','features'])vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/'+name+(legacy?'-legacy':'')+'.js'),'utf8'),sandbox);
   p=sandbox.TabGroups;
   const c={seenTabs:new Map(),initializedTabs:false,cancelHover(){},schedule(){},refresh(){p.syncTabs(win,c);},root:{querySelector:()=>null},collapsed:new Set(),signature:''};p.windows.set(win,c);
@@ -41,6 +42,7 @@ async function run(legacy) {
   p.state.groups[0].color='#21866a';p.state.groups[0].name='Changed';
   let result=await p.restoreWorkspace();
   assert.equal(result.ok,true);assert.equal(result.opened,1);assert.equal(result.alreadyOpen,1);
+  assert.equal(readerCalls,0);assert.equal(tabs._tabs.find(t=>t.data&&t.data.itemID===2).type,'reader-unloaded');
   assert.equal(p.groupOf(ungrouped),'g');assert.equal(p.state.groups[0].color,'#3977d5');
   assert.equal(p.state.groups[0].name,'研究主题');assert.equal(p.remark(ungrouped).note,'重点实验');
   assert.ok(tabs._tabs.some(t=>t.id===extra.id));assert.ok(p.state.collapsed.includes('g'));
@@ -51,6 +53,19 @@ async function run(legacy) {
   pref=JSON.stringify(p.state);p.load();assert.equal(p.state.workspace.tabs.length,2);assert.equal(p.getSettings().restoreClosedGroups,false);
   items[1].deleted=true;
   result=await p.restoreWorkspace();assert.equal(result.missing,1);assert.equal(result.opened,1);
+  assert.equal(result.failures.length,1);assert.equal(result.ok,false);
+  let metadataLoads=0;
+  items[1].deleted=false;items[0].loadAllData=async()=>{metadataLoads++;};items[0].fileExists=async()=>false;tabs._tabs=[tabs._tabs[0]];
+  result=await p.restoreWorkspace();assert.equal(result.failed,1);assert.match(result.failures[0].reason,/附件文件/);assert.equal(result.opened,1);
+  assert.equal(metadataLoads,1);
+  delete items[0].fileExists;
+  for(let id=4;id<=22;id++)items.push({id,libraryID:1,key:'ITEM'+id,isAttachment:()=>true,attachmentFilename:'paper'+id+'.pdf'});
+  tabs._tabs=[tabs._tabs[0]];p.state.workspace.tabs=items.slice(0,20).map(item=>({key:'1:'+item.key,libraryID:1,itemKey:item.key,kind:'reader',title:item.key,group:'g'}));
+  result=await p.restoreWorkspace();assert.equal(result.opened,20);assert.equal(result.failed,0);assert.equal(tabs._tabs.length,21);assert.equal(readerCalls,0);
+  result=await p.restoreWorkspace();assert.equal(result.alreadyOpen,20);assert.equal(tabs._tabs.length,21);
+  const nativeAdd=tabs.add;tabs.add=()=>({id:'not-actually-created'});tabs._tabs=[tabs._tabs[0]];
+  result=await p.restoreWorkspace();assert.equal(result.opened,0);assert.equal(result.failed,20);assert.equal(result.ok,false);
+  assert.ok(result.failures.every(f=>f.reason.includes('未创建')));tabs.add=nativeAdd;
   console.log((legacy?'legacy':'modern')+': closed-tab memory, settings and workspace restore checks passed');
 }
 (async()=>{await run(false);await run(true);})().catch(e=>{console.error(e);process.exitCode=1;});

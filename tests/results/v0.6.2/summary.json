@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-18",
+  "plugin": "0.6.2",
+  "platform": "Windows",
+  "xpiSHA256": "5642540ddc0a6a8380810b3cc5f461038358f5e98394d8a4acd4dd9b57675ac0",
+  "results": [
+    {
+      "version": "6.0.36",
+      "suite": "workspace-native-tabs-20",
+      "checks": 11,
+      "passed": true
+    },
+    {
+      "version": "7.0.32",
+      "suite": "workspace-real-pdf-20",
+      "checks": 32,
+      "passed": true
+    },
+    {
+      "version": "10.0.8",
+      "suite": "workspace-real-pdf-20",
+      "checks": 32,
+      "passed": true
+    }
+  ],
+  "baseline": {
+    "file": "0.6.1-baseline-7.json",
+    "version": "0.6.1",
+    "xpiSHA256": "a864ff342439092696a93e4db3fa2d974e1fed91659d434daa7c92dba75f4392",
+    "result": "FAIL: reported 20 opened but failed the complete distinct-tab check"
+  },
+  "limitations": [
+    "PDF rendering is tested on Zotero 7/10; Zotero 6 covers native tabs and error handling only.",
+    "Zotero 8/9 and macOS/Linux were not runtime-tested for this release."
+  ]
+}

@@ -241,3 +241,60 @@ async function runGroupListHarness(Zotero,Services,outputFile,fixtureDir){
   await Zotero.File.putContentsAsync(outputFile,JSON.stringify({version:Zotero.version,platform:'Windows',suite:'groups-unloaded-fixtures',passed:results.every(x=>x.passed===true),results},null,2));
   Services.startup.quit(Components.interfaces.nsIAppStartup.eForceQuit);
 }
+
+async function runWorkspaceHarness(Zotero,Services,outputFile,fixtureDir){
+  const results=[],errors=[],legacy=parseInt(Zotero.version,10)<7;let restoreResult=null;
+  const wait=ms=>new Promise(resolve=>{const timer=Components.classes['@mozilla.org/timer;1'].createInstance(Components.interfaces.nsITimer);timer.initWithCallback(()=>{timer.cancel();resolve();},ms,Components.interfaces.nsITimer.TYPE_ONE_SHOT);});
+  const check=(name,passed)=>{results.push({name,passed:!!passed});Zotero.debug('Workspace test: '+name+' '+!!passed);if(!passed)throw new Error(name);};
+  const until=async(test,label)=>{for(let i=0;i<300;i++){if(test())return;await wait(100);}throw new Error('Timed out: '+label);};
+  try{
+    if(Zotero.uiReadyPromise)await Zotero.uiReadyPromise;await wait(1500);
+    await until(()=>Zotero.TabManagerPlugin&&Zotero.getMainWindow().document.getElementById('ztg-inline'),'plugin');
+    const w=Zotero.getMainWindow(),p=Zotero.TabManagerPlugin,tabs=w.Zotero_Tabs,c=p.windows.get(w);w.focus();
+    const log=Zotero.logError;Zotero.logError=function(error){if(p.restoring)errors.push({error:String(error),stack:error.stack});return log.call(this,error);};
+    const items=[];
+    p.state.groups.push({id:'workspace-a',name:'Workspace A',color:'#21866a'},{id:'workspace-b',name:'Workspace B',color:'#8b5ac7'});p.save();
+    for(let i=0;i<20;i++){
+      const item=await Zotero.Attachments.linkFromFile({file:fixtureDir+'fixture-'+(i%2?'b':'a')+'.pdf'});items.push(item);
+      const tab=tabs.add({type:'reader-unloaded',title:'Workspace paper '+i,data:{itemID:item.id},select:false});p.assign(tabs._tabs.find(t=>t.id===tab.id),i<10?'workspace-a':'workspace-b');
+    }
+    const find=item=>tabs._tabs.find(t=>t.data&&t.data.itemID===item.id);
+    const ready=item=>{try{const r=Zotero.Reader.getByTabID(find(item).id);return r&&r._internalReader&&r._internalReader._primaryView&&r._internalReader._primaryView._iframeWindow.PDFViewerApplication.pdfDocument.numPages===1;}catch(e){return false;}};
+    if(!legacy){tabs.select(find(items[0]).id);await until(()=>ready(items[0]),'initial real PDF');
+    check('Initial PDF actually renders a page',ready(items[0]));}
+    p.setRemark(find(items[0]),'Saved experiment');p.setCollapsed('workspace-b',true);
+    check('Save captures twenty documents',p.saveWorkspace(w).ok&&p.state.workspace.tabs.length===20);
+    const saved=JSON.stringify(p.state.workspace);
+    tabs.closeAll();await wait(2000);c.refresh();
+    check('Closing all tabs retains the saved snapshot',tabs._tabs.length===1&&JSON.stringify(p.state.workspace)===saved);
+    let done=false;let failure;
+    p.restoreWorkspace().then(value=>{restoreResult=value;done=true;},error=>{failure=error;done=true;});
+    await until(()=>done,'batch restore');if(failure)throw failure;
+    check('Twenty-document restore reports no failures',restoreResult.failed===0&&restoreResult.opened+restoreResult.alreadyOpen===20);
+    check('All twenty distinct saved documents are restored',items.every(item=>!!find(item))&&tabs._tabs.filter(t=>t.type!=='library').length===20);
+    check('Group assignments, remarks and folding are restored',items.every((item,i)=>p.groupOf(find(item))===(i<10?'workspace-a':'workspace-b'))&&p.remark(find(items[0])).note==='Saved experiment'&&p.state.collapsed.includes('workspace-b'));
+    if(!legacy){await until(()=>ready(items[0]),'restored active PDF');check('Restored active PDF actually renders',ready(items[0]));}
+    const second=await p.restoreWorkspace();check('Repeated restore creates no duplicates',second.opened===0&&second.alreadyOpen===20&&tabs._tabs.length===21);
+    const visit=legacy?[]:[19,10,1,18,...Array.from({length:20},(_,i)=>i).filter(i=>![0,19,10,1,18].includes(i))];
+    for(const index of visit){tabs.select(find(items[index]).id);await until(()=>ready(items[index]),'restored PDF '+index);check('Restored PDF '+index+' actually renders',ready(items[index]));}
+    tabs.select('zotero-pane');tabs.close(tabs._tabs.filter(t=>t.type!=='library'&&t.data.itemID!==items[1].id).map(t=>t.id));await wait(300);c.refresh();
+    const extra=await Zotero.Attachments.linkFromFile({file:fixtureDir+'fixture-a.pdf'});
+    tabs.add({type:'reader-unloaded',title:'New unrelated paper',data:{itemID:extra.id},select:false});
+    p.state.groups=[];p.state.assignments={};p.save();
+    const mixed=await p.restoreWorkspace();
+    check('Partial restore preserves an existing saved paper and a newer paper',mixed.opened===19&&mixed.alreadyOpen===1&&mixed.failed===0&&!!find(extra)&&tabs._tabs.length===22);
+    check('Partial restore recreates both saved groups',p.state.groups.some(g=>g.id==='workspace-a')&&p.state.groups.some(g=>g.id==='workspace-b'));
+    check('Manual saved snapshot is unchanged by every restore',JSON.stringify(p.state.workspace)===saved);
+    const missing=await Zotero.Attachments.linkFromFile({file:fixtureDir+'fixture-a.pdf'});missing.attachmentPath=fixtureDir+'nonexistent-file.pdf';await missing.saveTx();
+    p.state.workspace=JSON.parse(saved);p.state.workspace.tabs.push({key:missing.libraryID+':'+missing.key,libraryID:missing.libraryID,itemKey:missing.key,title:'Missing file fixture',kind:'reader',group:''});
+    const unavailable=await p.restoreWorkspace();
+    check('Unavailable file reports its reason without blocking other papers',unavailable.failed===1&&unavailable.alreadyOpen===20&&unavailable.failures.some(f=>f.reason.includes('附件文件')));
+    await p.openSettings(w);let preferences;
+    await until(()=>{preferences=p.settingsPane?Services.wm.getMostRecentWindow('zotero:pref'):[...p.settingsWindows].find(x=>!x.closed);return preferences&&preferences.document.getElementById('tm-restore-failures');},'failure details');
+    const details=preferences.document.getElementById('tm-restore-failures');
+    check('Settings show the failed paper and actionable reason',!details.hidden&&details.textContent.includes('Missing file fixture')&&details.textContent.includes('附件文件'));
+    preferences.close();
+  }catch(error){results.push({error:String(error),stack:error.stack});}
+  await Zotero.File.putContentsAsync(outputFile,JSON.stringify({version:Zotero.version,platform:'Windows',suite:legacy?'workspace-native-tabs-20':'workspace-real-pdf-20',passed:results.every(x=>x.passed===true),restoreResult,errors,results},null,2));
+  Services.startup.quit(Components.interfaces.nsIAppStartup.eForceQuit);
+}

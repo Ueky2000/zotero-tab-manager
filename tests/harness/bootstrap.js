@@ -28,7 +28,9 @@ async function startup(data) {
   await Z.initializationPromise;
   var root=data.rootURI||data.resourceURI.spec,scope={ChromeUtils:ChromeUtils,Components:Components};
   HS.scriptloader.loadSubScript(root+'run-legacy.js',scope,'UTF-8');
-  if(Z.Prefs.get('extensions.tabManager.testSuite',true)==='groups')
+  if(Z.Prefs.get('extensions.tabManager.testSuite',true)==='workspace')
+    await scope.runWorkspaceHarness(Z,HS,Z.Prefs.get('extensions.tabManager.testOutput',true),Z.Prefs.get('extensions.tabManager.testFixtures',true));
+  else if(Z.Prefs.get('extensions.tabManager.testSuite',true)==='groups')
     await scope.runGroupListHarness(Z,HS,Z.Prefs.get('extensions.tabManager.testOutput',true),Z.Prefs.get('extensions.tabManager.testFixtures',true));
   else if(Z.Prefs.get('extensions.tabManager.testSuite',true)==='settings')
     await scope.runSettingsHarness(Z,HS,Z.Prefs.get('extensions.tabManager.testOutput',true),Z.Prefs.get('extensions.tabManager.testFixtures',true));

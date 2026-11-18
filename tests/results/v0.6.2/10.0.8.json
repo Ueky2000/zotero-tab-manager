@@ -1,0 +1,151 @@
+{
+  "version": "10.0.8",
+  "platform": "Windows",
+  "suite": "workspace-real-pdf-20",
+  "passed": true,
+  "restoreResult": {
+    "ok": true,
+    "opened": 20,
+    "alreadyOpen": 0,
+    "missing": 0,
+    "failed": 0,
+    "failures": [],
+    "message": "已恢复 20 篇，0 篇已打开。"
+  },
+  "errors": [
+    {
+      "error": "Error: 附件文件不在本机，请先下载或重新定位附件。",
+      "stack": "restoreWorkspace@jar:file:///E:/Default%20Path/%E6%96%87%E6%A1%A3/ChatGPT/Tab%20Manager/outputs/test-0.6.2-final-10/extensions/tab-groups@local.zotero.xpi!/features.js:166:103\ngetContentsFromURL@chrome://zotero/content/xpcom/file.js:346:13\n_open@chrome://zotero/content/xpcom/reader.js:239:30\n"
+    }
+  ],
+  "results": [
+    {
+      "name": "Initial PDF actually renders a page",
+      "passed": true
+    },
+    {
+      "name": "Save captures twenty documents",
+      "passed": true
+    },
+    {
+      "name": "Closing all tabs retains the saved snapshot",
+      "passed": true
+    },
+    {
+      "name": "Twenty-document restore reports no failures",
+      "passed": true
+    },
+    {
+      "name": "All twenty distinct saved documents are restored",
+      "passed": true
+    },
+    {
+      "name": "Group assignments, remarks and folding are restored",
+      "passed": true
+    },
+    {
+      "name": "Restored active PDF actually renders",
+      "passed": true
+    },
+    {
+      "name": "Repeated restore creates no duplicates",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 19 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 10 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 1 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 18 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 2 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 3 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 4 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 5 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 6 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 7 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 8 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 9 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 11 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 12 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 13 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 14 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 15 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 16 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Restored PDF 17 actually renders",
+      "passed": true
+    },
+    {
+      "name": "Partial restore preserves an existing saved paper and a newer paper",
+      "passed": true
+    },
+    {
+      "name": "Partial restore recreates both saved groups",
+      "passed": true
+    },
+    {
+      "name": "Manual saved snapshot is unchanged by every restore",
+      "passed": true
+    },
+    {
+      "name": "Unavailable file reports its reason without blocking other papers",
+      "passed": true
+    },
+    {
+      "name": "Settings show the failed paper and actionable reason",
+      "passed": true
+    }
+  ]
+}

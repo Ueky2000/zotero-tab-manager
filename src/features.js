@@ -123,8 +123,13 @@ Object.assign(TabGroups, {
   async restoreWorkspace() {
     const snapshot = this.state.workspace;
     if (this.readOnly || this.restoring || !snapshot || !Array.isArray(snapshot.tabs)) return {ok:false,message:'没有可恢复的阅读现场，或正在恢复中。'};
-    this.restoring = true; this.updateSettingsViews();
-    const result = {ok:true,opened:0,alreadyOpen:0,missing:0,failed:0};
+    this.restoring = true;this.lastRestoreResult=null; this.updateSettingsViews();
+    const result = {ok:true,opened:0,alreadyOpen:0,missing:0,failed:0,failures:[]};
+    this.lastRestoreResult=null;
+    const fail=(entry,reason,missing=false)=>{
+      if(missing)result.missing++;else result.failed++;
+      result.failures.push({key:entry.key,title:typeof entry.title==='string'?entry.title:'未命名文献',reason});
+    };
     try {
       const mapping = new Map([['','']]);
       for (const group of snapshot.groups) {
@@ -144,7 +149,7 @@ Object.assign(TabGroups, {
         let item;
         try { item=await Zotero.Items.getByLibraryAndKeyAsync(entry.libraryID,entry.itemKey); }
         catch(e) { Zotero.logError(e); }
-        if (!item || item.deleted) { result.missing++; continue; }
+        if (!item || item.deleted) { fail(entry,'文献已删除或不在当前文献库中。',true); continue; }
         const key = `${item.libraryID}:${item.key}`;
         const id = mapping.get(entry.group) || '';
         if (id) this.state.assignments[key]=id; else delete this.state.assignments[key];
@@ -152,11 +157,22 @@ Object.assign(TabGroups, {
         if (entry.remark && typeof entry.remark.note === 'string') this.state.remarks[key]={note:entry.remark.note.slice(0,300),mode:['original','note','both'].includes(entry.remark.mode)?entry.remark.mode:'original'};
         if (this.openDocuments().some(row=>row.key===key)) { result.alreadyOpen++; continue; }
         try {
-          const api=entry.kind==='note'?Zotero.Notes:Zotero.Reader;
-          if (!api || typeof api.open !== 'function') throw new Error('This Zotero version cannot open this document type');
-          await api.open(item.id,undefined,{openInBackground:true,allowDuplicate:false});
+          if(typeof Zotero.Items.loadDataTypes==='function')await Zotero.Items.loadDataTypes([item]);
+          else if(typeof item.loadAllData==='function')await item.loadAllData();
+          const main=typeof Zotero.getMainWindow==='function'?Zotero.getMainWindow():null;
+          const target=main&&this.windows.has(main)?main:[...this.windows.keys()].find(w=>!w.closed);
+          if(!target||typeof target.Zotero_Tabs.add!=='function')throw new Error('没有可恢复文献的 Zotero 主窗口。');
+          if(entry.kind==='note'&&!target.Zotero_Tabs.tabHooks?.load?.note)throw new Error('当前 Zotero 版本不支持笔记标签。');
+          if(entry.kind!=='note'&&typeof item.fileExists==='function'&&!await item.fileExists())throw new Error('附件文件不在本机，请先下载或重新定位附件。');
+          // Match native session restoration. Creating every live PDF reader can
+          // race tab closing/unloading and exhaust the reader cache. Native
+          // unloaded tabs are synchronous; only the selected paper is loaded.
+          target.Zotero_Tabs.add({type:entry.kind==='note'?'note-unloaded':'reader-unloaded',
+            title:this.plainTitle(entry.title||'未命名文献').replace(/[\u0000-\u001f\u007f-\u009f]/g,''),
+            data:{itemID:item.id},select:false});
+          if(!this.openDocuments().some(row=>row.key===key))throw new Error('Zotero 未创建对应的文献标签。');
           result.opened++;
-        } catch(e) { result.failed++; Zotero.logError(e); }
+        } catch(e) { fail(entry,e.message||String(e));Zotero.logError(e); }
       }
       const savedOrder=(snapshot.order||[]).map(id=>mapping.get(id)).filter(id=>id!==undefined);
       this.state.order=[...new Set([...savedOrder,...this.orderedGroups().map(g=>g.id)])];
@@ -178,15 +194,21 @@ Object.assign(TabGroups, {
         }
       }
       const selected=this.openDocuments().find(row=>row.key===snapshot.selectedKey);
-      if(selected)selected.win.Zotero_Tabs.select(selected.tab.id);
+      if(selected){
+        // Avoid treating the restored active paper as a manual unfold action.
+        const controller=this.windows.get(selected.win);if(controller)controller.lastSelected=selected.tab.id;
+        selected.win.Zotero_Tabs.select(selected.tab.id);
+      }
       for (const [w,c] of this.windows) {
         c.collapsed=new Set(this.state.collapsed);c.lastSelected=w.Zotero_Tabs.selectedID;
         this.syncTabs(w,c);c.signature='';
       }
       this.save();
-      result.message=`已打开 ${result.opened} 篇，${result.alreadyOpen} 篇已打开。`;
+      result.ok=result.failed===0&&result.missing===0;
+      result.message=`已恢复 ${result.opened} 篇，${result.alreadyOpen} 篇已打开。`;
       if(result.missing)result.message+=` ${result.missing} 篇文献已删除或无法找到。`;
-      if(result.failed)result.message+=` ${result.failed} 篇打开失败，可稍后重试。`;
+      if(result.failed)result.message+=` ${result.failed} 篇未恢复，请查看详情。`;
+      this.lastRestoreResult=result;
       return result;
     } finally { this.restoring=false; this.updateSettingsViews(); }
   },
@@ -267,12 +289,17 @@ Object.assign(TabGroups, {
     save.addEventListener('click',()=>{const r=this.saveWorkspace(Zotero.getMainWindow());showStatus(r.message);update();});
     restore.addEventListener('click',async()=>{try{const r=await this.restoreWorkspace();showStatus(r.message);}catch(e){Zotero.logError(e);showStatus('恢复未完成，可稍后重试。');}finally{update();}});
     actions.append(save,restore);workspace.append(actions);panel.append(status);
+    const failures=h('details');failures.id='tm-restore-failures';failures.hidden=true;
+    const failureSummary=h('summary'),failureList=h('ul');failureList.style.cssText='font-size:12px;max-height:180px;overflow:auto;padding-inline-start:20px;';
+    failures.append(failureSummary,failureList);workspace.append(failures);
     const note=h('p','仅保存在本机；再次保存会覆盖上次记录。');note.style.cssText='font-size:12px;opacity:.7;';workspace.append(note);
     const update=()=>{
       const s=this.getSettings();for(const [key,{input,type}] of controls){if(type==='checkbox')input.checked=s[key];else input.value=String(s[key]);input.disabled=!!this.readOnly;}
       const saved=this.state.workspace;
       detail.textContent=saved?`上次保存：${new Date(saved.savedAt).toLocaleString()} · ${saved.tabs.length} 篇文献 · ${saved.groups.length} 个分组`:'尚未保存阅读现场。';
       save.disabled=!!this.readOnly||!!this.restoring;restore.disabled=!!this.readOnly||!!this.restoring||!saved;restore.textContent=this.restoring?'正在恢复…':'恢复阅读现场';
+      const issues=this.lastRestoreResult?.failures||[];failures.hidden=!issues.length;failureSummary.textContent=`未恢复的文献（${issues.length}）`;
+      this.clear(failureList);for(const issue of issues)failureList.append(h('li',`${issue.title}：${issue.reason}`));
     };
     this.settingsViews.set(root,update);doc.defaultView.addEventListener('unload',()=>this.settingsViews.delete(root),{once:true});update();
   },

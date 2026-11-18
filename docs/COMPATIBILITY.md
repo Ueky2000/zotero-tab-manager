@@ -1,5 +1,25 @@
 # Compatibility record
 
+## Version 0.6.2 — 2026-11-18
+
+The published 0.6.1 XPI failed a new 20-document Zotero 7 regression: it returned `opened: 20` and no failures, but did not pass the complete distinct-tab check. This reproduces unreliable recovery/counting; it is not a claim to reproduce the user's exact 18-error count. The baseline failure is retained in `tests/results/v0.6.2/0.6.1-baseline-7.json`.
+
+The fix follows native session recovery: validate/load item metadata, create unloaded tabs synchronously, verify each document's actual tab, and let native selection load the active PDF. It avoids creating every live reader through `Reader.open()` and treats unavailable files as explicit per-paper errors.
+
+| Final runtime | Coverage | Checks | Result |
+| --- | --- | ---: | --- |
+| Zotero 7.0.32 | All 20 restored PDFs actually loaded | 32 | PASS |
+| Zotero 10.0.8 | All 20 restored PDFs actually loaded | 32 | PASS |
+| Zotero 6.0.36 | Native 20-tab restoration and error UI | 11 | PASS |
+
+The modern runs open and parse an actual one-page PDF, save 20 distinct attachments in two groups, close all tabs, restore all 20, verify groups/remarks/folding, load the restored active PDF, restore again without duplication, and then select/load every other restored PDF. They also preserve an existing saved paper plus an unrelated newer paper, recreate both removed groups, verify that the snapshot remains unchanged, and test an intentionally unavailable attachment with the actual failure-details settings UI.
+
+Zotero 6 runs the native-tab and error-handling subset without claiming PDF rendering. Synthetic files/libraries and fresh isolated profiles were used; only synthetic databases were reused. The earlier failed baseline and the final passing reports are retained. Test-only suppression of unrelated remote notices remains enabled.
+
+Modern and Firefox 60 feature tests now cover 20-tab restoration without calling live-reader creation, actual tab-count verification, false-success rejection, missing files, missing items and metadata-loading compatibility. Both generations also pass all 24 layout/state assertions.
+
+Final XPI SHA256: `5642540ddc0a6a8380810b3cc5f461038358f5e98394d8a4acd4dd9b57675ac0`. Reports: `tests/results/v0.6.2/`. Zotero 8/9 and macOS/Linux desktops were not rerun for this release.
+
 ## Version 0.6.1 — 2026-11-18
 
 The final XPI passed 15 focused UI checks on each of Zotero 6.0.36, 7.0.32 and 10.0.8 (45 total), using isolated Windows profiles and synthetic libraries.
