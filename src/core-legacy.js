@@ -331,10 +331,6 @@ var TabGroups = {
     for (const [win, c] of this.windows) {
       var _c$root$querySelector;
       if (this.key(win.Zotero_Tabs._tabs.find(t => t.id === win.Zotero_Tabs.selectedID)) !== key) continue;
-      if (c.isVertical(group)) {
-        c.openGroupList(group, true);
-        continue;
-      }
       (_c$root$querySelector = c.root.querySelector('.ztg-document.selected')) === null || _c$root$querySelector === void 0 || _c$root$querySelector.scrollIntoView({
         block: 'nearest',
         inline: 'nearest'
@@ -477,7 +473,7 @@ var TabGroups = {
       #ztg-inline [data-ztg-drop="after"], #ztg-inline [data-ztg-drop="group-after"] { border-right:4px solid #267dff; }
       #ztg-group-panel .ztg-group-list { box-sizing:border-box;display:block;width:440px;max-width:calc(100vw - 32px);max-height:420px;max-height:min(420px,calc(100vh - 140px));overflow:auto;padding:6px;font:12px system-ui;color:var(--fill-primary,inherit); }
       #ztg-group-panel .ztg-document.tab { box-sizing:border-box;position:relative;display:flex;align-items:center;width:100%;min-width:0;max-width:none;height:34px;flex:none;padding:4px 8px;margin:2px 0;border:1px solid #8884;border-radius:4px;background:transparent;cursor:default; }
-      #ztg-group-panel .ztg-document:hover { background:#8882; }
+      #ztg-group-panel .ztg-document:hover, #ztg-group-panel .ztg-document.selected:hover { background:var(--ztg-hover); }
       #ztg-group-panel .ztg-document.selected { border-color:var(--ztg-color);box-shadow:inset 0 -2px var(--ztg-color);background:var(--material-background,#8882); }
       #ztg-group-panel .ztg-title { flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis; }
       #ztg-group-panel .ztg-close { flex:none;margin-inline-start:8px;border:0;border-radius:3px;background:transparent;color:inherit;padding:1px 4px;font-size:16px;line-height:18px; }
@@ -485,6 +481,7 @@ var TabGroups = {
       #ztg-group-panel :focus { outline:none; }
       #ztg-group-panel :focus-visible { outline:2px solid var(--ztg-color,currentColor);outline-offset:-2px; }
       #ztg-group-panel :-moz-focusring { outline:2px solid var(--ztg-color,currentColor);outline-offset:-2px; }
+      #ztg-inline .ztg-document[data-pointer-focus], #ztg-group-panel .ztg-document[data-pointer-focus] { outline:none !important; }
       #ztg-group-panel [data-ztg-drop="join"] { outline:2px solid var(--ztg-color);outline-offset:-2px; }
       #ztg-group-panel [data-ztg-drop="before"] { border-top:3px solid var(--ztg-color); }
       #ztg-group-panel [data-ztg-drop="after"] { border-bottom:3px solid var(--ztg-color); }
@@ -504,6 +501,8 @@ var TabGroups = {
     groupList.className = 'ztg-group-list';
     groupList.setAttribute('role', 'tablist');
     groupList.setAttribute('aria-orientation', 'vertical');
+    const groupEntries = h('div');
+    groupList.append(groupEntries);
     groupPanel.append(groupList);
     doc.documentElement.append(groupPanel);
     const popups = new Set();
@@ -587,7 +586,11 @@ var TabGroups = {
         groupPanel.hidePopup();
         this.setCollapsed(id, !c.collapsed.has(id));
       },
-      isVertical: id => tabs._tabs.filter(t => t.type !== 'library' && this.groupOf(t) === id).length > (this.getSettings ? this.getSettings().verticalThreshold : Infinity),
+      isVertical: id => {
+        if (!this.getSettings) return false;
+        const settings = this.getSettings();
+        return this.state.groups.length > settings.groupCountThreshold || tabs._tabs.filter(t => t.type !== 'library' && this.groupOf(t) === id).length > settings.verticalThreshold;
+      },
       renderGroupList: () => {
         const group = this.orderedGroups().find(g => g.id === c.groupListID);
         if (!group || !c.isVertical(group.id)) {
@@ -595,10 +598,49 @@ var TabGroups = {
           return;
         }
         const scroll = groupList.scrollTop;
-        this.clear(groupList);
+        const members = tabs._tabs.filter(t => t.type !== 'library' && this.groupOf(t) === group.id);
+        const availableWidth = Math.max(240, win.innerWidth - 32),
+          availableHeight = Math.max(100, Math.min(420, win.innerHeight - 140));
+        const rowLimit = Math.max(1, Math.floor((availableHeight - 12) / 38));
+        const columns = Math.min(3, Math.max(1, Math.floor(availableWidth / 280)), Math.max(1, Math.ceil(members.length / rowLimit)));
+        const rows = Math.ceil(members.length / columns);
+        const signature = JSON.stringify([group.id, group.name, group.color, columns, availableWidth, availableHeight, members.map(t => [t.id, this.label(t), this.originalName(t), t.title, this.remark(t)])]);
+        if (signature === c.groupListSignature) return;
+        c.groupListSignature = signature;
+        if (c.groupListRenderedID !== group.id) {
+          this.clear(groupEntries);
+          c.groupListRenderedID = group.id;
+        }
+        const existing = new Map([...groupEntries.children].map(row => [row.dataset.id, row]));
         groupList.style.setProperty('--ztg-color', group.color);
         groupList.setAttribute('aria-label', group.name);
-        for (const tab of tabs._tabs.filter(t => t.type !== 'library' && this.groupOf(t) === group.id)) groupList.append(c.document(tab, group.id));
+        const rgb = group.color.slice(1).match(/../g).map(value => parseInt(value, 16));
+        groupList.style.setProperty('--ztg-hover', `rgba(${rgb.join(',')},0.14)`);
+        groupList.dataset.columns = String(columns);
+        groupList.dataset.rows = String(rows);
+        groupEntries.style.display = columns > 1 ? 'grid' : 'block';
+        groupEntries.style.gridAutoFlow = 'column';
+        groupEntries.style.gridTemplateRows = columns > 1 ? `repeat(${rows},38px)` : '';
+        groupEntries.style.gridTemplateColumns = columns > 1 ? `repeat(${columns},minmax(0,1fr))` : '';
+        groupEntries.style.columnGap = columns > 1 ? '8px' : '0';
+        groupList.style.width = Math.min(availableWidth, columns > 1 ? columns * 320 : 440) + 'px';
+        groupList.style.maxHeight = availableHeight + 'px';
+        groupList.style.minHeight = '0';
+        groupList.style.height = Math.min(availableHeight, rows * 38 + 12) + 'px';
+        members.forEach((tab, index) => {
+          const row = existing.get(tab.id) || c.document(tab, group.id, index + 1);
+          existing.delete(tab.id);
+          const note = this.remark(tab).note,
+            label = this.label(tab);
+          row.querySelector('.ztg-title').textContent = label;
+          row.querySelector('.ztg-index').textContent = String(index + 1);
+          row.title = `原文件名：${this.originalName(tab)}${note ? '\n备注：' + note : ''}\n原标题：${this.plainTitle(String(tab.title || '无标题'))}`;
+          row.querySelector('.ztg-close').setAttribute('aria-label', `关闭 ${label}`);
+          row.classList.toggle('selected', tabs.selectedID === tab.id);
+          row.setAttribute('aria-selected', String(tabs.selectedID === tab.id));
+          if (groupEntries.children[index] !== row) groupEntries.insertBefore(row, groupEntries.children[index] || null);
+        });
+        for (const row of existing.values()) row.remove();
         groupList.scrollTop = scroll;
       },
       openGroupList: (id, force = false, temporary = false) => {
@@ -656,10 +698,6 @@ var TabGroups = {
         c.lastSelected = id;
         tabs.select(id);
         c.refresh();
-        if (c.isVertical(this.groupOf(tab))) {
-          c.openGroupList(this.groupOf(tab), true);
-          return;
-        }
         (_root$querySelector = root.querySelector('.ztg-document.selected')) === null || _root$querySelector === void 0 || _root$querySelector.scrollIntoView({
           block: 'nearest',
           inline: 'nearest'
@@ -817,7 +855,6 @@ var TabGroups = {
         }, {
           disabled: !candidates.length
         });
-        c.item(popup, 'Tab Manager 设置…', () => this.openSettings ? this.openSettings(win) : this.setSuggestDays(win));
       }),
       fillAssignments: (popup, tab) => {
         for (const g of this.orderedGroups().filter(g => g.id)) c.item(popup, g.name, () => this.assign(tab, g.id), {
@@ -912,7 +949,7 @@ var TabGroups = {
           if (c.hoverTarget !== node) {
             c.cancelHover();
             c.hoverTarget = node;
-            if (c.dragged && (c.collapsed.has(group) || c.isVertical(group)) && (!this.getSettings || this.getSettings().hoverExpand)) c.hoverTimer = win.setTimeout(() => {
+            if (c.dragged && (c.collapsed.has(group) || c.isVertical(group))) c.hoverTimer = win.setTimeout(() => {
               c.hoverTimer = null;
               if (!c.disposed && c.hoverTarget === node && c.dragged) c.springOpen(group);
             }, 600);
@@ -934,7 +971,7 @@ var TabGroups = {
         });
         node.addEventListener('drop', e => c.drop(e, group, tabID, node));
       },
-      document: (tab, group) => {
+      document: (tab, group, number) => {
         const n = h('div');
         n.className = 'tab ztg-document' + (tabs.selectedID === tab.id ? ' selected' : '');
         n.dataset.id = tab.id;
@@ -956,13 +993,22 @@ var TabGroups = {
           tabs.close(tab.id);
           c.schedule();
         };
+        if (number !== undefined) {
+          const index = h('span', String(number));
+          index.className = 'ztg-index';
+          index.setAttribute('aria-hidden', 'true');
+          index.style.cssText = 'flex:0 0 26px;text-align:right;margin-inline-end:10px;opacity:.65;font-variant-numeric:tabular-nums;';
+          n.append(index);
+        }
         n.append(title, close);
         n.onmousedown = e => {
           if (e.button === 0 && !e.target.closest('button')) {
+            n.setAttribute('data-pointer-focus', 'true');
             e.stopPropagation();
             c.reveal(tab.id);
           }
         };
+        n.onblur = () => n.removeAttribute('data-pointer-focus');
         n.onauxclick = e => {
           if (e.button === 1) {
             e.preventDefault();
@@ -975,6 +1021,7 @@ var TabGroups = {
         };
         n.oncontextmenu = e => c.openTabMenu(e, tab.id);
         n.onkeydown = e => {
+          n.removeAttribute('data-pointer-focus');
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             c.reveal(tab.id);
@@ -1031,7 +1078,8 @@ var TabGroups = {
           verticalThreshold: Infinity
         };
         suggestions.hidden = !options.showSuggestions;
-        const signature = JSON.stringify([documents.map(t => [t.id, t.title, this.originalName(t), this.remark(t), this.groupOf(t)]), this.state.groups, this.state.ungroupedColor, this.state.order, [...c.collapsed], options]);
+        const activeVertical = documents.find(t => t.id === tabs.selectedID && c.isVertical(this.groupOf(t)));
+        const signature = JSON.stringify([activeVertical === null || activeVertical === void 0 ? void 0 : activeVertical.id, documents.map(t => [t.id, t.title, this.originalName(t), this.remark(t), this.groupOf(t)]), this.state.groups, this.state.ungroupedColor, this.state.order, [...c.collapsed], options]);
         if (searchPanel.state === 'open') c.renderSearch();
         suggestions.setAttribute('tooltiptext', `建议关闭 (${suggested})：${this.state.suggestDays} 天未查看的文献`);
         this.setLabel(suggestions, `建议关闭 (${suggested})`);
@@ -1042,10 +1090,7 @@ var TabGroups = {
         });
         if (c.isDragging()) return;
         if (signature === c.signature) {
-          if (selectedChanged) {
-            const selected = tabs._tabs.find(t => t.id === tabs.selectedID);
-            if (selected && c.isVertical(this.groupOf(selected))) c.openGroupList(this.groupOf(selected), true);
-          }
+          if (groupPanel.state === 'open') c.renderGroupList();
           return;
         }
         c.signature = signature;
@@ -1069,7 +1114,7 @@ var TabGroups = {
           heading.dataset.group = g.id;
           heading.style.width = this.headingWidth(g) + 'px';
           heading.title = g.id ? `${g.name}：点击折叠/展开，拖入文献加入，右键管理和设置颜色` : '未分组：点击折叠/展开，把文献拖到这里移出分组';
-          const vertical = members.length > (options.verticalThreshold || 7);
+          const vertical = c.isVertical(g.id);
           const expanded = vertical ? c.groupListID === g.id && (groupPanel.state === 'open' || groupPanel.state === 'showing') : !c.collapsed.has(g.id);
           if (vertical) {
             heading.textContent = heading.textContent.replace(/^[▸▾]/, expanded ? '▾' : '▸');
@@ -1096,6 +1141,7 @@ var TabGroups = {
           c.target(heading, g.id);
           section.append(heading);
           if (!vertical && !c.collapsed.has(g.id)) for (const tab of members) section.append(c.document(tab, g.id));
+          if (vertical && activeVertical && this.groupOf(activeVertical) === g.id) section.append(c.document(activeVertical, g.id));
           root.append(section);
         }
         const add = h('button', '＋');
@@ -1140,10 +1186,6 @@ var TabGroups = {
           inline: 'nearest'
         });
         if (groupPanel.state === 'open') c.renderGroupList();
-        if (selectedChanged) {
-          const selected = tabs._tabs.find(t => t.id === tabs.selectedID);
-          if (selected && c.isVertical(this.groupOf(selected))) c.openGroupList(this.groupOf(selected), true);
-        }
       }
     };
     suggestions.addEventListener('command', () => {
@@ -1172,10 +1214,11 @@ var TabGroups = {
         groupPanel.hidePopup();
         return;
       }
-      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+      if (!['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.key)) return;
       const rows = [...groupList.querySelectorAll('.ztg-document')],
         index = rows.indexOf(doc.activeElement);
-      const next = event.key === 'ArrowDown' ? Math.min(rows.length - 1, index + 1) : Math.max(0, index - 1);
+      const step = event.key === 'ArrowRight' ? Number(groupList.dataset.rows) : event.key === 'ArrowLeft' ? -Number(groupList.dataset.rows) : event.key === 'ArrowDown' ? 1 : -1;
+      const next = Math.max(0, Math.min(rows.length - 1, index + step));
       event.preventDefault();
       (_rows$next = rows[next]) === null || _rows$next === void 0 || _rows$next.focus();
     });
@@ -1254,11 +1297,13 @@ var TabGroups = {
       notify: c.schedule
     }, ['tab'], 'tab-groups-inline');
     const ageTimer = win.setInterval(c.schedule, 3600000);
+    win.addEventListener('resize', c.schedule);
     c.dispose = () => {
       c.disposed = true;
       observer.disconnect();
       Zotero.Notifier.unregisterObserver(notifier);
       doc.removeEventListener('popupshowing', menuShowing, true);
+      win.removeEventListener('resize', c.schedule);
       if (c.timer !== null) win.clearTimeout(c.timer);
       win.clearInterval(ageTimer);
       c.cancelHover();

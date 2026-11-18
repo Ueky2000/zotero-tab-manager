@@ -1,0 +1,23 @@
+{
+  "version": "0.6.3",
+  "sha256": "a8723aa7ad499c4a2ec82938e93f8d5a09410c04e19a2d826305eeb3a2b41885",
+  "suite": "groups-unloaded-fixtures",
+  "runtimes": [
+    {
+      "version": "6.0.36",
+      "checks": 35,
+      "passed": true
+    },
+    {
+      "version": "7.0.32",
+      "checks": 34,
+      "passed": true
+    },
+    {
+      "version": "10.0.8",
+      "checks": 34,
+      "passed": true
+    }
+  ],
+  "limits": "Windows UI and shared state checks; no physical drag or new PDF rendering claim."
+}

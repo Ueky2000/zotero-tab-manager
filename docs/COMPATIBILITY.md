@@ -1,5 +1,19 @@
 # Compatibility record
 
+## Version 0.6.3 — 2026-11-18
+
+The packaged group suite uses isolated synthetic attachment libraries to verify numbered single/two/three-column popups, bounded scrolling, active horizontal tabs after mouse and keyboard selection, stable list nodes, group-count thresholds, display overrides, settings labels/icons and cleanup. Zotero 6 additionally exercises the actual add-on manager preferences command. It does not claim physical drag-and-drop, PDF rendering coverage for this release, or tests on macOS/Linux. The shared state/workspace regressions pass for both modern and Firefox 60 sources; the 0.6.2 real-PDF recovery record remains below.
+
+Zotero 6 needs a separate block scroller around its grid to respect the native popup height limit. Popup rows are reconciled by tab ID so asynchronous title changes do not replace a focused/pressed row. Its add-on manager options command routes only this plugin's settings URL to the existing settings window, with the original function restored on shutdown.
+
+Final reports are recorded in `tests/results/v0.6.3/` with the installation-package SHA-256.
+
+| Runtime | Checks | Result |
+| --- | ---: | --- |
+| Zotero 6.0.36 | 35 | PASS |
+| Zotero 7.0.32 | 34 | PASS |
+| Zotero 10.0.8 | 34 | PASS |
+
 ## Version 0.6.2 — 2026-11-18
 
 The published 0.6.1 XPI failed a new 20-document Zotero 7 regression: it returned `opened: 20` and no failures, but did not pass the complete distinct-tab check. This reproduces unreliable recovery/counting; it is not a claim to reproduce the user's exact 18-error count. The baseline failure is retained in `tests/results/v0.6.2/0.6.1-baseline-7.json`.

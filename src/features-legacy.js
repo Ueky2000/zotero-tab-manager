@@ -2,15 +2,16 @@
 Object.assign(TabGroups, {
   settingsViews: new Map(),
   settingsWindows: new Set(),
+  legacyOptionsWindows: new Map(),
   getSettings() {
     const s = this.state.settings || {};
     return {
       restoreClosedGroups: s.restoreClosedGroups !== false,
       showGroupCounts: s.showGroupCounts !== false,
-      hoverExpand: s.hoverExpand !== false,
       showSuggestions: s.showSuggestions !== false,
       defaultDisplay: ['original', 'note', 'both'].includes(s.defaultDisplay) ? s.defaultDisplay : 'original',
       verticalThreshold: Number.isInteger(s.verticalThreshold) && s.verticalThreshold >= 1 && s.verticalThreshold <= 1000 ? s.verticalThreshold : 7,
+      groupCountThreshold: Number.isInteger(s.groupCountThreshold) && s.groupCountThreshold >= 1 && s.groupCountThreshold <= 1000 ? s.groupCountThreshold : 7,
       suggestDays: this.state.suggestDays,
       ungroupedColor: this.state.ungroupedColor
     };
@@ -21,13 +22,13 @@ Object.assign(TabGroups, {
       ...this.getSettings()
     };
     for (const [key, value] of Object.entries(patch)) {
-      if (['restoreClosedGroups', 'showGroupCounts', 'hoverExpand', 'showSuggestions'].includes(key)) {
+      if (['restoreClosedGroups', 'showGroupCounts', 'showSuggestions'].includes(key)) {
         if (typeof value !== 'boolean') return false;
       } else if (key === 'defaultDisplay') {
         if (!['original', 'note', 'both'].includes(value)) return false;
       } else if (key === 'suggestDays') {
         if (!Number.isInteger(value) || value < 1 || value > 3650) return false;
-      } else if (key === 'verticalThreshold') {
+      } else if (['verticalThreshold', 'groupCountThreshold'].includes(key)) {
         if (!Number.isInteger(value) || value < 1 || value > 1000) return false;
       } else if (key === 'ungroupedColor') {
         if (!this.normalizeColor(value)) return false;
@@ -37,13 +38,21 @@ Object.assign(TabGroups, {
     this.state.settings = {
       restoreClosedGroups: next.restoreClosedGroups,
       showGroupCounts: next.showGroupCounts,
-      hoverExpand: next.hoverExpand,
       showSuggestions: next.showSuggestions,
       defaultDisplay: next.defaultDisplay,
-      verticalThreshold: next.verticalThreshold
+      verticalThreshold: next.verticalThreshold,
+      groupCountThreshold: next.groupCountThreshold
     };
     this.state.suggestDays = next.suggestDays;
     this.state.ungroupedColor = this.normalizeColor(next.ungroupedColor);
+    if (Object.prototype.hasOwnProperty.call(patch, 'defaultDisplay')) {
+      for (const group of this.orderedGroups()) this.state.groupDisplay[group.id] = next.defaultDisplay;
+      for (const win of this.windows.keys()) for (const tab of win.Zotero_Tabs._tabs) {
+        if (tab.type === 'library') continue;
+        const remark = this.state.remarks[this.key(tab)];
+        if (remark) delete remark.mode;
+      }
+    }
     for (const c of this.windows.values()) c.cancelHover();
     this.save();
     return true;
@@ -330,6 +339,32 @@ Object.assign(TabGroups, {
         image: 'icon-32.png'
       });
     }
+    if (parseInt(Zotero.version, 10) < 7) {
+      const windows = Services.wm.getEnumerator(null);
+      while (windows.hasMoreElements()) this.attachLegacyOptions(windows.getNext());
+    }
+  },
+  attachLegacyOptions(win) {
+    if (parseInt(Zotero.version, 10) >= 7 || typeof win.openOptionsInTab !== 'function' || this.legacyOptionsWindows.has(win)) return;
+    // Firefox 60 only advertises tab-style options; Zotero has no browser tabs.
+    // Route our own URL to the existing settings dialog, preserving other add-ons.
+    const original = win.openOptionsInTab,
+      plugin = this;
+    const wrapped = function (url) {
+      if (url === 'chrome://tab-manager/content/preferences-window.xul') {
+        plugin.openSettings(Zotero.getMainWindow());
+        return true;
+      }
+      return original.apply(this, arguments);
+    };
+    win.openOptionsInTab = wrapped;
+    this.legacyOptionsWindows.set(win, {
+      original,
+      wrapped
+    });
+    win.addEventListener('unload', () => this.legacyOptionsWindows.delete(win), {
+      once: true
+    });
   },
   openSettings(win) {
     if (this.settingsPane) return Zotero.Utilities.Internal.openPreferences(this.settingsPane);
@@ -352,6 +387,10 @@ Object.assign(TabGroups, {
     loaded();
     return dialog;
   },
+  workspaceIcon(action) {
+    const body = action === 'save' ? '<rect x="3" y="3" width="18" height="18" rx="4" fill="#e8efff" stroke="#527bd7"/><path d="M8 3v7h8V3M8 21v-7h8v7" stroke="#527bd7"/>' : '<path d="M4 10a8 8 0 1 1 2 8" stroke="#299b86"/><path d="M4 4v6h6" stroke="#299b86"/><path d="M12 8v5l3 2" stroke="#d59a31"/>';
+    return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + body + '</svg>');
+  },
   attachToolsMenu(win) {
     const doc = win.document,
       parent = doc.getElementById('menu_ToolsPopup');
@@ -359,22 +398,24 @@ Object.assign(TabGroups, {
     const menu = this.xul(doc, 'menu');
     menu.id = 'ztg-tools-menu';
     menu.setAttribute('label', 'Tab Manager');
+    menu.classList.add('menu-iconic');
+    menu.setAttribute('image', this.pluginRoot + 'icon-16.png');
     const popup = this.xul(doc, 'menupopup');
     menu.append(popup);
-    const add = (label, fn) => {
+    const add = (label, image, fn) => {
       const item = this.xul(doc, 'menuitem');
+      item.classList.add('menuitem-iconic');
+      item.setAttribute('image', image);
       item.setAttribute('label', label);
       item.addEventListener('command', fn);
       popup.append(item);
       return item;
     };
-    add('设置…', () => this.openSettings(win));
-    popup.append(this.xul(doc, 'menuseparator'));
-    add('保存当前阅读现场', () => {
+    add('保存当前阅读现场', this.workspaceIcon('save'), () => {
       const r = this.saveWorkspace(win);
       Services.prompt.alert(win, 'Tab Manager', r.message);
     });
-    const restore = add('恢复阅读现场', async () => {
+    const restore = add('恢复阅读现场', this.workspaceIcon('restore'), async () => {
       try {
         const r = await this.restoreWorkspace();
         Services.prompt.alert(win, 'Tab Manager', r.message);
@@ -435,7 +476,7 @@ Object.assign(TabGroups, {
       } else input.type = type;
       if (type === 'number') {
         input.min = '1';
-        input.max = key === 'verticalThreshold' ? '1000' : '3650';
+        input.max = ['verticalThreshold', 'groupCountThreshold'].includes(key) ? '1000' : '3650';
         input.step = '1';
         input.style.width = '72px';
       }
@@ -453,7 +494,7 @@ Object.assign(TabGroups, {
         if (!this.updateSettings({
           [key]: value
         })) {
-          showStatus(key === 'verticalThreshold' ? '文献数量须为 1–1000 的整数。' : '设置未保存。天数须为 1–3650 的整数。');
+          showStatus(['verticalThreshold', 'groupCountThreshold'].includes(key) ? '数量须为 1–1000 的整数。' : '设置未保存。天数须为 1–3650 的整数。');
           update();
         }
       });
@@ -465,13 +506,13 @@ Object.assign(TabGroups, {
       if (help) row.title = help;
     };
     const groups = section('分组');
-    field(groups, 'restoreClosedGroups', '重新打开时恢复分组', 'checkbox', '原组不存在时自动重建；关闭此项不移动当前文献。');
+    field(groups, 'restoreClosedGroups', '重新打开文献时自动进入上一次的分组', 'checkbox', '原组不存在时自动重建；关闭此项不移动当前文献。');
     field(groups, 'showGroupCounts', '显示文献数量', 'checkbox');
-    field(groups, 'hoverExpand', '拖动悬停展开分组', 'checkbox');
-    field(groups, 'verticalThreshold', '超过此数量时竖向展开', 'number', '按每个分组内打开的文献数量计算。');
+    field(groups, 'verticalThreshold', '分组内文献超过此数量时竖向排列', 'number');
+    field(groups, 'groupCountThreshold', '分组数量超过此值时全部竖向排列', 'number', '按自建分组数量计算，不含未分组；当前阅读的文献仍横向显示。');
     field(groups, 'ungroupedColor', '未分组颜色', 'color');
     const display = section('标签显示');
-    field(display, 'defaultDisplay', '默认显示', 'select', '分组和单篇文献的设置优先。');
+    field(display, 'defaultDisplay', '默认显示', 'select', '立即应用到所有当前分组和已打开的文献。');
     const suggestions = section('建议关闭');
     field(suggestions, 'showSuggestions', '显示“建议关闭”按钮', 'checkbox');
     field(suggestions, 'suggestDays', '未查看天数', 'number', '仅提供建议，不会自动关闭文献。');
@@ -486,6 +527,18 @@ Object.assign(TabGroups, {
     save.type = restore.type = 'button';
     save.id = 'tm-save-workspace';
     restore.id = 'tm-restore-workspace';
+    let restoreLabel;
+    for (const [button, action] of [[save, 'save'], [restore, 'restore']]) {
+      const label = h('span', button.textContent),
+        icon = h('img');
+      icon.src = this.workspaceIcon(action);
+      icon.alt = '';
+      icon.width = icon.height = 16;
+      button.textContent = '';
+      button.append(icon, label);
+      button.style.cssText = 'display:inline-flex;align-items:center;gap:7px;';
+      if (action === 'restore') restoreLabel = label;
+    }
     save.addEventListener('click', () => {
       const r = this.saveWorkspace(Zotero.getMainWindow());
       showStatus(r.message);
@@ -530,7 +583,7 @@ Object.assign(TabGroups, {
       detail.textContent = saved ? `上次保存：${new Date(saved.savedAt).toLocaleString()} · ${saved.tabs.length} 篇文献 · ${saved.groups.length} 个分组` : '尚未保存阅读现场。';
       save.disabled = !!this.readOnly || !!this.restoring;
       restore.disabled = !!this.readOnly || !!this.restoring || !saved;
-      restore.textContent = this.restoring ? '正在恢复…' : '恢复阅读现场';
+      restoreLabel.textContent = this.restoring ? '正在恢复…' : '恢复阅读现场';
       const issues = ((_this$lastRestoreResu = this.lastRestoreResult) === null || _this$lastRestoreResu === void 0 ? void 0 : _this$lastRestoreResu.failures) || [];
       failures.hidden = !issues.length;
       failureSummary.textContent = `未恢复的文献（${issues.length}）`;
@@ -544,6 +597,11 @@ Object.assign(TabGroups, {
     update();
   },
   stopSettings() {
+    for (const [win, {
+      original,
+      wrapped
+    }] of this.legacyOptionsWindows) if (!win.closed && win.openOptionsInTab === wrapped) win.openOptionsInTab = original;
+    this.legacyOptionsWindows.clear();
     if (this.settingsPane && Zotero.PreferencePanes) Zotero.PreferencePanes.unregister(this.settingsPane);
     this.settingsPane = null;
     if (Zotero.TabManagerPlugin === this) delete Zotero.TabManagerPlugin;

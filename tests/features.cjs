@@ -15,6 +15,23 @@ async function run(legacy) {
   p.state.groups.push({id:'g',name:'研究主题',color:'#3977d5'});p.assign(a,'g');p.assign(b,'g');p.setRemark(a,'重点实验');p.setGroupDisplay('g','both');p.setCollapsed('g',true);
   assert.equal(p.getSettings().restoreClosedGroups,true);
   assert.equal(p.getSettings().verticalThreshold,7);
+  assert.equal(p.getSettings().groupCountThreshold,7);
+  assert.equal(p.updateSettings({groupCountThreshold:0}),false);
+  assert.equal(p.updateSettings({groupCountThreshold:2.5}),false);
+  assert.equal(p.updateSettings({groupCountThreshold:12}),true);
+  p.load();assert.equal(p.getSettings().groupCountThreshold,12);
+  p.updateSettings({groupCountThreshold:7});
+  p.setDisplay(a,'original');
+  p.state.groupDisplay['']='both';
+  assert.equal(p.updateSettings({defaultDisplay:'invalid'}),false);
+  assert.equal(p.remark(a).mode,'original');
+  assert.equal(p.updateSettings({defaultDisplay:'note'}),true);
+  assert.equal(p.remark(a).mode,'note');assert.equal(p.remark(b).mode,'note');
+  assert.equal(p.label(a),'重点实验');assert.equal(p.label(b),'paper2.pdf');
+  assert.equal(p.state.groupDisplay[''],'note');
+  p.load();assert.equal(p.remark(a).mode,'note');
+  p.setGroupDisplay('g','both'); // Later group overrides remain available.
+  assert.equal(p.remark(a).mode,'both');
   assert.equal(p.updateSettings({verticalThreshold:0}),false);
   assert.equal(p.updateSettings({verticalThreshold:2.5}),false);
   assert.equal(p.updateSettings({verticalThreshold:10}),true);

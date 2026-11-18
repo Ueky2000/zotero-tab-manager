@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-        id="tab-manager-settings-window" title="Tab Manager 设置" width="660" height="720">
+        id="tab-manager-settings-window" title="Tab Manager 设置" width="660" height="720"
+        onload="var p=Components.classes['@zotero.org/Zotero;1'].getService(Components.interfaces.nsISupports).wrappedJSObject.TabManagerPlugin; if(p){p.settingsWindows.add(window);p.renderSettings(document,document.getElementById('tm-settings-root'));window.addEventListener('unload',function(){p.settingsWindows.delete(window);},{once:true});}">
   <vbox flex="1" style="overflow:auto;padding:16px;" id="tm-settings-root"/>
 </window>

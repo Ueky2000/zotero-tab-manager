@@ -183,7 +183,7 @@ async function runSettingsHarness(Zotero, Services, outputFile, fixtureDir) {
       tabs = w.Zotero_Tabs,
       c = p.windows.get(w);
     check('Packaged plugin starts with settings support', !!p && !!c);
-    check('Tools menu contains settings and workspace shortcuts', !!w.document.getElementById('ztg-tools-menu'));
+    check('Tools menu contains workspace shortcuts', !!w.document.getElementById('ztg-tools-menu'));
     if (parseInt(Zotero.version, 10) < 7) {
       // Firefox 60's PDF renderer can wait indefinitely in a hidden window.
       // Check the real legacy settings window here; shared restore logic is
@@ -385,8 +385,8 @@ async function runSettingsHarness(Zotero, Services, outputFile, fixtureDir) {
     check('Clicking a vertical entry selects its document', tabs.selectedID === target.dataset.id);
     tabs.select(find(a).id);
     p.assign(find(a), 'settings-group');
-    await until(() => c.groupPanel.state === 'open');
-    check('Assigning the active paper reveals it in a vertical group', !!c.groupList.querySelector('.ztg-document.selected'));
+    await wait(100);
+    check('Assigning the active paper reveals its horizontal tab in a vertical group', !!c.root.querySelector('.ztg-document.selected'));
     c.groupPanel.hidePopup();
     tabs.close(extra.filter(id => tabs._tabs.some(t => t.id === id)));
     await wait(100);
@@ -444,6 +444,10 @@ async function runGroupListHarness(Zotero, Services, outputFile, fixtureDir) {
       tabs = w.Zotero_Tabs,
       c = p.windows.get(w);
     w.focus();
+    const tools = w.document.getElementById('ztg-tools-menu'),
+      actions = tools.querySelector('menupopup');
+    check('Tools submenu has exactly the two workspace actions', actions.children.length === 2 && actions.children[0].getAttribute('label') === '保存当前阅读现场' && actions.children[1].getAttribute('label') === '恢复阅读现场');
+    check('Tools menu and both actions have colored icons', tools.classList.contains('menu-iconic') && !!tools.getAttribute('image') && [...actions.children].every(n => n.classList.contains('menuitem-iconic') && n.getAttribute('image').startsWith('data:image/svg+xml,')));
     check('Threshold defaults to seven', p.getSettings().verticalThreshold === 7);
     p.state.groups.push({
       id: 'vertical-test',
@@ -473,16 +477,27 @@ async function runGroupListHarness(Zotero, Services, outputFile, fixtureDir) {
     await wait(100);
     const rows = [...c.groupList.querySelectorAll('.ztg-document')];
     check('Popup lists all eight papers vertically', rows.length === 8 && rows[1].getBoundingClientRect().top >= rows[0].getBoundingClientRect().bottom);
+    check('Vertical papers are numbered in group order', rows.every((row, i) => row.querySelector('.ztg-index').textContent === String(i + 1)));
     check('Top tab strip remains a single row', c.root.getBoundingClientRect().height <= 38);
     check('Rows retain right-click and drag actions', typeof rows[0].oncontextmenu === 'function' && rows[0].draggable);
     const focus = Components.interfaces.nsIFocusManager;
+    rows[0].dispatchEvent(new w.MouseEvent('mousedown', {
+      bubbles: true,
+      button: 0
+    }));
     Services.focus.setFocus(rows[0], focus.FLAG_BYMOUSE | focus.FLAG_NOSCROLL);
     await wait(50);
     check('Pointer focus adds no outline to popup rows', w.getComputedStyle(rows[0]).outlineStyle === 'none');
-    rows[0].blur();
-    Services.focus.setFocus(rows[0], focus.FLAG_BYKEY | focus.FLAG_NOSCROLL);
+    const focusRow = c.groupList.querySelector('.ztg-document');
+    focusRow.blur();
+    focusRow.dispatchEvent(new w.KeyboardEvent('keydown', {
+      key: 'ArrowUp',
+      bubbles: true
+    }));
+    Services.focus.setFocus(focusRow, focus.FLAG_BYKEY | focus.FLAG_NOSCROLL);
     await wait(50);
-    check('Keyboard focus follows the green group color', w.getComputedStyle(rows[0]).outlineColor === 'rgb(33, 134, 106)');
+    const focusColor = w.getComputedStyle(focusRow).outlineColor;
+    check('Keyboard focus follows the green group color (' + focusColor + ', connected=' + focusRow.isConnected + ')', focusColor === 'rgb(33, 134, 106)');
     c.dragged = ids[0];
     const rect = rows[1].getBoundingClientRect();
     check('Vertical drag insertion uses the row height', c.plan({
@@ -493,7 +508,28 @@ async function runGroupListHarness(Zotero, Services, outputFile, fixtureDir) {
       clientX: rect.left + rect.width / 2
     }, rows[1], 'vertical-test', ids[1]).mode === 'after');
     c.dragged = null;
-    rows[7].querySelector('.ztg-close').click();
+    rows[1].dispatchEvent(new w.MouseEvent('mousedown', {
+      bubbles: true,
+      button: 0
+    }));
+    await wait(100);
+    check('Selecting a vertical row exposes one horizontal active tab without replacing its popup row', !!c.root.querySelector('.ztg-document.selected') && c.root.querySelectorAll('.ztg-document').length === 1 && rows[1].isConnected);
+    rows[1].dispatchEvent(new w.MouseEvent('click', {
+      bubbles: true,
+      button: 0
+    }));
+    await wait(150);
+    check('Reading a vertical entry closes its popup', c.groupPanel.state === 'closed');
+    c.openGroupList('vertical-test', true);
+    await until(() => c.groupPanel.state === 'open');
+    const next = c.groupList.querySelectorAll('.ztg-document')[2];
+    next.dispatchEvent(new w.KeyboardEvent('keydown', {
+      key: 'Enter',
+      bubbles: true
+    }));
+    await wait(150);
+    check('Keyboard selection replaces the horizontal active paper', c.root.querySelectorAll('.ztg-document').length === 1 && c.root.querySelector('.ztg-document.selected').dataset.id === ids[2] && c.groupPanel.state === 'closed');
+    c.root.querySelector('.ztg-document.selected .ztg-close').click();
     await wait(250);
     c.refresh();
     check('Closing an entry at the boundary restores horizontal tabs', !c.isVertical('vertical-test') && c.root.querySelectorAll('.ztg-section[data-group="vertical-test"] .ztg-document').length === 7);
@@ -512,7 +548,93 @@ async function runGroupListHarness(Zotero, Services, outputFile, fixtureDir) {
       verticalThreshold: 100
     });
     check('Raising the threshold restores horizontal presentation', !c.isVertical('vertical-test') && c.root.querySelectorAll('.ztg-section[data-group="vertical-test"] .ztg-document').length === 7);
-    await p.openSettings(w);
+    for (let i = 0; i < 7; i++) p.state.groups.push({
+      id: 'count-test-' + i,
+      name: 'Count test ' + i,
+      color: '#3977d5'
+    });
+    p.save();
+    check('More than seven named groups switches every group to vertical mode', p.getSettings().groupCountThreshold === 7 && c.isVertical('vertical-test') && c.isVertical('') && c.root.querySelectorAll('.ztg-document').length === 1);
+    p.updateSettings({
+      groupCountThreshold: 8
+    });
+    check('The group-count threshold is strict and immediately adjustable', !c.isVertical('vertical-test') && c.root.querySelectorAll('.ztg-section[data-group="vertical-test"] .ztg-document').length === 7);
+    p.updateSettings({
+      groupCountThreshold: 7
+    });
+    p.state.groups = p.state.groups.filter(g => !g.id.startsWith('count-test-'));
+    p.save();
+    check('Removing excess groups restores per-group document thresholds', !c.isVertical('vertical-test'));
+    const rowLimit = Math.max(1, Math.floor((Math.max(100, Math.min(420, w.innerHeight - 140)) - 12) / 38));
+    const extra = [];
+    const grow = async count => {
+      while (tabs._tabs.filter(t => t.type !== 'library' && p.groupOf(t) === 'vertical-test').length < count) {
+        const item = await Zotero.Attachments.linkFromFile({
+          file: fixtureDir + 'fixture-a.pdf'
+        });
+        const tab = tabs.add({
+          type: 'reader-unloaded',
+          title: 'Multi-column paper',
+          data: {
+            itemID: item.id
+          },
+          select: false
+        });
+        extra.push(tab.id);
+        p.assign(tabs._tabs.find(t => t.id === tab.id), 'vertical-test');
+      }
+    };
+    p.updateSettings({
+      verticalThreshold: 6
+    });
+    await grow(rowLimit + 1);
+    c.openGroupList('vertical-test', true);
+    await until(() => c.groupPanel.state === 'open');
+    await wait(100);
+    const maxColumns = Math.min(3, Math.max(1, Math.floor(Math.max(240, w.innerWidth - 32) / 280)));
+    check('Large groups adapt to two columns when the window permits', Number(c.groupList.dataset.columns) === Math.min(2, maxColumns));
+    c.groupPanel.hidePopup();
+    await wait(100);
+    await grow(rowLimit * 3 + 2);
+    c.openGroupList('vertical-test', true);
+    await until(() => c.groupPanel.state === 'open');
+    await wait(100);
+    const many = [...c.groupList.querySelectorAll('.ztg-document')],
+      bounds = c.groupList.getBoundingClientRect();
+    results.push({
+      name: 'Multi-column layout measurements',
+      passed: true,
+      columns: Number(c.groupList.dataset.columns),
+      expectedColumns: maxColumns,
+      width: bounds.width,
+      height: bounds.height,
+      windowWidth: w.innerWidth,
+      scrollHeight: c.groupList.scrollHeight,
+      clientHeight: c.groupList.clientHeight
+    });
+    check('Very large groups cap at three columns and remain scrollable within the window', Number(c.groupList.dataset.columns) === maxColumns && bounds.width <= w.innerWidth && bounds.height <= 421 && c.groupList.scrollHeight > c.groupList.clientHeight);
+    check('Multi-column numbering stays in document order', many.every((row, i) => row.querySelector('.ztg-index').textContent === String(i + 1)));
+    if (maxColumns > 1) {
+      const perColumn = Number(c.groupList.dataset.rows);
+      check('Documents fill down each column before the next', many[perColumn].getBoundingClientRect().left > many[0].getBoundingClientRect().right && Math.abs(many[perColumn].getBoundingClientRect().top - many[0].getBoundingClientRect().top) < 2);
+    }
+    check('Hover tint uses the group color with high transparency', w.getComputedStyle(c.groupList).getPropertyValue('--ztg-hover').trim() === 'rgba(33,134,106,0.14)');
+    c.groupPanel.hidePopup();
+    await wait(100);
+    tabs.close(extra);
+    p.updateSettings({
+      verticalThreshold: 100
+    });
+    c.refresh();
+    let addons;
+    if (parseInt(Zotero.version, 10) < 7) {
+      addons = w.openDialog('chrome://mozapps/content/extensions/extensions.xul', '', 'chrome,centerscreen,resizable');
+      await until(() => p.legacyOptionsWindows.has(addons));
+      const manager = ChromeUtils.import('resource://gre/modules/AddonManager.jsm').AddonManager;
+      const addon = await manager.getAddonByID('tab-groups@local.zotero');
+      check('Zotero 6 exposes the plugin preferences action', addon && addon.isActive && Number(addon.optionsType) === 3);
+      addons.gViewController.commands.cmd_showItemPreferences.doCommand(addon);
+    } else await p.openSettings(w);
     let preferences;
     await until(() => {
       preferences = p.settingsPane ? Services.wm.getMostRecentWindow('zotero:pref') : [...p.settingsWindows].find(x => !x.closed);
@@ -520,12 +642,32 @@ async function runGroupListHarness(Zotero, Services, outputFile, fixtureDir) {
     });
     const threshold = preferences.document.getElementById('tm-setting-verticalThreshold');
     check('Settings include all eight compact controls', preferences.document.querySelectorAll('[id^="tm-setting-"]').length === 8 && threshold.getBoundingClientRect().left - threshold.previousElementSibling.getBoundingClientRect().right <= 16);
+    check('Settings use requested labels and omit the hover switch', preferences.document.getElementById('tm-setting-restoreClosedGroups').parentElement.textContent === '重新打开文献时自动进入上一次的分组' && threshold.parentElement.textContent === '分组内文献超过此数量时竖向排列' && !preferences.document.getElementById('tm-setting-hoverExpand'));
+    await until(() => [...preferences.document.querySelectorAll('#tm-save-workspace img,#tm-restore-workspace img')].every(n => n.naturalWidth === 16));
+    check('Both settings workspace buttons render matching colored icons', preferences.document.querySelectorAll('#tm-save-workspace img,#tm-restore-workspace img').length === 2);
     threshold.value = '9';
     threshold.dispatchEvent(new preferences.Event('change', {
       bubbles: true
     }));
     check('Threshold can be changed from the settings UI', p.getSettings().verticalThreshold === 9);
+    const groupThreshold = preferences.document.getElementById('tm-setting-groupCountThreshold');
+    groupThreshold.value = '10';
+    groupThreshold.dispatchEvent(new preferences.Event('change', {
+      bubbles: true
+    }));
+    check('The group-count threshold can be changed from settings', p.getSettings().groupCountThreshold === 10);
+    const paper = tabs._tabs.find(t => t.id === ids[0]);
+    p.setRemark(paper, 'Reading note');
+    p.setGroupDisplay('vertical-test', 'original');
+    p.setDisplay(paper, 'both');
+    const display = preferences.document.getElementById('tm-setting-defaultDisplay');
+    display.value = 'note';
+    display.dispatchEvent(new preferences.Event('change', {
+      bubbles: true
+    }));
+    check('Changing default display immediately overrides existing group and paper display settings', p.remark(paper).mode === 'note' && c.root.querySelector('[data-id="' + paper.id + '"] .ztg-title').textContent === 'Reading note' && p.state.groupDisplay[''] === 'note');
     preferences.close();
+    if (addons) addons.close();
     p.stop();
     check('Shutdown removes the popup', !w.document.getElementById('ztg-group-panel'));
   } catch (error) {

@@ -41,6 +41,7 @@ function tmReadyZotero() {
   });
 }
 function tmAttach(window) {
+  if (!TMStopped && TabGroups && TabGroups.attachLegacyOptions) TabGroups.attachLegacyOptions(window);
   if (TMStopped || !TabGroups || !window.Zotero_Tabs) return;
   var attempts = 0;
   function attempt() {

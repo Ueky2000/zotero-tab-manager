@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.3 — 2026-11-18
+
+- Number vertical entries, adapt large lists to two or three columns within the window, and use translucent group colors on hover.
+- Show the active document as a horizontal tab; keep popup rows stable during selection for drag support.
+- Add a configurable group-count threshold (default 7) that switches all groups to vertical lists when exceeded. Keep the active paper horizontal.
+- Apply default display changes immediately to current groups and open documents without changing remarks or saved workspaces.
+- Simplify Tools → Tab Manager to save/restore actions with matching colored icons in the menu and settings buttons; remove settings from the suggestions menu.
+- Clarify settings labels and always enable drag-hover expansion. Retain Zotero 6 settings through the add-on manager's options button.
+
 ## 0.6.2 — 2026-11-18
 
 - Fix unreliable bulk reading-workspace restoration on Zotero 7. Restore native unloaded tabs first, loading each PDF when selected, instead of constructing every reader at once.
