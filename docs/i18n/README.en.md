@@ -43,7 +43,18 @@ Install over an older version to keep your settings. Restart Zotero if necessary
 - **Suggested closures:** The far-right control lists inactive papers; the default threshold is 7 days and can be changed. It never closes papers automatically. Tracking starts when the plugin begins recording visits.
 - **Close group tabs:** The group's context menu closes its reading tabs and preserves group assignments.
 
-Version 0.5.1 fixes crowded tabs pushing the toolbar out of view. Tabs scroll horizontally with the mouse wheel, and activating an offscreen tab scrolls it into view.
+<details>
+<summary>Latest updates · v0.6.4: Group closing and toolbar improvements</summary>
+
+- **Optional automatic group removal:** A new setting dissolves an empty group after its one-click close action; it is off by default. Ungrouped tabs keep their section. If group restoration is enabled, reopening a paper can recreate its original group.
+- **Click again to close:** Search and suggested closures now open on the first click and close on the second. Opening one closes the other popup.
+- **Simpler settings:** Ungrouped color is now adjusted through its context menu instead of a duplicate control in settings.
+
+Recent versions also added one-click reading-workspace save/restore, a Zotero settings pane, numbered two- and three-column document lists, and adjustable vertical-layout thresholds. In vertical mode, the active paper remains a horizontal tab at the top.
+
+[Download the latest version](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) · [Full changelog](../CHANGELOG.md)
+
+</details>
 
 ## Compatibility
 

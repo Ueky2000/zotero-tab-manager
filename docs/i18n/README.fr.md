@@ -43,7 +43,18 @@ Vous pouvez installer par-dessus une ancienne version en conservant vos réglage
 - **Suggestions de fermeture :** le bouton tout à droite liste les documents inactifs ; le seuil par défaut de 7 jours est réglable. Rien n'est fermé automatiquement. Le suivi commence lorsque le plugin commence à enregistrer les consultations.
 - **Fermer les onglets d'un groupe :** le menu du groupe ferme les onglets de lecture en conservant leur appartenance au groupe.
 
-La version 0.5.1 corrige le débordement des onglets qui masquait les commandes à droite. La molette permet le défilement horizontal et l'activation d'un onglet hors champ le ramène automatiquement dans la zone visible.
+<details>
+<summary>Dernières mises à jour · v0.6.4 : Fermeture des groupes et barre d'outils</summary>
+
+- **Dissolution automatique facultative :** Un nouveau réglage supprime un groupe vide après la fermeture de tous ses onglets en une seule action. Il est désactivé par défaut ; la section sans groupe reste disponible. Si la restauration des groupes est activée, rouvrir un document peut recréer son groupe d'origine.
+- **Un second clic referme :** La recherche et les suggestions de fermeture s'ouvrent au premier clic et se ferment au second. Ouvrir l'un ferme la fenêtre de l'autre.
+- **Des réglages plus simples :** La couleur de la section sans groupe se règle dans son menu contextuel, sans commande en double dans les paramètres.
+
+Les versions récentes ont aussi ajouté l'enregistrement et la restauration de l'espace de lecture en un clic, un panneau dans les paramètres de Zotero, des listes numérotées sur deux ou trois colonnes et des seuils réglables pour l'affichage vertical. En mode vertical, le document actif reste un onglet horizontal en haut.
+
+[Télécharger la dernière version](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) · [Historique complet des modifications](../CHANGELOG.md)
+
+</details>
 
 ## Compatibilité
 

@@ -43,7 +43,18 @@ Puoi installare sopra una versione precedente mantenendo le impostazioni. Riavvi
 - **Chiusure suggerite:** il comando all'estrema destra elenca i documenti inattivi; la soglia predefinita di 7 giorni è modificabile. Non chiude nulla automaticamente. Gli intervalli sono calcolati da quando il plugin inizia a registrare le visite.
 - **Chiudi le schede del gruppo:** il menu contestuale chiude le schede di lettura e conserva le assegnazioni.
 
-La versione 0.5.1 risolve il problema delle schede numerose che spingevano i comandi fuori dalla finestra. La rotellina permette lo scorrimento orizzontale; attivare una scheda fuori vista la rende visibile automaticamente.
+<details>
+<summary>Novità · v0.6.4: Chiusura dei gruppi e barra degli strumenti</summary>
+
+- **Scioglimento automatico facoltativo:** Una nuova impostazione elimina un gruppo vuoto dopo la chiusura di tutte le sue schede con un solo comando. È disattivata per impostazione predefinita; la sezione senza gruppo rimane. Se il ripristino dei gruppi è attivo, riaprire un documento può ricreare il gruppo originale.
+- **Un secondo clic chiude:** Ricerca e suggerimenti di chiusura si aprono al primo clic e si chiudono al secondo. Aprire uno chiude il pannello dell'altro.
+- **Impostazioni più semplici:** Il colore della sezione senza gruppo si modifica dal suo menu contestuale, senza un controllo duplicato nelle impostazioni.
+
+Le versioni recenti hanno aggiunto anche salvataggio e ripristino dello spazio di lettura con un clic, un pannello nelle impostazioni di Zotero, elenchi numerati a due o tre colonne e soglie regolabili per la disposizione verticale. In modalità verticale, il documento attivo rimane una scheda orizzontale in alto.
+
+[Scarica l'ultima versione](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) · [Registro completo delle modifiche](../CHANGELOG.md)
+
+</details>
 
 ## Compatibilità
 
