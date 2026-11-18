@@ -1,5 +1,25 @@
 # Compatibility record
 
+## Version 0.5.2 — 2026-11-18
+
+The final XPI was tested on Windows in new isolated profiles, reusing only the synthetic test databases created during this run to avoid reinstalling bundled translators. No normal user profile or library was used. The test harness is now packaged as an XPI instead of relying on an extension-directory pointer.
+
+| Runtime | XPI / UI checks | Result |
+| --- | ---: | --- |
+| Zotero 6.0.36 | 42 | PASS |
+| Zotero 7.0.32 | 46 | PASS |
+| Zotero 10.0.8 | 46 | PASS |
+
+All three passed original-library-tab visibility at 960, 1280 and 1920px, selecting an offscreen paper, returning to the library through native mouse events, fixed toolbar geometry, default group ordering, stable heading width, and restoration of the native tab bar after disabling the plugin. The existing checks for remarks, colors, search, group closing and persistence also passed.
+
+`node tests/layout.cjs` passes 12 assertions for each of the modern and Firefox 60 sources (24 total), including migration of old ungrouped-first settings, retention of assignments/remarks/colors/folding, persistence of subsequent manual reordering, insertion of new groups before ungrouped across restart, and name-based width limits.
+
+Reports: `tests/results/v0.5.2/`. XPI SHA256: `115c4f0c5e56d112ddf51488619c53964d3b28505a5007f1ce6473feb71e2919`.
+
+The reported Zotero 10.0.1 native tab component was reviewed at its official source tag. Its official installer URL returned an installer whose internal application version is 10.0.8, so 10.0.1 itself is **not** recorded as a runtime pass. Zotero 8/9 were not rerun for this version; their previous-version results are below. macOS and Linux remain untested on a running desktop.
+
+## Previous validation: version 0.5.1
+
 Test date: 2026-11-17. Host: Windows. Plugin: 0.5.1.
 
 Each isolated run loaded the actual release XPI into a fresh profile with a separate data directory and synthetic PDF fixtures. It verified installation and bootstrap, enable/disable cleanup, group rendering, ungrouped color, folding, ordering, bulk labels, notes, search matching, result geometry, native context-menu extension, saved settings, actual group closing, preserved group assignment, document reveal and the visible suggestions control.

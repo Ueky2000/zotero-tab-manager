@@ -1,0 +1,175 @@
+{
+  "version": "6.0.36",
+  "platform": "Windows",
+  "passed": true,
+  "results": [
+    {
+      "name": "Packaged bootstrap starts and mounts UI",
+      "passed": true
+    },
+    {
+      "name": "Plugin installs and is active",
+      "passed": true
+    },
+    {
+      "name": "Disable removes UI",
+      "passed": true
+    },
+    {
+      "name": "Ungrouped follows named groups by default",
+      "passed": true
+    },
+    {
+      "name": "Heading width does not change with member count",
+      "passed": true
+    },
+    {
+      "name": "Groups render attachment tabs",
+      "passed": true
+    },
+    {
+      "name": "Ungrouped color supported",
+      "passed": true
+    },
+    {
+      "name": "Group collapse hides members",
+      "passed": true
+    },
+    {
+      "name": "Group order updates",
+      "passed": true
+    },
+    {
+      "name": "Bulk display and remarks supported",
+      "passed": true
+    },
+    {
+      "name": "Search matches remarks",
+      "passed": true
+    },
+    {
+      "name": "Remark appears on tab",
+      "passed": true
+    },
+    {
+      "name": "Search panel opens",
+      "passed": true
+    },
+    {
+      "name": "Search cards do not overlap",
+      "passed": true
+    },
+    {
+      "name": "Native tab menu includes remark display actions",
+      "passed": true
+    },
+    {
+      "name": "Settings persist",
+      "passed": true
+    },
+    {
+      "name": "Actual group close closes only its member",
+      "passed": true
+    },
+    {
+      "name": "Close preserves assignment",
+      "passed": true
+    },
+    {
+      "name": "Search-style reveal selects document and expands group",
+      "passed": true
+    },
+    {
+      "name": "Suggestion toolbar label is visible",
+      "passed": true
+    },
+    {
+      "name": "960px: search and suggestions remain visible",
+      "passed": true
+    },
+    {
+      "name": "960px: original library tab is visible before groups",
+      "passed": true
+    },
+    {
+      "name": "960px: document strip stays before toolbar",
+      "passed": true
+    },
+    {
+      "name": "960px: overflow is inside document strip",
+      "passed": true
+    },
+    {
+      "name": "1280px: search and suggestions remain visible",
+      "passed": true
+    },
+    {
+      "name": "1280px: original library tab is visible before groups",
+      "passed": true
+    },
+    {
+      "name": "1280px: document strip stays before toolbar",
+      "passed": true
+    },
+    {
+      "name": "1280px: overflow is inside document strip",
+      "passed": true
+    },
+    {
+      "name": "1920px: search and suggestions remain visible",
+      "passed": true
+    },
+    {
+      "name": "1920px: original library tab is visible before groups",
+      "passed": true
+    },
+    {
+      "name": "1920px: document strip stays before toolbar",
+      "passed": true
+    },
+    {
+      "name": "1920px: overflow is inside document strip",
+      "passed": true
+    },
+    {
+      "name": "Wheel scroll reaches offscreen tabs",
+      "passed": true
+    },
+    {
+      "name": "Selecting last overflowing tab scrolls it into view",
+      "passed": true
+    },
+    {
+      "name": "Revealing last tab does not move toolbar offscreen",
+      "passed": true
+    },
+    {
+      "name": "Native selection also reveals an overflowing tab",
+      "passed": true
+    },
+    {
+      "name": "Native library control returns from reader to library",
+      "passed": true
+    },
+    {
+      "name": "Library control stays fixed after scrolling",
+      "passed": true
+    },
+    {
+      "name": "Search lists overflowing open papers",
+      "passed": true
+    },
+    {
+      "name": "Cleanup removes all controls",
+      "passed": true
+    },
+    {
+      "name": "Cleanup restores native library tab",
+      "passed": true
+    },
+    {
+      "name": "Packaged plugin re-enables",
+      "passed": true
+    }
+  ]
+}

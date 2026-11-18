@@ -24,6 +24,12 @@ async function runCompatHarness(Zotero, Services, pluginRoot, outputFile, fixtur
     await wait(250);
     const aTab=tabs._tabs.find(t=>t.id===ta.id),bTab=tabs._tabs.find(t=>t.id===tb.id);
     p.state.groups.push({id:'compat-a',name:'Compatibility A',color:'#3977d5'},{id:'compat-b',name:'Compatibility B',color:'#21866a'});p.assign(aTab,'compat-a');p.assign(bTab,'compat-a');
+    check('Ungrouped follows named groups by default',p.orderedGroups().slice(-1)[0].id==='');
+    const heading=()=>d.querySelector('#ztg-inline .ztg-heading[data-group="compat-a"]');
+    const headingWidth=heading().getBoundingClientRect().width;
+    p.assign(bTab,'compat-b');
+    check('Heading width does not change with member count',heading().getBoundingClientRect().width===headingWidth);
+    p.assign(bTab,'compat-a');
     check('Groups render attachment tabs',d.querySelectorAll('#ztg-inline .ztg-document').length===2);
     p.setColor('','#f5d547');check('Ungrouped color supported',p.state.ungroupedColor==='#f5d547');
     p.setCollapsed('compat-a',true);check('Group collapse hides members',!d.querySelector('#ztg-inline .ztg-document'));
@@ -46,6 +52,7 @@ async function runCompatHarness(Zotero, Services, pluginRoot, outputFile, fixtur
     const stress={};Services.scriptloader.loadSubScript(pluginRoot+'tests/overflow.js',stress,'UTF-8');
     await stress.testOverflow(Zotero,p,w,check,wait,a.id);
     p.stop();check('Cleanup removes all controls',!d.getElementById('ztg-inline')&&!d.getElementById('ztg-search'));
+    check('Cleanup restores native library tab',Array.from(d.querySelectorAll('#tab-bar-container [data-id="zotero-pane"]')).some(n=>n.getBoundingClientRect().width>0));
     if(typeof plugin.enable==='function')await plugin.enable();else plugin.userDisabled=false;
     await wait(300);check('Packaged plugin re-enables',!!d.getElementById('ztg-inline'));
   } catch(error){results.push({error:String(error),stack:error.stack});}

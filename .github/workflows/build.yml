@@ -16,6 +16,7 @@ jobs:
       - run: npm --prefix scripts install --ignore-scripts --no-audit --no-fund
       - run: npm --prefix scripts run build
       - run: node --check src/bootstrap.js && node --check src/core.js && node --check src/core-legacy.js
+      - run: node tests/layout.cjs
       - run: git diff --exit-code -- src/core-legacy.js tests/harness/run-legacy.js updates.json dist
       - uses: actions/upload-artifact@v4
         with:

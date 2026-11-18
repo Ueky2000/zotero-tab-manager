@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.2 — 2026-11-18
+
+- Place ungrouped papers after named groups by default. Migrate the old layout once while preserving the relative order of named groups; subsequent manual group ordering remains persistent.
+- Size group headings by their names, with a bounded width that no longer grows with the number of open papers.
+- Keep Zotero's original library tab visible to the left of the grouped strip, independent of native overflow detection, including Zotero 10.0.1.
+- Verify returning to the library after scrolling through many tabs, plus fixed controls at 960, 1280 and 1920 pixel widths.
+
 ## 0.5.1 — 2026-11-17
 
 - Fix many open tabs pushing Zotero's native tab dropdown and Tab Manager's search and suggestions outside the window.

@@ -1,6 +1,6 @@
 """Prepare a NEW isolated Zotero test profile. Never point this at a real profile."""
 from pathlib import Path
-import argparse,json,shutil
+import argparse,json,shutil,zipfile
 
 def fixture(path,label):
     stream=f'BT /F1 16 Tf 72 720 Td (Tab Manager fixture {label}) Tj ET'.encode()
@@ -25,7 +25,9 @@ fixtures=profile/'fixtures';fixtures.mkdir()
 for label in ['a','b']:fixture(fixtures/f'fixture-{label}.pdf',label)
 manifest=json.loads((root/'src/manifest.json').read_text(encoding='utf-8'))
 shutil.copyfile(root/'dist'/f'tab-manager-{manifest["version"]}.xpi',extensions/(manifest['applications']['zotero']['id']+'.xpi'))
-(extensions/'test-harness@tab-manager.local').write_text(str(root/'tests/harness'),encoding='utf-8')
+with zipfile.ZipFile(extensions/'test-harness@tab-manager.local.xpi','w',zipfile.ZIP_DEFLATED) as archive:
+    for name in ['bootstrap.js','manifest.json','install.rdf','run-legacy.js']:
+        archive.write(root/'tests/harness'/name,name)
 prefs={'extensions.zotero.dataDir':str(data),'extensions.zotero.useDataDir':True,
     'extensions.zotero.firstRun':False,'extensions.zotero.firstRun2':False,
     'extensions.zotero.sync.autoSync':False,'extensions.autoDisableScopes':0,'extensions.enabledScopes':15,

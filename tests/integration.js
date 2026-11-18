@@ -168,8 +168,8 @@ async function testInlineGroups(Zotero) {
     check('Text contrast follows background', p.ink('#000000') === '#ffffff' && p.ink('#ffffff') !== '#ffffff');
     const beforeWidth = head('test-A').getBoundingClientRect().width;
     p.assign(b, 'test-A');
-    check('Group heading widens as document count rises', head('test-A').getBoundingClientRect().width > beforeWidth);
-    check('Heading width is bounded for large groups', p.headingWidth(gA(), 1000) === 320);
+    check('Group heading stays the same width as document count rises', head('test-A').getBoundingClientRect().width === beforeWidth);
+    check('Heading width is bounded for long names', p.headingWidth({name:'长分组名'.repeat(60)}, 1000) === 280);
     p.assign(b, 'test-B');
     head('test-A').click(); head('').click();
     check('Custom groups and ungrouped collapse independently', !node(a.id) && c.collapsed.has('') && !!node(b.id));

@@ -17,6 +17,8 @@ async function testOverflow(Zotero, p, w, check, wait, itemID) {
       bar.style.setProperty('min-width','0','important');await wait(60);
       if(menu)check(width+'px: native tab dropdown remains visible',visible(menu));
       check(width+'px: search and suggestions remain visible',visible(d.getElementById('ztg-search'))&&visible(d.getElementById('ztg-suggestions')));
+      const library=d.querySelector('#tab-bar-container .pinned-tabs [data-id="zotero-pane"]');
+      check(width+'px: original library tab is visible before groups',library&&visible(library)&&rect(library).right<=rect(root).left+1);
       const edge=toolbar===bar?rect(d.getElementById('ztg-search')).left:rect(toolbar).left;
       check(width+'px: document strip stays before toolbar',rect(root).width>50&&rect(root).right<=edge+1);
       check(width+'px: overflow is inside document strip',root.scrollWidth>root.clientWidth+100&&(host===bar||rect(host).right<=edge+1));
@@ -42,6 +44,13 @@ async function testOverflow(Zotero, p, w, check, wait, itemID) {
     const first=extra[0];tabs.select(first);await wait(250);
     const nativeSelected=root.querySelector('.ztg-document.selected');
     check('Native selection also reveals an overflowing tab',nativeSelected&&nativeSelected.dataset.id===first&&rect(nativeSelected).left>=rect(root).left-1&&rect(nativeSelected).right<=rect(root).right+1);
+    const library=d.querySelector('#tab-bar-container .pinned-tabs [data-id="zotero-pane"]');
+    // Zotero selects tabs on mousedown; click alone only tests its auxiliary action.
+    library.dispatchEvent(new w.MouseEvent('mousedown',{bubbles:true,cancelable:true,button:0}));
+    library.dispatchEvent(new w.MouseEvent('mouseup',{bubbles:true,cancelable:true,button:0}));
+    library.click();await wait(250);
+    check('Native library control returns from reader to library',tabs.selectedID==='zotero-pane'&&tabs.selectedType==='library');
+    check('Library control stays fixed after scrolling',visible(library)&&rect(library).right<=rect(root).left+1);
     c.openSearch();await wait(80);
     check('Search lists overflowing open papers',d.querySelectorAll('#ztg-search-panel .ztg-search-result').length>=60);
     d.getElementById('ztg-search-panel').hidePopup();

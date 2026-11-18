@@ -16,7 +16,7 @@ var TabGroups = {
   },
   pref: 'extensions.tabGroups.state',
   windows: new Map(),
-  state: { version: 1, groups: [], assignments: {}, ungroupedColor: '#737373', collapsed: [], order: [], history: {}, suggestDays: 7, remarks: {}, groupDisplay: {} },
+  state: { version: 1, orderVersion: 2, groups: [], assignments: {}, ungroupedColor: '#737373', collapsed: [], order: [], history: {}, suggestDays: 7, remarks: {}, groupDisplay: {} },
   colors: ['#3977d5', '#8b5ac7', '#21866a', '#bc6228', '#b34e77', '#667a2a'],
   normalizeColor(value) {
     const hex = String(value).trim().replace(/^#/, '');
@@ -48,11 +48,20 @@ var TabGroups = {
       const s = JSON.parse(raw);
       if (s.version !== 1 || !Array.isArray(s.groups) || !s.assignments || typeof s.assignments !== 'object') throw new Error('Invalid Tab Groups settings');
       const groups = s.groups.filter(g => typeof g.id === 'string' && g.id && typeof g.name === 'string' && /^#[0-9a-f]{6}$/i.test(g.color));
-      const valid = new Set(['', ...groups.map(g => g.id)]);
-      this.state = { version: 1, groups, assignments: { ...s.assignments },
+      const valid = new Set([...groups.map(g => g.id), '']);
+      let order = [...new Set(Array.isArray(s.order) ? s.order.filter(id => valid.has(id)) : [])];
+      for (const id of valid) {
+        if (order.includes(id)) continue;
+        const ungrouped = order.indexOf('');
+        order.splice(ungrouped === -1 ? order.length : ungrouped, 0, id);
+      }
+      // Move the old default ungrouped section once, retaining named-group order.
+      // Subsequent explicit drags, including moving ungrouped, remain persistent.
+      if (s.orderVersion !== 2) order = [...order.filter(id => id !== ''), ''];
+      this.state = { version: 1, orderVersion: 2, groups, assignments: { ...s.assignments },
         ungroupedColor: this.normalizeColor(s.ungroupedColor || '') || '#737373',
         collapsed: [...new Set(Array.isArray(s.collapsed) ? s.collapsed.filter(id => valid.has(id)) : [])],
-        order: [...new Set([...(Array.isArray(s.order) ? s.order.filter(id => valid.has(id)) : []), ...valid])],
+        order,
         history: s.history && typeof s.history === 'object' && !Array.isArray(s.history) ? { ...s.history } : {},
         suggestDays: Number.isInteger(s.suggestDays) && s.suggestDays >= 1 && s.suggestDays <= 3650 ? s.suggestDays : 7,
         remarks: s.remarks && typeof s.remarks === 'object' && !Array.isArray(s.remarks) ? { ...s.remarks } : {},
@@ -65,8 +74,13 @@ var TabGroups = {
     for (const c of this.windows.values()) c.refresh();
   },
   orderedGroups() {
-    const all = [{ id: '', name: '未分组', color: this.state.ungroupedColor || '#737373' }, ...this.state.groups];
-    const order = [...new Set([...(this.state.order || []), ...all.map(g => g.id)])];
+    const all = [...this.state.groups, { id: '', name: '未分组', color: this.state.ungroupedColor || '#737373' }];
+    const order = [...new Set((this.state.order || []).filter(id => all.some(g => g.id === id)))];
+    for (const g of all) {
+      if (order.includes(g.id)) continue;
+      const ungrouped = order.indexOf('');
+      order.splice(ungrouped === -1 ? order.length : ungrouped, 0, g.id);
+    }
     return order.map(id => all.find(g => g.id === id)).filter(Boolean);
   },
   moveGroup(id, target, after = false) {
@@ -87,8 +101,9 @@ var TabGroups = {
     }
     this.save();
   },
-  headingWidth(g, count) {
-    return Math.min(320, Math.max(96, 50 + [...g.name].length * 10) + Math.max(0, count) * 8);
+  headingWidth(g) {
+    const nameWidth = [...g.name].reduce((width, ch) => width + (ch.charCodeAt(0) > 255 ? 12 : 7), 0);
+    return Math.min(280, Math.max(96, 58 + nameWidth));
   },
   closeGroup(win, id) {
     const tabs = win.Zotero_Tabs;
@@ -261,6 +276,12 @@ var TabGroups = {
       #tab-bar-container[data-ztg-inline] > div { min-width:0 !important; width:0; flex:1 1 0% !important; }
       #tab-bar-container[data-ztg-inline] .tab-bar-inner-container { min-width:0 !important; width:100%; max-width:100%; box-sizing:border-box; }
       #tab-bar-container[data-ztg-inline] ~ #zotero-tabs-toolbar { flex:0 0 auto; -moz-box-flex:0; }
+      /* Native CSS normally hides this library tab until its own strip overflows.
+         Our strip replaces that layout, so keep the original library control
+         visible independently of Zotero's scrollable class (including v10). */
+      #tab-bar-container[data-ztg-inline] .pinned-tabs { display:flex !important; align-items:center; flex:0 0 auto !important; min-width:100px; max-width:180px; }
+      #tab-bar-container[data-ztg-inline] .pinned-tabs .tabs { display:flex; position:static; overflow:visible; }
+      #tab-bar-container[data-ztg-inline] .pinned-tabs .tab { flex:0 1 160px; min-width:100px; max-width:172px; }
       #ztg-actions { display:flex; align-items:center; flex:0 0 auto; -moz-window-dragging:no-drag; }
       #tab-bar-container[data-ztg-inline] .tabs-wrapper,
       #tab-bar-container[data-ztg-inline] .scroll-start-arrow,
@@ -582,7 +603,7 @@ var TabGroups = {
           if (g.color) { section.style.setProperty('--ztg-color', g.color); section.style.setProperty('--ztg-ink', this.ink(g.color)); }
           const heading = h('button', `${c.collapsed.has(g.id) ? '▸ ' : '▾ '}${g.name} (${members.length})`);
           heading.className = 'ztg-heading' + (!g.id ? ' ztg-ungrouped' : ''); heading.dataset.group = g.id;
-          heading.style.width = this.headingWidth(g, members.length) + 'px';
+          heading.style.width = this.headingWidth(g) + 'px';
           heading.title = g.id ? `${g.name}：点击折叠/展开，拖入文献加入，右键管理和设置颜色` : '未分组：点击折叠/展开，把文献拖到这里移出分组';
           heading.setAttribute('aria-expanded', String(!c.collapsed.has(g.id))); heading.onclick = () => c.toggle(g.id); heading.oncontextmenu = e => { e.preventDefault(); e.stopPropagation(); c.groupMenu(e, g); };
           heading.draggable = !this.readOnly;
