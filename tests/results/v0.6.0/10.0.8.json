@@ -1,0 +1,108 @@
+{
+  "version": "10.0.8",
+  "platform": "Windows",
+  "suite": "settings-workspace",
+  "passed": true,
+  "results": [
+    {
+      "name": "Packaged plugin starts with settings support",
+      "passed": true
+    },
+    {
+      "name": "Tools menu contains settings and workspace shortcuts",
+      "passed": true
+    },
+    {
+      "name": "Native Zotero preferences pane registered",
+      "passed": true
+    },
+    {
+      "name": "Settings page renders all seven controls",
+      "passed": true
+    },
+    {
+      "name": "Group count setting applies immediately",
+      "passed": true
+    },
+    {
+      "name": "Suggestion threshold persists",
+      "passed": true
+    },
+    {
+      "name": "Default tab display setting persists",
+      "passed": true
+    },
+    {
+      "name": "Suggestion button can be hidden",
+      "passed": true
+    },
+    {
+      "name": "Suggestion button can be restored",
+      "passed": true
+    },
+    {
+      "name": "One-click save captures both open documents",
+      "passed": true
+    },
+    {
+      "name": "Closing all documents retains saved workspace",
+      "passed": true
+    },
+    {
+      "name": "Closed document remembers group name and color",
+      "passed": true
+    },
+    {
+      "name": "Reopen recreates the missing group",
+      "passed": true
+    },
+    {
+      "name": "Disabling memory keeps current document grouped",
+      "passed": true
+    },
+    {
+      "name": "Reopen while memory disabled goes to ungrouped",
+      "passed": true
+    },
+    {
+      "name": "One-click restore reopens all saved documents",
+      "passed": true
+    },
+    {
+      "name": "Workspace restores grouping even when automatic memory is disabled",
+      "passed": true
+    },
+    {
+      "name": "Workspace restores colors and remarks",
+      "passed": true
+    },
+    {
+      "name": "Workspace restores saved paper order",
+      "passed": true
+    },
+    {
+      "name": "Workspace restores fold state",
+      "passed": true
+    },
+    {
+      "name": "Restoring twice does not duplicate documents",
+      "passed": true
+    },
+    {
+      "name": "Settings and workspace stored in preferences",
+      "passed": true
+    },
+    {
+      "name": "Moving selected document to another group reveals its tab",
+      "passed": true
+    },
+    {
+      "name": "Stopping removes the Tools menu",
+      "passed": true
+    },
+    {
+      "name": "Stopping unregisters the native settings pane",
+      "passed": true
+    }
+  ]
+}

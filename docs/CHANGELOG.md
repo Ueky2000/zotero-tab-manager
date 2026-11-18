@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 — 2026-11-18
+
+- Add a native Zotero 7–10 preferences pane and a compatible settings window for Zotero 6, accessible from Tools → Tab Manager.
+- Centralize group counts, hover expansion, ungrouped color, default label display and stale-tab suggestions.
+- Make closed-paper group memory optional. Recreate missing groups when enabled; leave currently open papers in place when switching it off.
+- Save and restore a reading workspace, including papers, groups, order, colors, remarks, display modes, folding and selection. Keep newer papers open, skip duplicates and report missing items.
+- Reveal the active paper after assigning it to another group, including groups outside the visible tab strip.
+
 ## 0.5.2 — 2026-11-18
 
 - Place ungrouped papers after named groups by default. Migrate the old layout once while preserving the relative order of named groups; subsequent manual group ordering remains persistent.

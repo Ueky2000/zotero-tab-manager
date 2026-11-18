@@ -66,8 +66,10 @@ async function startup(data) {
   // at build time, without modifying browser globals.
   var major = parseInt(zotero.version, 10);
   TMServices.scriptloader.loadSubScript(TMRoot + (major < 7 ? 'core-legacy.js' : 'core.js'), TMCore, 'UTF-8');
+  TMServices.scriptloader.loadSubScript(TMRoot + (major < 7 ? 'features-legacy.js' : 'features.js'), TMCore, 'UTF-8');
   TabGroups = TMCore.TabGroups;
   TabGroups.load();
+  try { await TabGroups.registerSettings(TMRoot); } catch(error) { zotero.logError(error); }
   TMWindowListener = {
     onOpenWindow:function(xulWindow) {
       var window = tmDOMWindow(xulWindow);

@@ -1,0 +1,36 @@
+{
+  "version": "6.0.36",
+  "platform": "Windows",
+  "suite": "legacy-settings-only",
+  "passed": true,
+  "results": [
+    {
+      "name": "Packaged plugin starts with settings support",
+      "passed": true
+    },
+    {
+      "name": "Tools menu contains settings and workspace shortcuts",
+      "passed": true
+    },
+    {
+      "name": "Legacy settings window renders all seven controls",
+      "passed": true
+    },
+    {
+      "name": "Legacy memory setting applies and persists",
+      "passed": true
+    },
+    {
+      "name": "Legacy suggestion threshold persists",
+      "passed": true
+    },
+    {
+      "name": "Legacy workspace buttons are available",
+      "passed": true
+    },
+    {
+      "name": "Legacy cleanup removes settings and Tools menu",
+      "passed": true
+    }
+  ]
+}

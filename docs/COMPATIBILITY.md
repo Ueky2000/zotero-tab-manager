@@ -1,5 +1,23 @@
 # Compatibility record
 
+## Version 0.6.0 — 2026-11-18
+
+The final packaged XPI was installed in fresh isolated Windows profiles, reusing only synthetic test databases. No normal user profile or library was used.
+
+| Runtime | Suite | UI checks | Result |
+| --- | --- | ---: | --- |
+| Zotero 6.0.36 | Legacy settings window | 7 | PASS |
+| Zotero 7.0.32 | Settings, real PDFs and reading workspace | 25 | PASS |
+| Zotero 10.0.8 | Settings, real PDFs and reading workspace | 25 | PASS |
+
+The modern UI suite covers the native preferences pane, all seven settings, saving two real PDF tabs, closing all tabs without overwriting the snapshot, recreating a removed group on reopen, disabling automatic memory, restoring while memory is disabled, saved colors/remarks/order/folding, duplicate avoidance, persisted preferences, revealing the selected paper after moving it to a distant group amid 35 extra tabs, and shutdown cleanup.
+
+The legacy UI suite covers the real settings window, its seven controls, preference persistence, workspace button availability and cleanup. **Full PDF reopening/restoration on Zotero 6 is not recorded as a runtime pass:** its renderer waited indefinitely in the hidden test window. An additional visible desktop check is still needed. The shared Firefox 60 implementation passes `node tests/features.cjs`, including closed-paper memory, missing group recreation, workspace restoration, duplicate avoidance, order and missing-item handling. Both source generations also pass the existing 24 layout/state assertions.
+
+Reports: `tests/results/v0.6.0/`. Final XPI SHA256: `5a8bad51e320de39ca2fbc9255c89e6a2920cd309c2bc4cc3e0ebdac66c7adc6`.
+
+Zotero 8/9 were not rerun for this version; earlier results remain below. macOS and Linux remain untested on a running desktop. Zotero 10.0.1 itself has not been runtime-tested.
+
 ## Version 0.5.2 — 2026-11-18
 
 The runtime-verified XPI was tested on Windows in new isolated profiles, reusing only the synthetic test databases created during this run to avoid reinstalling bundled translators. No normal user profile or library was used. The test harness is now packaged as an XPI instead of relying on an extension-directory pointer.

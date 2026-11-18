@@ -42,7 +42,10 @@ var TabGroups = {
     history: {},
     suggestDays: 7,
     remarks: {},
-    groupDisplay: {}
+    groupDisplay: {},
+    settings: {},
+    closedGroups: {},
+    workspace: null
   },
   colors: ['#3977d5', '#8b5ac7', '#21866a', '#bc6228', '#b34e77', '#667a2a'],
   normalizeColor(value) {
@@ -107,6 +110,13 @@ var TabGroups = {
         remarks: s.remarks && typeof s.remarks === 'object' && !Array.isArray(s.remarks) ? {
           ...s.remarks
         } : {},
+        settings: s.settings && typeof s.settings === 'object' && !Array.isArray(s.settings) ? {
+          ...s.settings
+        } : {},
+        closedGroups: s.closedGroups && typeof s.closedGroups === 'object' && !Array.isArray(s.closedGroups) ? {
+          ...s.closedGroups
+        } : {},
+        workspace: s.workspace && s.workspace.version === 1 && Array.isArray(s.workspace.tabs) && Array.isArray(s.workspace.groups) ? s.workspace : null,
         groupDisplay: s.groupDisplay && typeof s.groupDisplay === 'object' && !Array.isArray(s.groupDisplay) ? this.fromEntries(Object.entries(s.groupDisplay).filter(([id, mode]) => valid.has(id) && ['original', 'note', 'both'].includes(mode))) : {}
       };
     } catch (e) {
@@ -118,6 +128,7 @@ var TabGroups = {
     if (this.readOnly) throw new Error('分组设置无法读取，原数据已保留。');
     Zotero.Prefs.set(this.pref, JSON.stringify(this.state), true);
     for (const c of this.windows.values()) c.refresh();
+    if (this.updateSettingsViews) this.updateSettingsViews();
   },
   orderedGroups() {
     const all = [...this.state.groups, {
@@ -228,7 +239,7 @@ var TabGroups = {
   },
   remark(tab) {
     const r = this.state.remarks[this.key(tab)];
-    const defaultMode = this.state.groupDisplay[this.groupOf(tab)] || 'original';
+    const defaultMode = this.state.groupDisplay[this.groupOf(tab)] || (this.getSettings ? this.getSettings().defaultDisplay : 'original');
     return {
       note: typeof (r === null || r === void 0 ? void 0 : r.note) === 'string' ? r.note : '',
       mode: ['original', 'note', 'both'].includes(r === null || r === void 0 ? void 0 : r.mode) ? r.mode : defaultMode
@@ -309,6 +320,7 @@ var TabGroups = {
     const key = this.key(tab);
     if (!key || group && !this.state.groups.some(g => g.id === group)) return;
     if (group) this.state.assignments[key] = group;else delete this.state.assignments[key];
+    if (this.state.closedGroups) delete this.state.closedGroups[key];
     if (this.state.groupDisplay[group]) this.state.remarks[key] = {
       ...this.remark(tab),
       mode: this.state.groupDisplay[group]
@@ -316,6 +328,14 @@ var TabGroups = {
     this.state.collapsed = (this.state.collapsed || []).filter(id => id !== group);
     for (const c of this.windows.values()) c.collapsed.delete(group);
     this.save();
+    for (const [win, c] of this.windows) {
+      var _c$root$querySelector;
+      if (this.key(win.Zotero_Tabs._tabs.find(t => t.id === win.Zotero_Tabs.selectedID)) !== key) continue;
+      (_c$root$querySelector = c.root.querySelector('.ztg-document.selected')) === null || _c$root$querySelector === void 0 || _c$root$querySelector.scrollIntoView({
+        block: 'nearest',
+        inline: 'nearest'
+      });
+    }
   },
   create(win) {
     if (this.readOnly) return null;
@@ -464,6 +484,8 @@ var TabGroups = {
       lastSelected: tabs.selectedID,
       timer: null,
       disposed: false,
+      seenTabs: new Map(),
+      initializedTabs: false,
       dragged: null,
       draggedGroup: null,
       pendingMenu: null,
@@ -686,9 +708,7 @@ var TabGroups = {
         }, {
           disabled: !candidates.length
         });
-        c.item(popup, `设置天数阈值…（当前 ${this.state.suggestDays} 天）`, () => this.setSuggestDays(win), {
-          disabled: !!this.readOnly
-        });
+        c.item(popup, 'Tab Manager 设置…', () => this.openSettings ? this.openSettings(win) : this.setSuggestDays(win));
       }),
       fillAssignments: (popup, tab) => {
         for (const g of this.orderedGroups().filter(g => g.id)) c.item(popup, g.name, () => this.assign(tab, g.id), {
@@ -781,7 +801,7 @@ var TabGroups = {
           if (c.hoverTarget !== node) {
             c.cancelHover();
             c.hoverTarget = node;
-            if (c.dragged && c.collapsed.has(group)) c.hoverTimer = win.setTimeout(() => {
+            if (c.dragged && c.collapsed.has(group) && (!this.getSettings || this.getSettings().hoverExpand)) c.hoverTimer = win.setTimeout(() => {
               c.hoverTimer = null;
               if (!c.disposed && c.hoverTarget === node && c.dragged) c.springOpen(group);
             }, 600);
@@ -867,6 +887,7 @@ var TabGroups = {
         var _root$querySelector2, _root$querySelector3;
         if (c.disposed) return;
         c.mount();
+        if (this.syncTabs) this.syncTabs(win, c);
         c.activitySelectedID = this.track(tabs, c.activitySelectedID);
         const selectedChanged = c.lastSelected !== tabs.selectedID;
         if (selectedChanged) {
@@ -883,7 +904,12 @@ var TabGroups = {
           n.setAttribute('aria-selected', String(selected));
         }
         const suggested = this.suggestions(tabs).length;
-        const signature = JSON.stringify([documents.map(t => [t.id, t.title, this.originalName(t), this.remark(t), this.groupOf(t)]), this.state.groups, this.state.ungroupedColor, this.state.order, [...c.collapsed]]);
+        const options = this.getSettings ? this.getSettings() : {
+          showGroupCounts: true,
+          showSuggestions: true
+        };
+        suggestions.hidden = !options.showSuggestions;
+        const signature = JSON.stringify([documents.map(t => [t.id, t.title, this.originalName(t), this.remark(t), this.groupOf(t)]), this.state.groups, this.state.ungroupedColor, this.state.order, [...c.collapsed], options]);
         if (searchPanel.state === 'open') c.renderSearch();
         suggestions.setAttribute('tooltiptext', `建议关闭 (${suggested})：${this.state.suggestDays} 天未查看的文献`);
         this.setLabel(suggestions, `建议关闭 (${suggested})`);
@@ -909,7 +935,7 @@ var TabGroups = {
             section.style.setProperty('--ztg-color', g.color);
             section.style.setProperty('--ztg-ink', this.ink(g.color));
           }
-          const heading = h('button', `${c.collapsed.has(g.id) ? '▸ ' : '▾ '}${g.name} (${members.length})`);
+          const heading = h('button', `${c.collapsed.has(g.id) ? '▸ ' : '▾ '}${g.name}${options.showGroupCounts ? ` (${members.length})` : ''}`);
           heading.className = 'ztg-heading' + (!g.id ? ' ztg-ungrouped' : '');
           heading.dataset.group = g.id;
           heading.style.width = this.headingWidth(g) + 'px';
@@ -1085,11 +1111,14 @@ var TabGroups = {
       legacyActions.remove();
       style.remove();
       this.windows.delete(win);
+      if (c.toolsMenu) c.toolsMenu.remove();
     };
     this.windows.set(win, c);
+    if (this.attachToolsMenu) c.toolsMenu = this.attachToolsMenu(win);
     c.refresh();
   },
   stop() {
+    if (this.stopSettings) this.stopSettings();
     for (const c of [...this.windows.values()]) c.dispose();
   }
 };

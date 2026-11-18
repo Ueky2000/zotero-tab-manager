@@ -16,6 +16,7 @@ def fixture(path,label):
 
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--profile',required=True);parser.add_argument('--report',required=True)
+parser.add_argument('--suite',choices=['compat','settings'],default='compat')
 args=parser.parse_args();profile=Path(args.profile).resolve();report=Path(args.report).resolve()
 if profile.exists():raise SystemExit('Refusing an existing profile. Choose a new directory.')
 root=Path(__file__).resolve().parent.parent
@@ -33,6 +34,7 @@ prefs={'extensions.zotero.dataDir':str(data),'extensions.zotero.useDataDir':True
     'extensions.zotero.sync.autoSync':False,'extensions.autoDisableScopes':0,'extensions.enabledScopes':15,
     'extensions.update.enabled':False,'app.update.enabled':False,
     'extensions.tabManager.testOutput':str(report),'extensions.tabManager.testRoot':root.as_uri()+'/',
+    'extensions.tabManager.testSuite':args.suite,
     'extensions.tabManager.testFixtures':str(fixtures)+str(__import__('os').sep)}
 for branch in ['zoteroWinWordIntegration','zoteroOpenOfficeIntegration','zoteroMacWordIntegration']:
     prefs['extensions.'+branch+'.skipInstallation']=True

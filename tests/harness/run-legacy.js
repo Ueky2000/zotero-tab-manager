@@ -152,3 +152,202 @@ async function runCompatHarness(Zotero, Services, pluginRoot, outputFile, fixtur
   await Zotero.File.putContentsAsync(outputFile, JSON.stringify(report, null, 2));
   Services.startup.quit(Components.interfaces.nsIAppStartup.eForceQuit);
 }
+async function runSettingsHarness(Zotero, Services, outputFile, fixtureDir) {
+  const results = [];
+  const wait = ms => new Promise(resolve => Zotero.getMainWindow().setTimeout(resolve, ms));
+  const check = (name, passed) => {
+    results.push({
+      name,
+      passed: !!passed
+    });
+    if (!passed) throw new Error(name);
+  };
+  const until = async test => {
+    for (let i = 0; i < 200; i++) {
+      if (test()) return;
+      await wait(100);
+    }
+    throw new Error('Timed out waiting for settings/workspace UI');
+  };
+  try {
+    if (Zotero.uiReadyPromise) await Zotero.uiReadyPromise;
+    await wait(1500);
+    await until(() => Zotero.TabManagerPlugin && Zotero.getMainWindow().document.getElementById('ztg-inline'));
+    const w = Zotero.getMainWindow(),
+      p = Zotero.TabManagerPlugin,
+      tabs = w.Zotero_Tabs,
+      c = p.windows.get(w);
+    check('Packaged plugin starts with settings support', !!p && !!c);
+    check('Tools menu contains settings and workspace shortcuts', !!w.document.getElementById('ztg-tools-menu'));
+    if (parseInt(Zotero.version, 10) < 7) {
+      // Firefox 60's PDF renderer can wait indefinitely in a hidden window.
+      // Check the real legacy settings window here; shared restore logic is
+      // covered by features.cjs, and full PDF flows by the modern UI runs.
+      await p.openSettings(w);
+      let legacyWin;
+      await wait(500);
+      await until(() => {
+        legacyWin = [...p.settingsWindows].find(x => !x.closed);
+        return legacyWin && legacyWin.document.getElementById('tm-setting-restoreClosedGroups');
+      });
+      const doc = legacyWin.document;
+      check('Legacy settings window renders all seven controls', doc.querySelectorAll('[id^="tm-setting-"]').length === 7);
+      const memory = doc.getElementById('tm-setting-restoreClosedGroups');
+      memory.checked = false;
+      memory.dispatchEvent(new legacyWin.Event('change', {
+        bubbles: true
+      }));
+      check('Legacy memory setting applies and persists', !p.getSettings().restoreClosedGroups && !JSON.parse(Zotero.Prefs.get(p.pref, true)).settings.restoreClosedGroups);
+      const days = doc.getElementById('tm-setting-suggestDays');
+      days.value = '14';
+      days.dispatchEvent(new legacyWin.Event('change', {
+        bubbles: true
+      }));
+      check('Legacy suggestion threshold persists', p.state.suggestDays === 14);
+      check('Legacy workspace buttons are available', !!doc.getElementById('tm-save-workspace') && doc.getElementById('tm-restore-workspace').disabled);
+      legacyWin.close();
+      p.stop();
+      check('Legacy cleanup removes settings and Tools menu', !p.settingsWindows.size && !w.document.getElementById('ztg-tools-menu'));
+      await Zotero.File.putContentsAsync(outputFile, JSON.stringify({
+        version: Zotero.version,
+        platform: 'Windows',
+        suite: 'legacy-settings-only',
+        passed: true,
+        results
+      }, null, 2));
+      Services.startup.quit(Components.interfaces.nsIAppStartup.eForceQuit);
+      return;
+    }
+    if (parseInt(Zotero.version, 10) >= 7) check('Native Zotero preferences pane registered', Zotero.PreferencePanes.pluginPanes.some(pane => pane.id === 'tab-manager-settings'));
+    const a = await Zotero.Attachments.linkFromFile({
+        file: fixtureDir + 'fixture-a.pdf'
+      }),
+      b = await Zotero.Attachments.linkFromFile({
+        file: fixtureDir + 'fixture-b.pdf'
+      });
+    await Zotero.Reader.open(a.id);
+    await Zotero.Reader.open(b.id);
+    await wait(400);
+    const find = item => tabs._tabs.find(t => t.data && t.data.itemID === item.id);
+    p.state.groups.push({
+      id: 'settings-group',
+      name: 'Reading task',
+      color: '#3977d5'
+    });
+    p.assign(find(a), 'settings-group');
+    p.assign(find(b), 'settings-group');
+    p.setRemark(find(a), 'Workspace experiment');
+    p.setGroupDisplay('settings-group', 'both');
+    await p.openSettings(w);
+    let settingsWin;
+    await until(() => {
+      settingsWin = p.settingsPane ? Services.wm.getMostRecentWindow('zotero:pref') : [...p.settingsWindows].find(x => !x.closed);
+      return settingsWin && settingsWin.document.getElementById('tm-setting-restoreClosedGroups');
+    });
+    const d = settingsWin.document,
+      control = key => d.getElementById('tm-setting-' + key);
+    check('Settings page renders all seven controls', d.querySelectorAll('[id^="tm-setting-"]').length === 7);
+    const change = (key, value) => {
+      const n = control(key);
+      if (n.type === 'checkbox') n.checked = value;else n.value = value;
+      n.dispatchEvent(new settingsWin.Event('change', {
+        bubbles: true
+      }));
+    };
+    change('showGroupCounts', false);
+    check('Group count setting applies immediately', !w.document.querySelector('.ztg-heading').textContent.includes('('));
+    change('showGroupCounts', true);
+    change('suggestDays', 14);
+    check('Suggestion threshold persists', p.state.suggestDays === 14);
+    change('defaultDisplay', 'note');
+    check('Default tab display setting persists', p.getSettings().defaultDisplay === 'note');
+    change('showSuggestions', false);
+    check('Suggestion button can be hidden', w.document.getElementById('ztg-suggestions').hidden);
+    change('showSuggestions', true);
+    check('Suggestion button can be restored', !w.document.getElementById('ztg-suggestions').hidden);
+    p.setCollapsed('settings-group', true);
+    d.getElementById('tm-save-workspace').click();
+    check('One-click save captures both open documents', p.state.workspace && p.state.workspace.tabs.length === 2);
+    const saved = JSON.stringify(p.state.workspace);
+    tabs.close([find(a).id, find(b).id]);
+    await wait(500);
+    check('Closing all documents retains saved workspace', JSON.stringify(p.state.workspace) === saved);
+    check('Closed document remembers group name and color', p.state.closedGroups[p.key({
+      data: {
+        itemID: a.id
+      }
+    })].name === 'Reading task');
+    p.state.groups = [];
+    p.state.assignments = {};
+    p.state.groupDisplay = {};
+    p.save();
+    await Zotero.Reader.open(a.id);
+    await wait(400);
+    check('Reopen recreates the missing group', p.groupOf(find(a)) === 'settings-group' && p.state.groups.some(g => g.name === 'Reading task'));
+    change('restoreClosedGroups', false);
+    check('Disabling memory keeps current document grouped', p.groupOf(find(a)) === 'settings-group');
+    tabs.close(find(a).id);
+    await wait(400);
+    await Zotero.Reader.open(a.id);
+    await wait(400);
+    check('Reopen while memory disabled goes to ungrouped', p.groupOf(find(a)) === '');
+    p.state.groups[0].color = '#21866a';
+    p.save();
+    d.getElementById('tm-restore-workspace').click();
+    await until(() => !p.restoring && !!find(b));
+    await wait(400);
+    check('One-click restore reopens all saved documents', !!find(a) && !!find(b));
+    check('Workspace restores grouping even when automatic memory is disabled', p.groupOf(find(a)) === 'settings-group' && p.groupOf(find(b)) === 'settings-group');
+    check('Workspace restores colors and remarks', p.state.groups[0].color === '#3977d5' && p.remark(find(a)).note === 'Workspace experiment');
+    check('Workspace restores saved paper order', tabs._tabs.indexOf(find(a)) < tabs._tabs.indexOf(find(b)));
+    check('Workspace restores fold state', p.state.collapsed.includes('settings-group') && c.collapsed.has('settings-group'));
+    const count = tabs._tabs.length;
+    await p.restoreWorkspace();
+    check('Restoring twice does not duplicate documents', tabs._tabs.length === count);
+    check('Settings and workspace stored in preferences', JSON.parse(Zotero.Prefs.get(p.pref, true)).workspace.tabs.length === 2);
+    // Give the target group a distant position, then move the selected paper there.
+    p.setCollapsed('settings-group', false);
+    p.state.groups.push({
+      id: 'far-group',
+      name: 'Far group',
+      color: '#8b5ac7'
+    });
+    p.save();
+    const extra = [];
+    for (let i = 0; i < 35; i++) extra.push(tabs.add({
+      type: 'reader-unloaded',
+      title: 'Scroll fixture ' + i,
+      data: {
+        itemID: b.id
+      },
+      select: false
+    }).id);
+    tabs.select(find(a).id);
+    await wait(300);
+    p.assign(find(a), 'far-group');
+    await wait(150);
+    const selected = c.root.querySelector('.ztg-document.selected'),
+      r = selected.getBoundingClientRect(),
+      bar = c.root.getBoundingClientRect();
+    check('Moving selected document to another group reveals its tab', r.left >= bar.left - 1 && r.right <= bar.right + 1);
+    tabs.close(extra);
+    await wait(100);
+    settingsWin.close();
+    p.stop();
+    check('Stopping removes the Tools menu', !w.document.getElementById('ztg-tools-menu'));
+    check('Stopping unregisters the native settings pane', !p.settingsPane && (!Zotero.PreferencePanes || !Zotero.PreferencePanes.pluginPanes.some(pane => pane.id === 'tab-manager-settings')));
+  } catch (error) {
+    results.push({
+      error: String(error),
+      stack: error.stack
+    });
+  }
+  await Zotero.File.putContentsAsync(outputFile, JSON.stringify({
+    version: Zotero.version,
+    platform: Zotero.isWin ? 'Windows' : 'other',
+    suite: 'settings-workspace',
+    passed: results.every(x => x.passed === true),
+    results
+  }, null, 2));
+  Services.startup.quit(Components.interfaces.nsIAppStartup.eForceQuit);
+}

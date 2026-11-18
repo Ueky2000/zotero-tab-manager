@@ -4,7 +4,7 @@ const path = require('path');
 const babel = require(process.argv[2] ? path.resolve(process.argv[2]) : '@babel/standalone');
 const root = path.resolve(__dirname,'..');
 const src = path.join(root,'src');
-for (const name of ['core']) {
+for (const name of ['core','features']) {
   const result = babel.transform(fs.readFileSync(path.join(src,name+'.js'),'utf8'), {
     presets:[['env',{targets:{firefox:'60'},modules:false,useBuiltIns:false}]],
     sourceType:'script', comments:true, compact:false

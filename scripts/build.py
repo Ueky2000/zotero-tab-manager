@@ -4,7 +4,7 @@ import hashlib,json,zipfile,xml.etree.ElementTree as ET
 
 ROOT=Path(__file__).resolve().parent.parent
 SRC=ROOT/'src'
-RUNTIME=['bootstrap.js','core.js','core-legacy.js','manifest.json','install.rdf','LICENSE','icon.png','icon64.png']+[f'icon-{n}.png' for n in [16,32,48,96,128,256]]
+RUNTIME=['bootstrap.js','chrome.manifest','core.js','core-legacy.js','features.js','features-legacy.js','preferences.xhtml','preferences-window.xul','manifest.json','install.rdf','LICENSE','icon.png','icon64.png']+[f'icon-{n}.png' for n in [16,32,48,96,128,256]]
 
 def build():
     manifest=json.loads((SRC/'manifest.json').read_text(encoding='utf-8'))

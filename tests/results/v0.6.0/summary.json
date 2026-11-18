@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-18",
+  "plugin": "0.6.0",
+  "platform": "Windows",
+  "xpiSHA256": "5a8bad51e320de39ca2fbc9255c89e6a2920cd309c2bc4cc3e0ebdac66c7adc6",
+  "results": [
+    {
+      "version": "6.0.36",
+      "suite": "legacy-settings-only",
+      "checks": 7,
+      "passed": true
+    },
+    {
+      "version": "7.0.32",
+      "suite": "settings-workspace",
+      "checks": 25,
+      "passed": true
+    },
+    {
+      "version": "10.0.8",
+      "suite": "settings-workspace",
+      "checks": 25,
+      "passed": true
+    }
+  ],
+  "limitations": [
+    "Zotero 6 UI checks cover settings only; full PDF restoration stalled in a hidden window. Shared legacy restore logic passes unit checks.",
+    "Zotero 8/9, macOS and Linux were not runtime-tested for this version."
+  ]
+}

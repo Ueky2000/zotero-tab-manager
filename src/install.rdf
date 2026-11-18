@@ -3,7 +3,7 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>tab-groups@local.zotero</em:id>
     <em:name>Tab Manager</em:name>
-    <em:version>0.5.2</em:version>
+    <em:version>0.6.0</em:version>
     <em:description>Your tabs, in order.</em:description>
     <em:creator>Ueky2000</em:creator>
     <em:type>2</em:type><em:bootstrap>true</em:bootstrap>
