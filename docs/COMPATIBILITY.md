@@ -1,5 +1,19 @@
 # Compatibility record
 
+## Version 0.6.4 — 2026-11-18
+
+The isolated packaged UI suite adds native synthesized mouse-event checks for both toolbar buttons: first-click open, second-click close, and mutual exclusion. It also changes the new auto-dissolve checkbox through the settings UI, closes the actual group's tabs, verifies group removal and persisted settings, checks retained closed-paper memory, and reopens an attachment to recreate the group. The removed ungrouped-color control is checked as absent.
+
+Shared modern/Firefox 60 state tests cover the default-off behavior, persisted toggles, partial/failed closes, another window retaining group members, the permanent ungrouped area, unchanged remarks/workspace snapshots, and reopening with group memory enabled or disabled. Tests use disposable profiles and synthetic libraries. No new claim is made for physical mouse input, macOS/Linux, or full PDF-rendering coverage.
+
+Final reports and the tested installation-package SHA-256 are in `tests/results/v0.6.4/`.
+
+| Runtime | Checks | Result |
+| --- | ---: | --- |
+| Zotero 6.0.36 | 43 | PASS |
+| Zotero 7.0.32 | 42 | PASS |
+| Zotero 10.0.8 | 42 | PASS |
+
 ## Version 0.6.3 — 2026-11-18
 
 The packaged group suite uses isolated synthetic attachment libraries to verify numbered single/two/three-column popups, bounded scrolling, active horizontal tabs after mouse and keyboard selection, stable list nodes, group-count thresholds, display overrides, settings labels/icons and cleanup. Zotero 6 additionally exercises the actual add-on manager preferences command. It does not claim physical drag-and-drop, PDF rendering coverage for this release, or tests on macOS/Linux. The shared state/workspace regressions pass for both modern and Firefox 60 sources; the 0.6.2 real-PDF recovery record remains below.

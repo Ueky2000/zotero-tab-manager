@@ -70,7 +70,7 @@ async function runSettingsHarness(Zotero, Services, outputFile, fixtureDir) {
   const wait=ms=>new Promise(resolve=>Zotero.getMainWindow().setTimeout(resolve,ms));
   const check=(name,passed)=>{results.push({name,passed:!!passed});if(!passed)throw new Error(name);};
   const until=async test=>{for(let i=0;i<200;i++){if(test())return;await wait(100);}throw new Error('Timed out waiting for settings/workspace UI');};
-  const checkCompact=doc=>check('Settings controls stay beside their labels',['ungroupedColor','defaultDisplay','suggestDays'].every(key=>{
+  const checkCompact=doc=>check('Settings controls stay beside their labels',['verticalThreshold','defaultDisplay','suggestDays'].every(key=>{
     const input=doc.getElementById('tm-setting-'+key),gap=input.getBoundingClientRect().left-input.previousElementSibling.getBoundingClientRect().right;
     return gap>=0&&gap<=16;
   }));
@@ -200,6 +200,17 @@ async function runGroupListHarness(Zotero,Services,outputFile,fixtureDir){
     check('Tools submenu has exactly the two workspace actions',actions.children.length===2&&actions.children[0].getAttribute('label')==='保存当前阅读现场'&&actions.children[1].getAttribute('label')==='恢复阅读现场');
     check('Tools menu and both actions have colored icons',tools.classList.contains('menu-iconic')&&!!tools.getAttribute('image')&&[...actions.children].every(n=>n.classList.contains('menuitem-iconic')&&n.getAttribute('image').startsWith('data:image/svg+xml,')));
     check('Threshold defaults to seven',p.getSettings().verticalThreshold===7);
+    const searchButton=w.document.getElementById('ztg-search'),suggestButton=w.document.getElementById('ztg-suggestions'),searchPopup=w.document.getElementById('ztg-search-panel');
+    const utils=w.windowUtils||w.QueryInterface(Components.interfaces.nsIInterfaceRequestor).getInterface(Components.interfaces.nsIDOMWindowUtils);
+    const clickButton=button=>{const rect=button.getBoundingClientRect();for(const type of ['mousedown','mouseup'])utils.sendMouseEvent(type,rect.left+rect.width/2,rect.top+rect.height/2,0,1,0);};
+    clickButton(searchButton);await until(()=>searchPopup.state==='open');
+    clickButton(searchButton);await until(()=>searchPopup.state==='closed');check('Search button opens on first click and closes on second click',true);
+    clickButton(suggestButton);await until(()=>c.suggestionsPopup&&c.suggestionsPopup.state==='open');
+    clickButton(suggestButton);await until(()=>!c.suggestionsPopup);check('Suggestions button opens on first click and closes on second click',true);
+    clickButton(searchButton);await until(()=>searchPopup.state==='open');clickButton(suggestButton);await until(()=>c.suggestionsPopup&&c.suggestionsPopup.state==='open');
+    check('Opening suggestions closes search',searchPopup.state==='closed');
+    clickButton(searchButton);await until(()=>searchPopup.state==='open');check('Opening search closes suggestions',!c.suggestionsPopup);
+    searchPopup.hidePopup();await until(()=>searchPopup.state==='closed');
     p.state.groups.push({id:'vertical-test',name:'Vertical test',color:'#21866a'});p.save();
     const ids=[];
     for(let i=0;i<8;i++){
@@ -292,6 +303,14 @@ async function runGroupListHarness(Zotero,Services,outputFile,fixtureDir){
     const paper=tabs._tabs.find(t=>t.id===ids[0]);p.setRemark(paper,'Reading note');p.setGroupDisplay('vertical-test','original');p.setDisplay(paper,'both');
     const display=preferences.document.getElementById('tm-setting-defaultDisplay');display.value='note';display.dispatchEvent(new preferences.Event('change',{bubbles:true}));
     check('Changing default display immediately overrides existing group and paper display settings',p.remark(paper).mode==='note'&&c.root.querySelector('[data-id="'+paper.id+'"] .ztg-title').textContent==='Reading note'&&p.state.groupDisplay['']==='note');
+    const autoDissolve=preferences.document.getElementById('tm-setting-dissolveOnGroupClose');
+    check('Auto-dissolve is optional and ungrouped color is absent from settings',autoDissolve&&!autoDissolve.checked&&!preferences.document.getElementById('tm-setting-ungroupedColor'));
+    const workspaceBefore=JSON.stringify(p.state.workspace);autoDissolve.checked=true;autoDissolve.dispatchEvent(new preferences.Event('change',{bubbles:true}));
+    p.closeGroup(w,'vertical-test');c.refresh();
+    check('Group close removes the empty group when enabled',!p.state.groups.some(g=>g.id==='vertical-test')&&!c.root.querySelector('.ztg-section[data-group="vertical-test"]')&&JSON.parse(Zotero.Prefs.get(p.pref,true)).settings.dissolveOnGroupClose===true);
+    check('Auto-dissolve preserves reading workspace and paper group memory',JSON.stringify(p.state.workspace)===workspaceBefore&&p.state.closedGroups[p.key(paper)].name==='Vertical test');
+    const reopened=tabs.add({type:'reader-unloaded',title:'Reopened paper',data:{itemID:paper.data.itemID},select:false});c.refresh();
+    check('Reopening a paper recreates its automatically dissolved group',p.groupOf(tabs._tabs.find(t=>t.id===reopened.id))==='vertical-test'&&p.state.groups.find(g=>g.id==='vertical-test').color==='#21866a');
     preferences.close();
     if(addons)addons.close();
     p.stop();check('Shutdown removes the popup',!w.document.getElementById('ztg-group-panel'));

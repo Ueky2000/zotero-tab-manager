@@ -7,6 +7,7 @@ Object.assign(TabGroups, {
     const s = this.state.settings || {};
     return {
       restoreClosedGroups: s.restoreClosedGroups !== false,
+      dissolveOnGroupClose: s.dissolveOnGroupClose === true,
       showGroupCounts: s.showGroupCounts !== false,
       showSuggestions: s.showSuggestions !== false,
       defaultDisplay: ['original','note','both'].includes(s.defaultDisplay) ? s.defaultDisplay : 'original',
@@ -20,7 +21,7 @@ Object.assign(TabGroups, {
     if (this.readOnly) return false;
     const next = { ...this.getSettings() };
     for (const [key, value] of Object.entries(patch)) {
-      if (['restoreClosedGroups','showGroupCounts','showSuggestions'].includes(key)) {
+      if (['restoreClosedGroups','dissolveOnGroupClose','showGroupCounts','showSuggestions'].includes(key)) {
         if (typeof value !== 'boolean') return false;
       } else if (key === 'defaultDisplay') {
         if (!['original','note','both'].includes(value)) return false;
@@ -34,6 +35,7 @@ Object.assign(TabGroups, {
       next[key] = value;
     }
     this.state.settings = { restoreClosedGroups:next.restoreClosedGroups, showGroupCounts:next.showGroupCounts,
+      dissolveOnGroupClose:next.dissolveOnGroupClose,
       showSuggestions:next.showSuggestions, defaultDisplay:next.defaultDisplay,verticalThreshold:next.verticalThreshold,groupCountThreshold:next.groupCountThreshold };
     this.state.suggestDays = next.suggestDays;
     this.state.ungroupedColor = this.normalizeColor(next.ungroupedColor);
@@ -296,10 +298,10 @@ Object.assign(TabGroups, {
     };
     const groups=section('分组');
     field(groups,'restoreClosedGroups','重新打开文献时自动进入上一次的分组','checkbox','原组不存在时自动重建；关闭此项不移动当前文献。');
+    field(groups,'dissolveOnGroupClose','关闭组内所有文献后自动解散分组','checkbox');
     field(groups,'showGroupCounts','显示文献数量','checkbox');
     field(groups,'verticalThreshold','分组内文献超过此数量时竖向排列','number');
     field(groups,'groupCountThreshold','分组数量超过此值时全部竖向排列','number','按自建分组数量计算，不含未分组；当前阅读的文献仍横向显示。');
-    field(groups,'ungroupedColor','未分组颜色','color');
     const display=section('标签显示');
     field(display,'defaultDisplay','默认显示','select','立即应用到所有当前分组和已打开的文献。');
     const suggestions=section('建议关闭');

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.4 — 2026-11-18
+
+- Toggle search and suggestions popups with repeated toolbar clicks; opening one closes the other. Use anchored native popups to avoid rollup immediately reopening a just-closed popup.
+- Add an optional setting to dissolve an empty named group after its one-click close action, disabled by default. Preserve groups when tabs remain open, including in other windows.
+- Capture closed-paper memories before dissolution so reopening can recreate the original group when that separate option is enabled. Keep remarks and saved workspaces intact.
+- Remove the ungrouped-color control from settings; retain color selection in the ungrouped context menu.
+
 ## 0.6.3 — 2026-11-18
 
 - Number vertical entries, adapt large lists to two or three columns within the window, and use translucent group colors on hover.

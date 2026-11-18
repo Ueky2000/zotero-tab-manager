@@ -1,0 +1,23 @@
+{
+  "version": "0.6.4",
+  "sha256": "4167b9fbb493708a4455142ee1a4c267f4747df6917d86a9d4b7d0aa83c7cde8",
+  "suite": "groups-unloaded-fixtures",
+  "runtimes": [
+    {
+      "version": "6.0.36",
+      "checks": 43,
+      "passed": true
+    },
+    {
+      "version": "7.0.32",
+      "checks": 42,
+      "passed": true
+    },
+    {
+      "version": "10.0.8",
+      "checks": 42,
+      "passed": true
+    }
+  ],
+  "limits": "Isolated Windows UI with trusted synthesized mouse events and shared state tests; no physical mouse, other OS or new PDF rendering claim."
+}

@@ -112,8 +112,25 @@ var TabGroups = {
   closeGroup(win, id) {
     const tabs = win.Zotero_Tabs;
     const ids = tabs._tabs.filter(t => t.type !== 'library' && this.groupOf(t) === id).map(t => t.id);
+    const dissolve=!!id&&!this.readOnly&&this.getSettings&&this.getSettings().dissolveOnGroupClose;
+    if(dissolve&&this.syncTabs)for(const [w,c] of this.windows)this.syncTabs(w,c);
     if (ids.length) tabs.close(ids);
+    if(dissolve&&ids.length&&![...this.windows.keys(),win].some(w=>w.Zotero_Tabs._tabs.some(t=>t.type!=='library'&&this.groupOf(t)===id))){
+      // Capture closed-paper memories while the group still exists.
+      if(this.syncTabs)for(const [w,c] of this.windows)this.syncTabs(w,c);
+      this.dissolveGroup(id);
+    }
     return ids;
+  },
+  dissolveGroup(id) {
+    if(!id||this.readOnly||!this.state.groups.some(g=>g.id===id))return false;
+    this.state.groups=this.state.groups.filter(g=>g.id!==id);
+    for(const key of Object.keys(this.state.assignments))if(this.state.assignments[key]===id)delete this.state.assignments[key];
+    this.state.order=this.state.order.filter(group=>group!==id);
+    this.state.collapsed=this.state.collapsed.filter(group=>group!==id);
+    delete this.state.groupDisplay[id];
+    for(const c of this.windows.values())c.collapsed.delete(id);
+    this.save();return true;
   },
   track(tabs, previousSelected) {
     if (this.readOnly) return tabs.selectedID;
@@ -267,6 +284,7 @@ var TabGroups = {
     const searchIcon = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="8.2" cy="8.2" r="5.2" fill="#f1edff" stroke="#8262c9" stroke-width="1.7"/><path d="m12.2 12.2 4.2 4.2" stroke="#8262c9" stroke-width="2" stroke-linecap="round"/></svg>');
     searchButton.style.listStyleImage = `url("${searchIcon}")`;
     const searchPanel = this.xul(doc, 'panel'); searchPanel.id = 'ztg-search-panel'; searchPanel.setAttribute('orient', 'vertical');
+    searchPanel.setAttribute('norolluponanchor','true');searchPanel.setAttribute('consumeoutsideclicks','false');
     const searchBox = h('div'); searchBox.className = 'ztg-search-box';
     const searchInput = h('input'); searchInput.type = 'search'; searchInput.placeholder = '搜索备注、原文件名或文献标题…'; searchInput.setAttribute('aria-label', '搜索已打开文献');
     const searchStatus = h('div'); searchStatus.className = 'ztg-search-status'; searchStatus.setAttribute('role', 'status');
@@ -342,6 +360,7 @@ var TabGroups = {
       #ztg-group-panel :focus-visible { outline:2px solid var(--ztg-color,currentColor);outline-offset:-2px; }
       #ztg-group-panel :-moz-focusring { outline:2px solid var(--ztg-color,currentColor);outline-offset:-2px; }
       #ztg-inline .ztg-document[data-pointer-focus], #ztg-group-panel .ztg-document[data-pointer-focus] { outline:none !important; }
+      #ztg-inline .ztg-document[data-keyboard-focus], #ztg-group-panel .ztg-document[data-keyboard-focus] { outline:2px solid var(--ztg-color,currentColor);outline-offset:-2px; }
       #ztg-group-panel [data-ztg-drop="join"] { outline:2px solid var(--ztg-color);outline-offset:-2px; }
       #ztg-group-panel [data-ztg-drop="before"] { border-top:3px solid var(--ztg-color); }
       #ztg-group-panel [data-ztg-drop="after"] { border-bottom:3px solid var(--ztg-color); }
@@ -493,14 +512,17 @@ var TabGroups = {
         if (!matches.length) searchResults.append(h('p', '没有匹配的已打开文献。'));
       },
       openSearch: () => {
+        if(['open','showing','hiding'].includes(searchPanel.state)){searchPanel.hidePopup();return;}
+        if(c.suggestionsPopup)c.suggestionsPopup.hidePopup();groupPanel.hidePopup();
         c.renderSearch(); searchPanel.openPopup(searchButton, 'after_end');
       },
-      popup: (event, build) => {
+      popup: (event, build, anchor) => {
         const popup = this.xul(doc, 'menupopup');
         doc.querySelector('popupset').append(popup); popups.add(popup);
         popup.addEventListener('popuphidden', e => { if (e.target === popup) { popups.delete(popup); popup.remove(); } });
         build(popup);
-        popup.openPopupAtScreen(event.screenX, event.screenY, true); return popup;
+        if(anchor){popup.setAttribute('norolluponanchor','true');popup.setAttribute('consumeoutsideclicks','false');popup.openPopup(anchor,'after_end');}
+        else popup.openPopupAtScreen(event.screenX, event.screenY, true);return popup;
       },
       groupMenu: (event, g) => c.popup(event, popup => {
         if (g.id) c.item(popup, '重命名此分组', () => {
@@ -509,13 +531,7 @@ var TabGroups = {
         }, { disabled: !!this.readOnly });
         if (g.id) c.item(popup, '解散该分组', () => {
           if (!Services.prompt.confirm(win, '解散分组', `解散“${g.name}”？文献会回到未分组，标签页保持打开。`)) return;
-          this.state.groups = this.state.groups.filter(x => x.id !== g.id);
-          for (const key of Object.keys(this.state.assignments)) if (this.state.assignments[key] === g.id) delete this.state.assignments[key];
-          this.state.order = this.state.order.filter(id => id !== g.id);
-          this.state.collapsed = this.state.collapsed.filter(id => id !== g.id);
-          delete this.state.groupDisplay[g.id];
-          for (const controller of this.windows.values()) controller.collapsed.delete(g.id);
-          this.save();
+          this.dissolveGroup(g.id);
         }, { disabled: !!this.readOnly });
         const colors = this.xul(doc, 'menu'); colors.setAttribute('label', '分组颜色');
         const palette = this.xul(doc, 'menupopup'); colors.append(palette); popup.append(colors);
@@ -534,9 +550,15 @@ var TabGroups = {
         const groupTabs=tabs._tabs.filter(t=>t.type!=='library'&&this.groupOf(t)===g.id);
         for(const [value,label] of [['original','原文件名'],['note','备注'],['both','原文件名 + 备注']]) c.item(displayOptions,label,()=>this.setGroupDisplay(g.id,value),{type:'radio',name:'ztg-group-display',checked:groupTabs.length?groupTabs.every(t=>this.remark(t).mode===value):(this.state.groupDisplay[g.id]||'original')===value,disabled:!!this.readOnly});
         const count = tabs._tabs.filter(t => t.type !== 'library' && this.groupOf(t) === g.id).length;
-        c.item(popup, '关闭分组下所有文献', () => { this.closeGroup(win, g.id); c.schedule(); }, { disabled: count === 0, tooltiptext: `关闭 ${count} 个阅读标签，保留文献与分组` });
+        const autoDissolve=!!g.id&&this.getSettings&&this.getSettings().dissolveOnGroupClose;
+        c.item(popup, '关闭分组下所有文献', () => { this.closeGroup(win, g.id); c.schedule(); }, { disabled: count === 0, tooltiptext: `关闭 ${count} 个阅读标签${autoDissolve?'，关闭后自动解散空分组':'，保留分组'}` });
       }),
-      openSuggestions: event => c.popup(event, popup => {
+      openSuggestions: event => {
+        if(c.suggestionsPopup&&['open','showing','hiding'].includes(c.suggestionsPopup.state)){c.suggestionsPopup.hidePopup();return;}
+        searchPanel.hidePopup();groupPanel.hidePopup();
+        c.suggestionsPopup=c.popup(event, popup => {
+        popup.id='ztg-suggestions-popup';
+        popup.addEventListener('popuphidden',e=>{if(e.target===popup&&c.suggestionsPopup===popup)c.suggestionsPopup=null;});
         const candidates = this.suggestions(tabs);
         c.item(popup, `${this.state.suggestDays} 天未查看的文献 (${candidates.length})`, () => {}, { disabled: true });
         if (!candidates.length) c.item(popup, '暂时没有建议关闭的文献', () => {}, { disabled: true });
@@ -556,7 +578,8 @@ var TabGroups = {
           const ids = candidates.map(x => x.tab.id).filter(id => eligible.has(id));
           if (ids.length) tabs.close(ids); c.schedule();
         }, { disabled: !candidates.length });
-      }),
+      },suggestions);
+      },
       fillAssignments: (popup, tab) => {
         for (const g of this.orderedGroups().filter(g => g.id)) c.item(popup, g.name, () => this.assign(tab, g.id), { type: 'checkbox', checked: this.groupOf(tab) === g.id, disabled: !!this.readOnly });
         c.item(popup, '新建分组并加入…', () => { const id = this.create(win); if (id) this.assign(tab, id); }, { disabled: !!this.readOnly });
@@ -647,13 +670,14 @@ var TabGroups = {
         close.onclick = e => { e.stopPropagation(); tabs.close(tab.id); c.schedule(); };
         if(number!==undefined){const index=h('span',String(number));index.className='ztg-index';index.setAttribute('aria-hidden','true');index.style.cssText='flex:0 0 26px;text-align:right;margin-inline-end:10px;opacity:.65;font-variant-numeric:tabular-nums;';n.append(index);}
         n.append(title, close);
-        n.onmousedown = e => { if (e.button === 0 && !e.target.closest('button')) { n.setAttribute('data-pointer-focus','true');e.stopPropagation(); c.reveal(tab.id); } };
-        n.onblur=()=>n.removeAttribute('data-pointer-focus');
+        n.onmousedown = e => { if (e.button === 0 && !e.target.closest('button')) { n.removeAttribute('data-keyboard-focus');n.setAttribute('data-pointer-focus','true');e.stopPropagation(); c.reveal(tab.id); } };
+        n.onblur=()=>{n.removeAttribute('data-pointer-focus');n.removeAttribute('data-keyboard-focus');};
         n.onauxclick = e => { if (e.button === 1) { e.preventDefault(); tabs.close(tab.id); c.schedule(); } };
         n.onclick=e=>{if(n.closest('.ztg-group-list')&&!e.target.closest('button'))groupPanel.hidePopup();};
         n.oncontextmenu = e => c.openTabMenu(e, tab.id);
         n.onkeydown = e => {
           n.removeAttribute('data-pointer-focus');
+          n.setAttribute('data-keyboard-focus','true');
           if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.reveal(tab.id);if(n.closest('.ztg-group-list'))groupPanel.hidePopup(); }
           if (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) {
             const r = n.getBoundingClientRect(); c.openTabMenu({ preventDefault() {}, stopPropagation() {}, screenX: win.mozInnerScreenX + r.left, screenY: win.mozInnerScreenY + r.bottom }, tab.id); e.preventDefault();

@@ -14,6 +14,8 @@ async function run(legacy) {
   const a=add(1),b=add(2);
   p.state.groups.push({id:'g',name:'研究主题',color:'#3977d5'});p.assign(a,'g');p.assign(b,'g');p.setRemark(a,'重点实验');p.setGroupDisplay('g','both');p.setCollapsed('g',true);
   assert.equal(p.getSettings().restoreClosedGroups,true);
+  assert.equal(p.getSettings().dissolveOnGroupClose,false);
+  assert.equal(p.updateSettings({dissolveOnGroupClose:'true'}),false);
   assert.equal(p.getSettings().verticalThreshold,7);
   assert.equal(p.getSettings().groupCountThreshold,7);
   assert.equal(p.updateSettings({groupCountThreshold:0}),false);
@@ -83,6 +85,26 @@ async function run(legacy) {
   const nativeAdd=tabs.add;tabs.add=()=>({id:'not-actually-created'});tabs._tabs=[tabs._tabs[0]];
   result=await p.restoreWorkspace();assert.equal(result.opened,0);assert.equal(result.failed,20);assert.equal(result.ok,false);
   assert.ok(result.failures.every(f=>f.reason.includes('未创建')));tabs.add=nativeAdd;
+  tabs.close=ids=>{tabs._tabs=tabs._tabs.filter(t=>!ids.includes(t.id));tabs.selectedID='zotero-pane';};
+  p.syncTabs(win,c);p.state.groups=[{id:'g',name:'研究主题',color:'#3977d5'},{id:'other',name:'Other',color:'#21866a'}];
+  p.updateSettings({restoreClosedGroups:true});
+  const first=add(1),second=add(2),other=add(3);p.assign(first,'g');p.assign(second,'g');p.assign(other,'other');
+  p.closeGroup(win,'g');assert.ok(p.state.groups.some(g=>g.id==='g'));assert.ok(tabs._tabs.includes(other));
+  const reopened=add(1);add(2);p.setCollapsed('g',true);p.setGroupDisplay('g','note');
+  const workspaceBefore=JSON.stringify(p.state.workspace),noteBefore=p.remark(reopened).note;
+  p.updateSettings({dissolveOnGroupClose:true});p.load();assert.equal(p.getSettings().dissolveOnGroupClose,true);
+  p.closeGroup(win,'g');
+  assert.ok(!p.state.groups.some(g=>g.id==='g'));assert.ok(!p.state.order.includes('g'));assert.ok(!p.state.collapsed.includes('g'));assert.equal(p.state.groupDisplay.g,undefined);
+  assert.ok(tabs._tabs.includes(other));assert.equal(JSON.stringify(p.state.workspace),workspaceBefore);
+  assert.equal(p.state.closedGroups['1:ITEM1'].name,'研究主题');
+  const restored=add(1);assert.equal(p.groupOf(restored),'g');assert.equal(p.state.groups.find(g=>g.id==='g').color,'#3977d5');assert.equal(p.remark(restored).note,noteBefore);
+  const realClose=tabs.close;tabs.close=()=>{};p.closeGroup(win,'g');assert.ok(p.state.groups.some(g=>g.id==='g'));tabs.close=realClose;
+  const otherWin={Zotero_Tabs:{_tabs:[{id:'other-window',type:'reader',data:{itemID:2}}]}};
+  p.state.assignments['1:ITEM2']='g';p.windows.set(otherWin,{seenTabs:new Map(),initializedTabs:false,collapsed:new Set(),schedule(){},cancelHover(){},refresh(){}});
+  p.closeGroup(win,'g');assert.ok(p.state.groups.some(g=>g.id==='g')); // Another window still uses this group.
+  p.windows.delete(otherWin);const remaining=add(1);p.assign(remaining,'g');
+  p.updateSettings({restoreClosedGroups:false});p.closeGroup(win,'g');assert.ok(!p.state.groups.some(g=>g.id==='g'));
+  const plain=add(1);assert.equal(p.groupOf(plain),'');p.closeGroup(win,'');assert.ok(p.state.groups.some(g=>g.id==='other'));
   console.log((legacy?'legacy':'modern')+': closed-tab memory, settings and workspace restore checks passed');
 }
 (async()=>{await run(false);await run(true);})().catch(e=>{console.error(e);process.exitCode=1;});
