@@ -1,5 +1,19 @@
 # Compatibility record
 
+## Version 0.6.1 — 2026-11-18
+
+The final XPI passed 15 focused UI checks on each of Zotero 6.0.36, 7.0.32 and 10.0.8 (45 total), using isolated Windows profiles and synthetic libraries.
+
+These checks use eight distinct real attachment records opened as unloaded tabs. They verify the default threshold of seven, vertical list geometry, a single tab-bar row, preserved right-click/drag handlers, mouse focus without an outline, keyboard focus in the group color, vertical insertion decisions, closing from eight to seven papers, threshold changes and persistence, repeated open/close, all eight compact settings controls, editing the threshold from the actual settings UI, and cleanup.
+
+The test-only harness strips remote repository message notices while retaining update data, so an unrelated native Word-integration upgrade dialog cannot take focus. It also uses a native timer to avoid background-window throttling. These changes are not shipped in the production plugin. Earlier hidden-window attempts encountered native dialogs, focus loss and reader waits; they are not counted as final passes.
+
+An earlier candidate's failed full-PDF missing-group reopen report is retained as `7.0.32-first-attempt.json`, with that candidate's hash in the summary. The subsequent late-item-identifier fix is covered by modern and Firefox 60 feature tests. Both generations also pass the 24 layout/state assertions.
+
+**Limits:** the final focused suite does not verify PDF rendering, a physical mouse drag, or full reading-workspace restoration. Previous full workspace validation is recorded under 0.6.0 below. Zotero 8/9 were not rerun for this version; macOS/Linux desktop rendering remains untested.
+
+Reports: `tests/results/v0.6.1/`. Final XPI SHA256: `a864ff342439092696a93e4db3fa2d974e1fed91659d434daa7c92dba75f4392`.
+
 ## Version 0.6.0 — 2026-11-18
 
 The final packaged XPI was installed in fresh isolated Windows profiles, reusing only synthetic test databases. No normal user profile or library was used.

@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-18",
+  "plugin": "0.6.1",
+  "platform": "Windows",
+  "xpiSHA256": "a864ff342439092696a93e4db3fa2d974e1fed91659d434daa7c92dba75f4392",
+  "results": [
+    {
+      "version": "6.0.36",
+      "suite": "groups-unloaded-fixtures",
+      "checks": 15,
+      "passed": true
+    },
+    {
+      "version": "7.0.32",
+      "suite": "groups-unloaded-fixtures",
+      "checks": 15,
+      "passed": true
+    },
+    {
+      "version": "10.0.8",
+      "suite": "groups-unloaded-fixtures",
+      "checks": 15,
+      "passed": true
+    }
+  ],
+  "limitations": [
+    "UI fixtures are real attachments opened as unloaded tabs; this suite does not claim PDF rendering, a physical drag, or full workspace restoration.",
+    "Remote repository notices are removed only in the isolated test harness to prevent a native Word integration notice from stealing focus.",
+    "Zotero 8/9, macOS and Linux were not runtime-tested for this version."
+  ],
+  "candidateAttempt": {
+    "file": "7.0.32-first-attempt.json",
+    "xpiSHA256": "1a366018249861b1434276310b942ff3755b670e1a4dbac937299de247a0fad9",
+    "note": "An earlier candidate failed the full-PDF missing-group reopen check. Late tab item-identifier handling was subsequently fixed and covered by modern/legacy feature tests."
+  }
+}

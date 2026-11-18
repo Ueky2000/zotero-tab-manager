@@ -224,6 +224,7 @@ var TabGroups = {
     this.save();
     for (const [win,c] of this.windows) {
       if (this.key(win.Zotero_Tabs._tabs.find(t=>t.id===win.Zotero_Tabs.selectedID)) !== key) continue;
+      if(c.isVertical(group)){c.openGroupList(group,true);continue;}
       c.root.querySelector('.ztg-document.selected')?.scrollIntoView({block:'nearest',inline:'nearest'});
     }
   },
@@ -325,17 +326,35 @@ var TabGroups = {
       #ztg-search-panel .ztg-search-secondary { color:var(--fill-secondary,inherit); font-size:12px; }
       .ztg-color-option .menu-iconic-left { display:flex !important; visibility:visible !important; }
       .ztg-color-option .menu-iconic-icon { display:flex !important; visibility:visible !important; width:14px !important; height:14px !important; margin:1px; border-radius:3px; background-color:var(--ztg-swatch) !important; border:1px solid #8885; list-style-image:none !important; }
+      #ztg-inline :focus { outline:none; }
+      #ztg-inline :focus-visible { outline:2px solid var(--ztg-color,currentColor); outline-offset:-2px; }
+      #ztg-inline :-moz-focusring { outline:2px solid var(--ztg-color,currentColor); outline-offset:-2px; }
       #ztg-inline [data-ztg-drop="join"] { outline:2px solid var(--ztg-color,#3977d5); outline-offset:-2px; box-shadow:inset 0 0 0 3px #ffffff88; }
       #ztg-inline [data-ztg-drop="before"], #ztg-inline [data-ztg-drop="group-before"] { border-left:4px solid #267dff; }
       #ztg-inline [data-ztg-drop="after"], #ztg-inline [data-ztg-drop="group-after"] { border-right:4px solid #267dff; }
+      #ztg-group-panel .ztg-group-list { box-sizing:border-box;display:block;width:440px;max-width:calc(100vw - 32px);max-height:420px;max-height:min(420px,calc(100vh - 140px));overflow:auto;padding:6px;font:12px system-ui;color:var(--fill-primary,inherit); }
+      #ztg-group-panel .ztg-document.tab { box-sizing:border-box;position:relative;display:flex;align-items:center;width:100%;min-width:0;max-width:none;height:34px;flex:none;padding:4px 8px;margin:2px 0;border:1px solid #8884;border-radius:4px;background:transparent;cursor:default; }
+      #ztg-group-panel .ztg-document:hover { background:#8882; }
+      #ztg-group-panel .ztg-document.selected { border-color:var(--ztg-color);box-shadow:inset 0 -2px var(--ztg-color);background:var(--material-background,#8882); }
+      #ztg-group-panel .ztg-title { flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis; }
+      #ztg-group-panel .ztg-close { flex:none;margin-inline-start:8px;border:0;border-radius:3px;background:transparent;color:inherit;padding:1px 4px;font-size:16px;line-height:18px; }
+      #ztg-group-panel .ztg-close:hover { background:#8883; }
+      #ztg-group-panel :focus { outline:none; }
+      #ztg-group-panel :focus-visible { outline:2px solid var(--ztg-color,currentColor);outline-offset:-2px; }
+      #ztg-group-panel :-moz-focusring { outline:2px solid var(--ztg-color,currentColor);outline-offset:-2px; }
+      #ztg-group-panel [data-ztg-drop="join"] { outline:2px solid var(--ztg-color);outline-offset:-2px; }
+      #ztg-group-panel [data-ztg-drop="before"] { border-top:3px solid var(--ztg-color); }
+      #ztg-group-panel [data-ztg-drop="after"] { border-bottom:3px solid var(--ztg-color); }
       .ztg-drop-hint { position:fixed; pointer-events:none; z-index:2147483647; max-width:400px; font:12px system-ui; color:white; background:#20252e; border:1px solid #ffffff66; border-radius:5px; padding:5px 9px; }
-      #ztg-inline :focus { outline:2px solid #3977d5; outline-offset:-2px; }
     `;
     doc.documentElement.append(style);
     const hint = h('div'); hint.className = 'ztg-drop-hint'; hint.hidden = true; hint.setAttribute('role', 'status');
     doc.documentElement.append(hint);
+    const groupPanel=this.xul(doc,'panel');groupPanel.id='ztg-group-panel';groupPanel.setAttribute('noautofocus','true');groupPanel.setAttribute('animate','false');
+    const groupList=h('div');groupList.className='ztg-group-list';groupList.setAttribute('role','tablist');groupList.setAttribute('aria-orientation','vertical');groupPanel.append(groupList);doc.documentElement.append(groupPanel);
     const popups = new Set();
     const c = {
+      groupPanel,groupList,groupListID:null,pendingGroup:null,
       root, collapsed: new Set(this.state.collapsed || []), lastSelected: tabs.selectedID, timer: null, disposed: false, seenTabs: new Map(), initializedTabs: false,
       dragged: null, draggedGroup: null, pendingMenu: null, signature: '', hoverTimer: null, hoverTarget: null, activitySelectedID: null,
       isDragging: () => c.dragged !== null || c.draggedGroup !== null,
@@ -345,6 +364,7 @@ var TabGroups = {
       },
       clearDrop: () => {
         root.querySelectorAll('[data-ztg-drop]').forEach(n => n.removeAttribute('data-ztg-drop'));
+        groupList.querySelectorAll('[data-ztg-drop]').forEach(n => n.removeAttribute('data-ztg-drop'));
         hint.hidden = true;
       },
       finishDrag: () => {
@@ -356,7 +376,9 @@ var TabGroups = {
         // Append only to the target section. Rebuilding the bar here would remove
         // the source DOM node and abort a real native drag.
         const section = [...root.querySelectorAll('.ztg-section')].find(n => n.dataset.group === group);
-        if (!section || !c.collapsed.has(group) || !c.dragged) return;
+        if (!section || !c.dragged) return;
+        if(c.isVertical(group)){c.openGroupList(group,true,true);return;}
+        if(!c.collapsed.has(group))return;
         c.collapsed.delete(group);
         const heading = section.querySelector('.ztg-heading');
         heading.setAttribute('aria-expanded', 'true'); heading.textContent = heading.textContent.replace(/^▸/, '▾');
@@ -377,7 +399,32 @@ var TabGroups = {
         c.timer = win.setTimeout(() => { c.timer = null; c.refresh(); }, 0);
       },
       toggle: id => {
+        if(c.isVertical(id)){c.openGroupList(id);return;}
+        groupPanel.hidePopup();
         this.setCollapsed(id, !c.collapsed.has(id));
+      },
+      isVertical: id => tabs._tabs.filter(t=>t.type!=='library'&&this.groupOf(t)===id).length>(this.getSettings?this.getSettings().verticalThreshold:Infinity),
+      renderGroupList: () => {
+        const group=this.orderedGroups().find(g=>g.id===c.groupListID);
+        if(!group||!c.isVertical(group.id)){groupPanel.hidePopup();return;}
+        const scroll=groupList.scrollTop;
+        this.clear(groupList);groupList.style.setProperty('--ztg-color',group.color);groupList.setAttribute('aria-label',group.name);
+        for(const tab of tabs._tabs.filter(t=>t.type!=='library'&&this.groupOf(t)===group.id))groupList.append(c.document(tab,group.id));
+        groupList.scrollTop=scroll;
+      },
+      openGroupList: (id,force=false,temporary=false) => {
+        if(!c.isVertical(id))return;
+        if(groupPanel.state==='hiding'){c.pendingGroup={id,force,temporary};return;}
+        if(!force&&c.groupListID===id&&(groupPanel.state==='open'||groupPanel.state==='showing')){groupPanel.hidePopup();return;}
+        if(force&&c.groupListID===id&&(groupPanel.state==='open'||groupPanel.state==='showing')){groupList.querySelector('.selected')?.scrollIntoView({block:'nearest'});return;}
+        if(c.groupListID!==id&&(groupPanel.state==='open'||groupPanel.state==='showing')){c.pendingGroup={id,force,temporary};groupPanel.hidePopup();return;}
+        c.groupListID=id;if(temporary)c.collapsed.delete(id);else this.setCollapsed(id,false);c.renderGroupList();
+        const heading=[...root.querySelectorAll('.ztg-heading')].find(n=>n.dataset.group===id);
+        if(!heading)return;
+        heading.scrollIntoView({block:'nearest',inline:'nearest'});
+        heading.setAttribute('aria-expanded','true');heading.textContent=heading.textContent.replace(/^▸/,'▾');
+        if(groupPanel.state!=='open'&&groupPanel.state!=='showing')groupPanel.openPopup(heading,'after_start',0,0,false,false);
+        groupList.querySelector('.selected')?.scrollIntoView({block:'nearest'});
       },
       reveal: id => {
         const tab = tabs._tabs.find(t => t.id === id);
@@ -385,6 +432,7 @@ var TabGroups = {
         this.setCollapsed(this.groupOf(tab), false);
         c.lastSelected = id;
         tabs.select(id); c.refresh();
+        if(c.isVertical(this.groupOf(tab))){c.openGroupList(this.groupOf(tab),true);return;}
         root.querySelector('.ztg-document.selected')?.scrollIntoView({ block:'nearest', inline:'nearest' });
       },
       item: (popup, label, action, attrs = {}) => {
@@ -493,14 +541,16 @@ var TabGroups = {
       },
       plan: (event, node, group, tabID) => {
         if (c.draggedGroup !== null) {
-          const heading = node.closest('.ztg-section').querySelector('.ztg-heading');
+          const heading = node.closest('.ztg-section')?.querySelector('.ztg-heading')||[...root.querySelectorAll('.ztg-heading')].find(n=>n.dataset.group===group);
           const r = heading.getBoundingClientRect();
           const after = Number.isFinite(event.clientX) && event.clientX > r.left + r.width / 2;
           return { group, after, mode: after ? 'group-after' : 'group-before', marker: heading,
             label: `移动分组到“${this.orderedGroups().find(g => g.id === group)?.name}”${after ? '之后' : '之前'}` };
         }
         const r = node.getBoundingClientRect();
-        const ratio = Number.isFinite(event.clientX) ? (event.clientX - r.left) / r.width : 0.5;
+        const vertical=!!node.closest('.ztg-group-list');
+        const coordinate=vertical?event.clientY:event.clientX;
+        const ratio = Number.isFinite(coordinate) ? (coordinate - (vertical?r.top:r.left)) / (vertical?r.height:r.width) : 0.5;
         const mode = tabID && ratio < 0.25 ? 'before' : tabID && ratio > 0.75 ? 'after' : 'join';
         const tab = tabs._tabs.find(t => t.id === tabID);
         return { group, tabID, mode, marker: node,
@@ -536,14 +586,15 @@ var TabGroups = {
           hint.style.top = bounds.bottom + 5 + 'px';
           if (c.hoverTarget !== node) {
             c.cancelHover(); c.hoverTarget = node;
-            if (c.dragged && c.collapsed.has(group) && (!this.getSettings || this.getSettings().hoverExpand)) c.hoverTimer = win.setTimeout(() => {
+              if (c.dragged && (c.collapsed.has(group)||c.isVertical(group)) && (!this.getSettings || this.getSettings().hoverExpand)) c.hoverTimer = win.setTimeout(() => {
               c.hoverTimer = null;
               if (!c.disposed && c.hoverTarget === node && c.dragged) c.springOpen(group);
             }, 600);
           }
-          const rect = root.getBoundingClientRect();
-          if (e.clientX > rect.right - 35) root.scrollLeft += 18;
-          if (e.clientX < rect.left + 35) root.scrollLeft -= 18;
+          const list=node.closest('.ztg-group-list');
+          const rect=(list||root).getBoundingClientRect();
+          if(list){if(e.clientY>rect.bottom-35)list.scrollTop+=18;if(e.clientY<rect.top+35)list.scrollTop-=18;}
+          else{if(e.clientX>rect.right-35)root.scrollLeft+=18;if(e.clientX<rect.left+35)root.scrollLeft-=18;}
         });
         node.addEventListener('dragleave', e => {
           if (node.contains(e.relatedTarget)) return;
@@ -565,9 +616,10 @@ var TabGroups = {
         n.append(title, close);
         n.onmousedown = e => { if (e.button === 0 && !e.target.closest('button')) { e.stopPropagation(); c.reveal(tab.id); } };
         n.onauxclick = e => { if (e.button === 1) { e.preventDefault(); tabs.close(tab.id); c.schedule(); } };
+        n.onclick=e=>{if(n.closest('.ztg-group-list')&&!e.target.closest('button'))groupPanel.hidePopup();};
         n.oncontextmenu = e => c.openTabMenu(e, tab.id);
         n.onkeydown = e => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.reveal(tab.id); }
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.reveal(tab.id);if(n.closest('.ztg-group-list'))groupPanel.hidePopup(); }
           if (e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey)) {
             const r = n.getBoundingClientRect(); c.openTabMenu({ preventDefault() {}, stopPropagation() {}, screenX: win.mozInnerScreenX + r.left, screenY: win.mozInnerScreenY + r.bottom }, tab.id); e.preventDefault();
           }
@@ -590,13 +642,13 @@ var TabGroups = {
         const documents = tabs._tabs.filter(t => t.type !== 'library');
         // Selection must not recreate the pressed DOM node: doing so aborts a real
         // mouse drag before dragstart, even though synthetic drag tests still pass.
-        for (const n of root.querySelectorAll('.ztg-document')) {
+        for (const n of [...root.querySelectorAll('.ztg-document'),...groupList.querySelectorAll('.ztg-document')]) {
           const selected = n.dataset.id === tabs.selectedID;
           n.classList.toggle('selected', selected);
           n.setAttribute('aria-selected', String(selected));
         }
         const suggested = this.suggestions(tabs).length;
-        const options = this.getSettings ? this.getSettings() : {showGroupCounts:true,showSuggestions:true};
+        const options = this.getSettings ? this.getSettings() : {showGroupCounts:true,showSuggestions:true,verticalThreshold:Infinity};
         suggestions.hidden = !options.showSuggestions;
         const signature = JSON.stringify([documents.map(t => [t.id, t.title, this.originalName(t), this.remark(t), this.groupOf(t)]), this.state.groups, this.state.ungroupedColor, this.state.order, [...c.collapsed], options]);
         if (searchPanel.state === 'open') c.renderSearch();
@@ -604,7 +656,11 @@ var TabGroups = {
         this.setLabel(suggestions, `建议关闭 (${suggested})`);
         suggestions.setAttribute('aria-label', `建议关闭的文献，${suggested} 篇`);
         if (selectedChanged) root.querySelector('.ztg-document.selected')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-        if (signature === c.signature || c.isDragging()) return;
+        if (c.isDragging()) return;
+        if (signature === c.signature) {
+          if(selectedChanged){const selected=tabs._tabs.find(t=>t.id===tabs.selectedID);if(selected&&c.isVertical(this.groupOf(selected)))c.openGroupList(this.groupOf(selected),true);}
+          return;
+        }
         c.signature = signature;
         const focused = root.contains(doc.activeElement) ? { id: doc.activeElement.dataset.id, group: doc.activeElement.dataset.group } : null;
         const scroll = root.scrollLeft;
@@ -617,12 +673,15 @@ var TabGroups = {
           heading.className = 'ztg-heading' + (!g.id ? ' ztg-ungrouped' : ''); heading.dataset.group = g.id;
           heading.style.width = this.headingWidth(g) + 'px';
           heading.title = g.id ? `${g.name}：点击折叠/展开，拖入文献加入，右键管理和设置颜色` : '未分组：点击折叠/展开，把文献拖到这里移出分组';
-          heading.setAttribute('aria-expanded', String(!c.collapsed.has(g.id))); heading.onclick = () => c.toggle(g.id); heading.oncontextmenu = e => { e.preventDefault(); e.stopPropagation(); c.groupMenu(e, g); };
+          const vertical=members.length>(options.verticalThreshold||7);
+          const expanded=vertical?c.groupListID===g.id&&(groupPanel.state==='open'||groupPanel.state==='showing'):!c.collapsed.has(g.id);
+          if(vertical){heading.textContent=heading.textContent.replace(/^[▸▾]/,expanded?'▾':'▸');heading.setAttribute('aria-haspopup','true');}
+          heading.setAttribute('aria-expanded', String(expanded)); heading.onclick = () => c.toggle(g.id); heading.oncontextmenu = e => { e.preventDefault(); e.stopPropagation(); c.groupMenu(e, g); };
           heading.draggable = !this.readOnly;
           heading.ondragstart = e => { e.stopPropagation(); c.draggedGroup = g.id; c.dragged = null; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('application/x-ztg-group', g.id || '__ungrouped__'); };
           heading.ondragend = () => { if (c.isDragging()) c.finishDrag(); };
           c.target(heading, g.id); section.append(heading);
-          if (!c.collapsed.has(g.id)) for (const tab of members) section.append(c.document(tab, g.id));
+          if (!vertical&&!c.collapsed.has(g.id)) for (const tab of members) section.append(c.document(tab, g.id));
           root.append(section);
         }
         const add = h('button', '＋'); add.className = 'ztg-add'; add.title = '新建分组（也可将文献拖到这里）'; add.setAttribute('aria-label', '新建分组'); add.disabled = !!this.readOnly;
@@ -640,11 +699,27 @@ var TabGroups = {
           target?.focus({ preventScroll: true });
         }
         if (selectedChanged) root.querySelector('.ztg-document.selected')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        if(groupPanel.state==='open')c.renderGroupList();
+        if(selectedChanged){const selected=tabs._tabs.find(t=>t.id===tabs.selectedID);if(selected&&c.isVertical(this.groupOf(selected)))c.openGroupList(this.groupOf(selected),true);}
       }
     };
     suggestions.addEventListener('command', () => {
       const r = suggestions.getBoundingClientRect();
       c.openSuggestions({ screenX: win.mozInnerScreenX + r.right, screenY: win.mozInnerScreenY + r.bottom });
+    });
+    groupPanel.addEventListener('popuphidden',event=>{
+      if(event.target!==groupPanel)return;
+      const heading=[...root.querySelectorAll('.ztg-heading')].find(n=>n.dataset.group===c.groupListID);
+      if(heading&&c.isVertical(c.groupListID)){heading.setAttribute('aria-expanded','false');heading.textContent=heading.textContent.replace(/^▾/,'▸');}
+      const pending=c.pendingGroup;c.pendingGroup=null;
+      if(pending&&!c.disposed)win.setTimeout(()=>{if(!c.disposed)c.openGroupList(pending.id,pending.force,pending.temporary);},0);
+    });
+    groupList.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){groupPanel.hidePopup();return;}
+      if(event.key!=='ArrowDown'&&event.key!=='ArrowUp')return;
+      const rows=[...groupList.querySelectorAll('.ztg-document')],index=rows.indexOf(doc.activeElement);
+      const next=event.key==='ArrowDown'?Math.min(rows.length-1,index+1):Math.max(0,index-1);
+      event.preventDefault();rows[next]?.focus();
     });
     searchButton.addEventListener('command', c.openSearch);
     searchPanel.addEventListener('popupshown', e => { if (e.target === searchPanel) { searchInput.focus(); searchInput.select(); } });
@@ -686,6 +761,7 @@ var TabGroups = {
       for (const popup of popups) { popup.hidePopup(); popup.remove(); }
       doc.querySelectorAll('.ztg-menu').forEach(n => n.remove());
       searchPanel.hidePopup(); searchPanel.remove(); searchButton.remove();
+      groupPanel.hidePopup();groupPanel.remove();
       host.removeAttribute('data-ztg-inline'); root.remove(); suggestions.remove(); legacyActions.remove(); style.remove(); this.windows.delete(win);
       if (c.toolsMenu) c.toolsMenu.remove();
     };

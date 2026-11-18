@@ -1,0 +1,68 @@
+{
+  "version": "7.0.32",
+  "platform": "Windows",
+  "suite": "groups-unloaded-fixtures",
+  "passed": true,
+  "results": [
+    {
+      "name": "Threshold defaults to seven",
+      "passed": true
+    },
+    {
+      "name": "Eight papers switch to a vertical group",
+      "passed": true
+    },
+    {
+      "name": "Popup lists all eight papers vertically",
+      "passed": true
+    },
+    {
+      "name": "Top tab strip remains a single row",
+      "passed": true
+    },
+    {
+      "name": "Rows retain right-click and drag actions",
+      "passed": true
+    },
+    {
+      "name": "Pointer focus adds no outline to popup rows",
+      "passed": true
+    },
+    {
+      "name": "Keyboard focus follows the green group color",
+      "passed": true
+    },
+    {
+      "name": "Vertical drag insertion uses the row height",
+      "passed": true
+    },
+    {
+      "name": "Closing an entry at the boundary restores horizontal tabs",
+      "passed": true
+    },
+    {
+      "name": "A configured threshold changes the presentation",
+      "passed": true
+    },
+    {
+      "name": "Clicking the same heading closes its list",
+      "passed": true
+    },
+    {
+      "name": "Raising the threshold restores horizontal presentation",
+      "passed": true
+    },
+    {
+      "name": "Settings include all eight compact controls",
+      "passed": true
+    },
+    {
+      "name": "Threshold can be changed from the settings UI",
+      "passed": true
+    },
+    {
+      "name": "Shutdown removes the popup",
+      "passed": true
+    }
+  ]
+}

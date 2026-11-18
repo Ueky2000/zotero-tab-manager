@@ -13,6 +13,12 @@ async function run(legacy) {
   const a=add(1),b=add(2);
   p.state.groups.push({id:'g',name:'研究主题',color:'#3977d5'});p.assign(a,'g');p.assign(b,'g');p.setRemark(a,'重点实验');p.setGroupDisplay('g','both');p.setCollapsed('g',true);
   assert.equal(p.getSettings().restoreClosedGroups,true);
+  assert.equal(p.getSettings().verticalThreshold,7);
+  assert.equal(p.updateSettings({verticalThreshold:0}),false);
+  assert.equal(p.updateSettings({verticalThreshold:2.5}),false);
+  assert.equal(p.updateSettings({verticalThreshold:10}),true);
+  assert.equal(p.getSettings().verticalThreshold,10);
+  p.updateSettings({verticalThreshold:7});
   assert.equal(p.updateSettings({suggestDays:0}),false);
   assert.equal(p.updateSettings({showGroupCounts:'no'}),false);
   assert.equal(p.updateSettings({showGroupCounts:false,suggestDays:14}),true);
@@ -23,7 +29,8 @@ async function run(legacy) {
   assert.equal(p.state.closedGroups['1:ITEM1'].name,'研究主题');
   assert.equal(JSON.stringify(p.state.workspace),snapshot); // Closing never overwrites a save.
   p.state.groups=[];p.state.assignments={};p.save();
-  const again=add(1);
+  const again={id:'reopening-1',type:'reader',title:'Loading',data:{}};
+  tabs._tabs.push(again);p.syncTabs(win,c);again.data.itemID=1;p.syncTabs(win,c);
   assert.equal(p.groupOf(again),'g');assert.equal(p.state.groups[0].name,'研究主题');
   assert.equal(p.state.closedGroups['1:ITEM1'],undefined); // A restored memory is consumed.
   p.updateSettings({restoreClosedGroups:false});

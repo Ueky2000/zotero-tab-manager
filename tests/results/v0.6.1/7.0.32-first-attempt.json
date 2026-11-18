@@ -1,0 +1,64 @@
+{
+  "version": "7.0.32",
+  "platform": "Windows",
+  "suite": "settings-workspace",
+  "passed": false,
+  "results": [
+    {
+      "name": "Packaged plugin starts with settings support",
+      "passed": true
+    },
+    {
+      "name": "Tools menu contains settings and workspace shortcuts",
+      "passed": true
+    },
+    {
+      "name": "Native Zotero preferences pane registered",
+      "passed": true
+    },
+    {
+      "name": "Settings page renders all seven controls",
+      "passed": true
+    },
+    {
+      "name": "Group count setting applies immediately",
+      "passed": true
+    },
+    {
+      "name": "Suggestion threshold persists",
+      "passed": true
+    },
+    {
+      "name": "Default tab display setting persists",
+      "passed": true
+    },
+    {
+      "name": "Suggestion button can be hidden",
+      "passed": true
+    },
+    {
+      "name": "Suggestion button can be restored",
+      "passed": true
+    },
+    {
+      "name": "One-click save captures both open documents",
+      "passed": true
+    },
+    {
+      "name": "Closing all documents retains saved workspace",
+      "passed": true
+    },
+    {
+      "name": "Closed document remembers group name and color",
+      "passed": true
+    },
+    {
+      "name": "Reopen recreates the missing group",
+      "passed": false
+    },
+    {
+      "error": "Error: Reopen recreates the missing group",
+      "stack": "check@jar:file:///E:/Default%20Path/%E6%96%87%E6%A1%A3/ChatGPT/Tab%20Manager/outputs/test-0.6.1-7/extensions/test-harness@tab-manager.local.xpi!/run-legacy.js:163:24\nrunSettingsHarness@jar:file:///E:/Default%20Path/%E6%96%87%E6%A1%A3/ChatGPT/Tab%20Manager/outputs/test-0.6.1-7/extensions/test-harness@tab-manager.local.xpi!/run-legacy.js:286:10\n"
+    }
+  ]
+}

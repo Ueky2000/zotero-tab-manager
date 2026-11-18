@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.1 — 2026-11-18
+
+- Remove the fixed blue focus outline during pointer interaction. Preserve the selected tab's group-colored border and bottom stripe.
+- Use the group color for keyboard focus, including Firefox 60's compatible focus-ring selector. Keep drag-and-drop join indicators visible.
+- Compact the settings pane: place controls beside their labels, shorten option names, move secondary hints to tooltips and remove repetitive explanatory paragraphs.
+- Show a group's papers in a vertical popup when its count exceeds a configurable threshold (default 7); keep the tab bar on one line. Preserve selection, closing, context menus and drag targets in the list.
+- Restore group memory when an opening tab receives its item identifier after its first render.
+
 ## 0.6.0 — 2026-11-18
 
 - Add a native Zotero 7–10 preferences pane and a compatible settings window for Zotero 6, accessible from Tools → Tab Manager.

@@ -70,6 +70,10 @@ async function runSettingsHarness(Zotero, Services, outputFile, fixtureDir) {
   const wait=ms=>new Promise(resolve=>Zotero.getMainWindow().setTimeout(resolve,ms));
   const check=(name,passed)=>{results.push({name,passed:!!passed});if(!passed)throw new Error(name);};
   const until=async test=>{for(let i=0;i<200;i++){if(test())return;await wait(100);}throw new Error('Timed out waiting for settings/workspace UI');};
+  const checkCompact=doc=>check('Settings controls stay beside their labels',['ungroupedColor','defaultDisplay','suggestDays'].every(key=>{
+    const input=doc.getElementById('tm-setting-'+key),gap=input.getBoundingClientRect().left-input.previousElementSibling.getBoundingClientRect().right;
+    return gap>=0&&gap<=16;
+  }));
   try {
     if(Zotero.uiReadyPromise)await Zotero.uiReadyPromise;
     await wait(1500);
@@ -84,7 +88,8 @@ async function runSettingsHarness(Zotero, Services, outputFile, fixtureDir) {
       await p.openSettings(w);let legacyWin;await wait(500);
       await until(()=>{legacyWin=[...p.settingsWindows].find(x=>!x.closed);return legacyWin&&legacyWin.document.getElementById('tm-setting-restoreClosedGroups');});
       const doc=legacyWin.document;
-      check('Legacy settings window renders all seven controls',doc.querySelectorAll('[id^="tm-setting-"]').length===7);
+      check('Legacy settings window renders all eight controls',doc.querySelectorAll('[id^="tm-setting-"]').length===8);
+      checkCompact(doc);
       const memory=doc.getElementById('tm-setting-restoreClosedGroups');memory.checked=false;memory.dispatchEvent(new legacyWin.Event('change',{bubbles:true}));
       check('Legacy memory setting applies and persists',!p.getSettings().restoreClosedGroups&&!JSON.parse(Zotero.Prefs.get(p.pref,true)).settings.restoreClosedGroups);
       const days=doc.getElementById('tm-setting-suggestDays');days.value='14';days.dispatchEvent(new legacyWin.Event('change',{bubbles:true}));
@@ -107,7 +112,8 @@ async function runSettingsHarness(Zotero, Services, outputFile, fixtureDir) {
       return settingsWin&&settingsWin.document.getElementById('tm-setting-restoreClosedGroups');
     });
     const d=settingsWin.document,control=key=>d.getElementById('tm-setting-'+key);
-    check('Settings page renders all seven controls',d.querySelectorAll('[id^="tm-setting-"]').length===7);
+    check('Settings page renders all eight controls',d.querySelectorAll('[id^="tm-setting-"]').length===8);
+    checkCompact(d);
     const change=(key,value)=>{const n=control(key);if(n.type==='checkbox')n.checked=value;else n.value=value;n.dispatchEvent(new settingsWin.Event('change',{bubbles:true}));};
     change('showGroupCounts',false);check('Group count setting applies immediately',!w.document.querySelector('.ztg-heading').textContent.includes('('));
     change('showGroupCounts',true);change('suggestDays',14);check('Suggestion threshold persists',p.state.suggestDays===14);
@@ -117,14 +123,14 @@ async function runSettingsHarness(Zotero, Services, outputFile, fixtureDir) {
     p.setCollapsed('settings-group',true);d.getElementById('tm-save-workspace').click();
     check('One-click save captures both open documents',p.state.workspace&&p.state.workspace.tabs.length===2);
     const saved=JSON.stringify(p.state.workspace);
-    tabs.close([find(a).id,find(b).id]);await wait(500);
+    tabs.close([find(a).id,find(b).id]);await wait(1200);
     check('Closing all documents retains saved workspace',JSON.stringify(p.state.workspace)===saved);
     check('Closed document remembers group name and color',p.state.closedGroups[p.key({data:{itemID:a.id}})].name==='Reading task');
     p.state.groups=[];p.state.assignments={};p.state.groupDisplay={};p.save();
     await Zotero.Reader.open(a.id);await wait(400);
     check('Reopen recreates the missing group',p.groupOf(find(a))==='settings-group'&&p.state.groups.some(g=>g.name==='Reading task'));
     change('restoreClosedGroups',false);check('Disabling memory keeps current document grouped',p.groupOf(find(a))==='settings-group');
-    tabs.close(find(a).id);await wait(400);await Zotero.Reader.open(a.id);await wait(400);
+    tabs.close(find(a).id);await wait(1200);await Zotero.Reader.open(a.id);await wait(400);
     check('Reopen while memory disabled goes to ungrouped',p.groupOf(find(a))==='');
     p.state.groups[0].color='#21866a';p.save();
     d.getElementById('tm-restore-workspace').click();await until(()=>!p.restoring&&!!find(b));await wait(400);
@@ -136,17 +142,102 @@ async function runSettingsHarness(Zotero, Services, outputFile, fixtureDir) {
     const count=tabs._tabs.length;await p.restoreWorkspace();check('Restoring twice does not duplicate documents',tabs._tabs.length===count);
     check('Settings and workspace stored in preferences',JSON.parse(Zotero.Prefs.get(p.pref,true)).workspace.tabs.length===2);
     // Give the target group a distant position, then move the selected paper there.
+    check('Vertical list threshold defaults to seven',p.getSettings().verticalThreshold===7);
+    p.updateSettings({verticalThreshold:100});
     p.setCollapsed('settings-group',false);
     p.state.groups.push({id:'far-group',name:'Far group',color:'#8b5ac7'});p.save();
     const extra=[];for(let i=0;i<35;i++)extra.push(tabs.add({type:'reader-unloaded',title:'Scroll fixture '+i,data:{itemID:b.id},select:false}).id);
     tabs.select(find(a).id);await wait(300);p.assign(find(a),'far-group');await wait(150);
     const selected=c.root.querySelector('.ztg-document.selected'),r=selected.getBoundingClientRect(),bar=c.root.getBoundingClientRect();
     check('Moving selected document to another group reveals its tab',r.left>=bar.left-1&&r.right<=bar.right+1);
-    tabs.close(extra);await wait(100);
-    settingsWin.close();p.stop();
+    settingsWin.close();w.focus();await wait(150);
+    const focus=Components.interfaces.nsIFocusManager;
+    Services.focus.setFocus(selected,focus.FLAG_BYMOUSE|focus.FLAG_NOSCROLL);await wait(50);
+    check('Pointer focus has no extra tab outline',w.getComputedStyle(selected).outlineStyle==='none');
+    selected.blur();Services.focus.setFocus(selected,focus.FLAG_BYKEY|focus.FLAG_NOSCROLL);await wait(50);
+    const focusedStyle=w.getComputedStyle(selected),groupColor=focusedStyle.getPropertyValue('--ztg-color').trim();
+    check('Keyboard focus uses the group color',focusedStyle.outlineStyle==='solid'&&groupColor==='#8b5ac7'&&focusedStyle.outlineColor==='rgb(139, 90, 199)');
+    p.updateSettings({verticalThreshold:7});
+    check('Large group keeps its papers out of the horizontal strip',c.isVertical('settings-group')&&![...c.root.querySelectorAll('.ztg-section[data-group="settings-group"] .ztg-document')].length);
+    c.openGroupList('settings-group',true);await until(()=>c.groupPanel.state==='open');
+    const rows=[...c.groupList.querySelectorAll('.ztg-document')];
+    check('Large group opens a vertical list below its heading',rows.length===36&&rows[1].getBoundingClientRect().top>=rows[0].getBoundingClientRect().bottom);
+    check('Vertical list scrolls within a bounded height',c.groupList.getBoundingClientRect().height<=420&&c.groupList.scrollHeight>c.groupList.clientHeight);
+    c.groupPanel.hidePopup();await wait(100);
+    const seven=extra.slice(0,6);tabs.close(extra.filter(id=>!seven.includes(id)));await wait(300);
+    check('Exactly seven papers remain horizontal',!c.isVertical('settings-group')&&c.root.querySelectorAll('.ztg-section[data-group="settings-group"] .ztg-document').length===7);
+    p.updateSettings({verticalThreshold:6});
+    check('Changing the threshold changes the group presentation',c.isVertical('settings-group')&&JSON.parse(Zotero.Prefs.get(p.pref,true)).settings.verticalThreshold===6);
+    c.openGroupList('settings-group',true);await until(()=>c.groupPanel.state==='open');
+    const target=c.groupList.querySelector('.ztg-document');target.dispatchEvent(new w.MouseEvent('mousedown',{bubbles:true,button:0}));target.click();await wait(100);
+    check('Clicking a vertical entry selects its document',tabs.selectedID===target.dataset.id);
+    tabs.select(find(a).id);p.assign(find(a),'settings-group');await until(()=>c.groupPanel.state==='open');
+    check('Assigning the active paper reveals it in a vertical group',!!c.groupList.querySelector('.ztg-document.selected'));
+    c.groupPanel.hidePopup();
+    tabs.close(extra.filter(id=>tabs._tabs.some(t=>t.id===id)));await wait(100);
+    p.stop();
     check('Stopping removes the Tools menu',!w.document.getElementById('ztg-tools-menu'));
     check('Stopping unregisters the native settings pane',!p.settingsPane&&(!Zotero.PreferencePanes||!Zotero.PreferencePanes.pluginPanes.some(pane=>pane.id==='tab-manager-settings')));
   } catch(error){results.push({error:String(error),stack:error.stack});}
   await Zotero.File.putContentsAsync(outputFile,JSON.stringify({version:Zotero.version,platform:Zotero.isWin?'Windows':'other',suite:'settings-workspace',passed:results.every(x=>x.passed===true),results},null,2));
+  Services.startup.quit(Components.interfaces.nsIAppStartup.eForceQuit);
+}
+
+// Exercise the actual grouped strip and native popup without waiting for a PDF
+// renderer. Fixtures are real library attachments, opened as unloaded tabs.
+async function runGroupListHarness(Zotero,Services,outputFile,fixtureDir){
+  const results=[],wait=ms=>new Promise(resolve=>{
+    const timer=Components.classes['@mozilla.org/timer;1'].createInstance(Components.interfaces.nsITimer);
+    timer.initWithCallback(()=>{timer.cancel();resolve();},ms,Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+  });
+  const check=(name,passed)=>{results.push({name,passed:!!passed});Zotero.debug('Tab Manager groups: '+name+' '+!!passed);if(!passed)throw new Error(name);};
+  const until=async test=>{for(let i=0;i<200;i++){if(test())return;await wait(100);}throw new Error('Timed out waiting for group list');};
+  try{
+    if(Zotero.uiReadyPromise)await Zotero.uiReadyPromise;await wait(1500);
+    await until(()=>Zotero.TabManagerPlugin&&Zotero.getMainWindow().document.getElementById('ztg-inline'));
+    const w=Zotero.getMainWindow(),p=Zotero.TabManagerPlugin,tabs=w.Zotero_Tabs,c=p.windows.get(w);w.focus();
+    check('Threshold defaults to seven',p.getSettings().verticalThreshold===7);
+    p.state.groups.push({id:'vertical-test',name:'Vertical test',color:'#21866a'});p.save();
+    const ids=[];
+    for(let i=0;i<8;i++){
+      const item=await Zotero.Attachments.linkFromFile({file:fixtureDir+'fixture-a.pdf'});
+      const tab=tabs.add({type:'reader-unloaded',title:'Vertical fixture '+i,data:{itemID:item.id},select:false});ids.push(tab.id);
+      p.assign(tabs._tabs.find(t=>t.id===tab.id),'vertical-test');
+    }
+    check('Eight papers switch to a vertical group',c.isVertical('vertical-test')&&!c.root.querySelector('.ztg-section[data-group="vertical-test"] .ztg-document'));
+    c.toggle('vertical-test');await until(()=>c.groupPanel.state==='open');await wait(100);
+    const rows=[...c.groupList.querySelectorAll('.ztg-document')];
+    check('Popup lists all eight papers vertically',rows.length===8&&rows[1].getBoundingClientRect().top>=rows[0].getBoundingClientRect().bottom);
+    check('Top tab strip remains a single row',c.root.getBoundingClientRect().height<=38);
+    check('Rows retain right-click and drag actions',typeof rows[0].oncontextmenu==='function'&&rows[0].draggable);
+    const focus=Components.interfaces.nsIFocusManager;
+    Services.focus.setFocus(rows[0],focus.FLAG_BYMOUSE|focus.FLAG_NOSCROLL);await wait(50);
+    check('Pointer focus adds no outline to popup rows',w.getComputedStyle(rows[0]).outlineStyle==='none');
+    rows[0].blur();Services.focus.setFocus(rows[0],focus.FLAG_BYKEY|focus.FLAG_NOSCROLL);await wait(50);
+    check('Keyboard focus follows the green group color',w.getComputedStyle(rows[0]).outlineColor==='rgb(33, 134, 106)');
+    c.dragged=ids[0];const rect=rows[1].getBoundingClientRect();
+    check('Vertical drag insertion uses the row height',c.plan({clientY:rect.top+1,clientX:rect.left+rect.width/2},rows[1],'vertical-test',ids[1]).mode==='before'&&c.plan({clientY:rect.bottom-1,clientX:rect.left+rect.width/2},rows[1],'vertical-test',ids[1]).mode==='after');
+    c.dragged=null;
+    rows[7].querySelector('.ztg-close').click();await wait(250);c.refresh();
+    check('Closing an entry at the boundary restores horizontal tabs',!c.isVertical('vertical-test')&&c.root.querySelectorAll('.ztg-section[data-group="vertical-test"] .ztg-document').length===7);
+    p.updateSettings({verticalThreshold:6});
+    check('A configured threshold changes the presentation',c.isVertical('vertical-test')&&JSON.parse(Zotero.Prefs.get(p.pref,true)).settings.verticalThreshold===6);
+    Zotero.debug('Tab Manager popup before reopen: '+c.groupPanel.state);
+    c.openGroupList('vertical-test',true);await until(()=>c.groupPanel.state==='open');
+    Zotero.debug('Tab Manager popup reopened');
+    c.toggle('vertical-test');await wait(100);
+    check('Clicking the same heading closes its list',c.groupPanel.state==='closed');
+    p.updateSettings({verticalThreshold:100});
+    check('Raising the threshold restores horizontal presentation',!c.isVertical('vertical-test')&&c.root.querySelectorAll('.ztg-section[data-group="vertical-test"] .ztg-document').length===7);
+    await p.openSettings(w);let preferences;
+    await until(()=>{preferences=p.settingsPane?Services.wm.getMostRecentWindow('zotero:pref'):[...p.settingsWindows].find(x=>!x.closed);return preferences&&preferences.document.getElementById('tm-setting-verticalThreshold');});
+    const threshold=preferences.document.getElementById('tm-setting-verticalThreshold');
+    check('Settings include all eight compact controls',preferences.document.querySelectorAll('[id^="tm-setting-"]').length===8&&threshold.getBoundingClientRect().left-threshold.previousElementSibling.getBoundingClientRect().right<=16);
+    threshold.value='9';threshold.dispatchEvent(new preferences.Event('change',{bubbles:true}));
+    check('Threshold can be changed from the settings UI',p.getSettings().verticalThreshold===9);
+    preferences.close();
+    p.stop();check('Shutdown removes the popup',!w.document.getElementById('ztg-group-panel'));
+  }catch(error){results.push({error:String(error),stack:error.stack});}
+  await Zotero.File.putContentsAsync(outputFile,JSON.stringify({version:Zotero.version,platform:'Windows',suite:'groups-unloaded-fixtures',passed:results.every(x=>x.passed===true),results},null,2));
   Services.startup.quit(Components.interfaces.nsIAppStartup.eForceQuit);
 }

@@ -10,6 +10,7 @@ Object.assign(TabGroups, {
       hoverExpand: s.hoverExpand !== false,
       showSuggestions: s.showSuggestions !== false,
       defaultDisplay: ['original', 'note', 'both'].includes(s.defaultDisplay) ? s.defaultDisplay : 'original',
+      verticalThreshold: Number.isInteger(s.verticalThreshold) && s.verticalThreshold >= 1 && s.verticalThreshold <= 1000 ? s.verticalThreshold : 7,
       suggestDays: this.state.suggestDays,
       ungroupedColor: this.state.ungroupedColor
     };
@@ -26,6 +27,8 @@ Object.assign(TabGroups, {
         if (!['original', 'note', 'both'].includes(value)) return false;
       } else if (key === 'suggestDays') {
         if (!Number.isInteger(value) || value < 1 || value > 3650) return false;
+      } else if (key === 'verticalThreshold') {
+        if (!Number.isInteger(value) || value < 1 || value > 1000) return false;
       } else if (key === 'ungroupedColor') {
         if (!this.normalizeColor(value)) return false;
       } else return false;
@@ -36,7 +39,8 @@ Object.assign(TabGroups, {
       showGroupCounts: next.showGroupCounts,
       hoverExpand: next.hoverExpand,
       showSuggestions: next.showSuggestions,
-      defaultDisplay: next.defaultDisplay
+      defaultDisplay: next.defaultDisplay,
+      verticalThreshold: next.verticalThreshold
     };
     this.state.suggestDays = next.suggestDays;
     this.state.ungroupedColor = this.normalizeColor(next.ungroupedColor);
@@ -89,8 +93,9 @@ Object.assign(TabGroups, {
       changed = true;
     }
     for (const tab of current) {
+      var _c$seenTabs$get;
       const key = this.key(tab);
-      if (!key || c.seenTabs.has(tab.id) || survivingKeys.has(key) || this.restoring) continue;
+      if (!key || ((_c$seenTabs$get = c.seenTabs.get(tab.id)) === null || _c$seenTabs$get === void 0 ? void 0 : _c$seenTabs$get.key) === key || survivingKeys.has(key) || this.restoring) continue;
       if (remember && this.validGroupRecord(this.state.closedGroups[key])) {
         this.state.assignments[key] = this.restoreGroupRecord(this.state.closedGroups[key]);
         delete this.state.closedGroups[key];
@@ -367,27 +372,29 @@ Object.assign(TabGroups, {
     };
     const panel = h('div');
     panel.className = 'tm-settings';
-    panel.style.cssText = 'font:13px/1.6 system-ui;max-width:680px;padding:8px 4px;color:inherit;';
+    panel.style.cssText = 'font:13px/1.5 system-ui;max-width:640px;padding:0 4px;color:inherit;';
     root.append(panel);
-    const intro = h('p', '整理标签，保留阅读线索。修改设置后立即生效。');
-    panel.append(intro);
     const controls = new Map(),
       status = h('p');
     status.id = 'tm-settings-status';
     status.setAttribute('role', 'status');
-    status.style.cssText = 'min-height:24px;';
+    status.hidden = true;
+    const showStatus = message => {
+      status.textContent = message;
+      status.hidden = false;
+    };
     const section = title => {
       const box = h('section');
-      box.style.cssText = 'margin:20px 0;padding-top:12px;border-top:1px solid #8884;';
+      box.style.cssText = 'margin:0 0 18px;';
       const heading = h('h2', title);
-      heading.style.cssText = 'font-size:16px;margin:0 0 12px;';
+      heading.style.cssText = 'font-size:15px;margin:0 0 10px;';
       box.append(heading);
       panel.append(box);
       return box;
     };
     const field = (box, key, label, type, help) => {
       const row = h('label');
-      row.style.cssText = 'display:flex;gap:10px;align-items:center;margin:10px 0;';
+      row.style.cssText = 'display:flex;align-items:center;margin:9px 0;';
       const input = h(type === 'select' ? 'select' : 'input');
       input.id = 'tm-setting-' + key;
       if (type === 'select') for (const [value, name] of [['original', '原文件名'], ['note', '备注'], ['both', '原文件名 + 备注']]) {
@@ -397,50 +404,50 @@ Object.assign(TabGroups, {
       } else input.type = type;
       if (type === 'number') {
         input.min = '1';
-        input.max = '3650';
+        input.max = key === 'verticalThreshold' ? '1000' : '3650';
         input.step = '1';
-        input.style.width = '90px';
+        input.style.width = '72px';
       }
       const text = h('span', label);
-      if (type === 'checkbox') row.append(input, text);else {
+      if (type === 'checkbox') {
+        row.append(input, text);
+        input.style.marginInlineEnd = '8px';
+      } else {
         row.append(text, input);
-        input.style.marginInlineStart = 'auto';
+        input.style.marginInlineStart = '12px';
+        input.style.flex = '0 0 auto';
       }
       input.addEventListener('change', () => {
         const value = type === 'checkbox' ? input.checked : type === 'number' ? Number(input.value) : input.value;
         if (!this.updateSettings({
           [key]: value
         })) {
-          status.textContent = '设置未保存，请检查输入。天数须为 1–3650 的整数。';
+          showStatus(key === 'verticalThreshold' ? '文献数量须为 1–1000 的整数。' : '设置未保存。天数须为 1–3650 的整数。');
           update();
-        } else status.textContent = '设置已保存。';
+        }
       });
       controls.set(key, {
         input,
         type
       });
       box.append(row);
-      if (help) {
-        const note = h('p', help);
-        note.style.cssText = 'color:var(--fill-secondary,#777);font-size:12px;margin:0 0 12px 26px;';
-        box.append(note);
-      }
+      if (help) row.title = help;
     };
-    const groups = section('分组与重新打开');
-    field(groups, 'restoreClosedGroups', '重新打开文献时恢复原分组', 'checkbox', '开启时记住文献关闭前的分组；原组已不存在则自动重建。关闭时，之后重新打开的文献进入未分组，不移动当前打开的文献。');
-    field(groups, 'showGroupCounts', '在组名后显示文献数量', 'checkbox');
-    field(groups, 'hoverExpand', '拖动文献悬停时展开折叠组', 'checkbox');
+    const groups = section('分组');
+    field(groups, 'restoreClosedGroups', '重新打开时恢复分组', 'checkbox', '原组不存在时自动重建；关闭此项不移动当前文献。');
+    field(groups, 'showGroupCounts', '显示文献数量', 'checkbox');
+    field(groups, 'hoverExpand', '拖动悬停展开分组', 'checkbox');
+    field(groups, 'verticalThreshold', '超过此数量时竖向展开', 'number', '按每个分组内打开的文献数量计算。');
     field(groups, 'ungroupedColor', '未分组颜色', 'color');
     const display = section('标签显示');
-    field(display, 'defaultDisplay', '默认显示方式', 'select', '应用于没有单独设置的文献；分组和单篇文献的设置优先。');
+    field(display, 'defaultDisplay', '默认显示', 'select', '分组和单篇文献的设置优先。');
     const suggestions = section('建议关闭');
-    field(suggestions, 'showSuggestions', '在标签栏显示“建议关闭”按钮', 'checkbox');
-    field(suggestions, 'suggestDays', '多少天未查看后列入建议', 'number', '只提供建议，不会自动关闭文献。');
+    field(suggestions, 'showSuggestions', '显示“建议关闭”按钮', 'checkbox');
+    field(suggestions, 'suggestDays', '未查看天数', 'number', '仅提供建议，不会自动关闭文献。');
     const workspace = section('阅读现场');
     const detail = h('p');
     detail.id = 'tm-workspace-summary';
     workspace.append(detail);
-    workspace.append(h('p', '保存当前打开的文献、分组、顺序、颜色、备注和折叠状态。再次保存会替换上一次记录；关闭标签不会覆盖记录。'));
     const actions = h('div');
     actions.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;';
     const save = h('button', '保存当前阅读现场'),
@@ -450,16 +457,16 @@ Object.assign(TabGroups, {
     restore.id = 'tm-restore-workspace';
     save.addEventListener('click', () => {
       const r = this.saveWorkspace(Zotero.getMainWindow());
-      status.textContent = r.message;
+      showStatus(r.message);
       update();
     });
     restore.addEventListener('click', async () => {
       try {
         const r = await this.restoreWorkspace();
-        status.textContent = r.message;
+        showStatus(r.message);
       } catch (e) {
         Zotero.logError(e);
-        status.textContent = '恢复未完成，可稍后重试。';
+        showStatus('恢复未完成，可稍后重试。');
       } finally {
         update();
       }
@@ -467,7 +474,9 @@ Object.assign(TabGroups, {
     actions.append(save, restore);
     workspace.append(actions);
     panel.append(status);
-    panel.append(h('p', '设置和阅读现场保存在本机，不随 Zotero 文献库同步。恢复会跳过已打开的文献，并保留后来打开的其他文献。'));
+    const note = h('p', '仅保存在本机；再次保存会覆盖上次记录。');
+    note.style.cssText = 'font-size:12px;opacity:.7;';
+    workspace.append(note);
     const update = () => {
       const s = this.getSettings();
       for (const [key, {
