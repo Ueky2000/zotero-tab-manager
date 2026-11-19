@@ -8,11 +8,11 @@
 <p align="center"><strong>让 Zotero 打开的文献井井有条。</strong></p>
 
 <p align="center">
-  <a href="#兼容性"><img src="https://img.shields.io/badge/Zotero-6-e05d66?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 6"></a>
-  <a href="#兼容性"><img src="https://img.shields.io/badge/Zotero-7-ed8b45?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 7"></a>
-  <a href="#兼容性"><img src="https://img.shields.io/badge/Zotero-8-d9ab3c?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 8"></a>
-  <a href="#兼容性"><img src="https://img.shields.io/badge/Zotero-9-6ba753?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 9"></a>
-  <a href="#兼容性"><img src="https://img.shields.io/badge/Zotero-10-24a698?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 10"></a>
+  <a href="https://www.zotero.org/"><img src="https://img.shields.io/badge/Zotero-6-e05d66?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 6"></a>
+  <a href="https://www.zotero.org/"><img src="https://img.shields.io/badge/Zotero-7-ed8b45?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 7"></a>
+  <a href="https://www.zotero.org/"><img src="https://img.shields.io/badge/Zotero-8-d9ab3c?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 8"></a>
+  <a href="https://www.zotero.org/"><img src="https://img.shields.io/badge/Zotero-9-6ba753?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 9"></a>
+  <a href="https://www.zotero.org/"><img src="https://img.shields.io/badge/Zotero-10-24a698?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 10"></a>
 </p>
 
 <p align="center">
