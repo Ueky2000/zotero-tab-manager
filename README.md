@@ -18,7 +18,6 @@
   <a href="https://github.com/Ueky2000/zotero-tab-manager/releases/latest"><img src="https://img.shields.io/github/v/release/Ueky2000/zotero-tab-manager?style=flat-square&amp;logo=github&amp;logoColor=white&amp;label=Release&amp;labelColor=555555&amp;color=7868c9" alt="最新发布版本"></a>
   <a href="https://github.com/Ueky2000/zotero-tab-manager/releases"><img src="https://img.shields.io/github/downloads/Ueky2000/zotero-tab-manager/total?style=flat-square&amp;label=Downloads&amp;labelColor=555555&amp;color=24a698" alt="GitHub Release 附件总下载量"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-ed8b45?style=flat-square&amp;labelColor=555555" alt="MIT 许可证"></a>
-  <a href="https://github.com/Ueky2000/zotero-tab-manager/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/Ueky2000/zotero-tab-manager/build.yml?branch=main&amp;style=flat-square&amp;logo=githubactions&amp;logoColor=white&amp;label=Build&amp;labelColor=555555&amp;color=6ba753" alt="构建状态"></a>
 </p>
 
 <p align="center">
