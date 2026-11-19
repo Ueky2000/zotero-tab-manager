@@ -1,5 +1,26 @@
 # Compatibility record
 
+## Version 1.0.0 — 2026-11-19
+
+Starting with this stable release, current installation, updates and runtime tests target Zotero 7–10 only. Zotero 6 users should download [0.6.6](https://github.com/Ueky2000/zotero-tab-manager/releases/tag/v0.6.6). Further Zotero 6 updates and maintenance have ended to reduce maintenance costs; the older records below remain historical evidence for those releases.
+
+The XPI contains only modern runtime source and a Zotero manifest. Removed files include both generated runtime modules, the standalone settings window, chrome.manifest, install.rdf declarations and the Firefox 60 generation script. There is no Babel dependency or generated test harness. Package checks verify a Zotero 7 minimum, a Zotero 10.0.x maximum, source/archive agreement and a modern-only update entry. The old updater skips update entries without a gecko application target, so it is not offered 1.0.0.
+
+The native startup uses Zotero's main-window load/unload callbacks and native preference panes. The plugin ID and local data format remain unchanged. Existing state migration and workspace regressions run against the single modern source. All runtime validation uses isolated Windows profiles and synthetic libraries; no physical mouse, macOS or Linux coverage is claimed.
+
+Final reports and installation-package digest are stored under `tests/results/v1.0.0/`.
+
+| Runtime | Packaged UI checks | Actual PDF recovery checks | Result |
+| --- | ---: | ---: | --- |
+| Zotero 7.0.32 | 50 | 32 | PASS |
+| Zotero 8.0.4 | 50 | Not repeated | PASS |
+| Zotero 9.0.6 | 50 | Not repeated | PASS |
+| Zotero 10.0.8 | 50 | 32 | PASS |
+
+The PDF suites actually parse every one of the 20 restored fixture PDFs, retain newer unrelated tabs, avoid duplicates on repeated restore, recreate saved groups, preserve manual snapshots and report unavailable files in the native settings pane. The UI suites exercise toolbar toggles, group layouts, focus colors, settings and saved-name behavior. The build also verifies package contents and update eligibility.
+
+Zotero 7.0.32 additionally passes 47 install/lifecycle/overflow checks, including the native dropdown, fixed right-side controls at 960/1280/1920 pixels, offscreen-tab selection, return to the library, cleanup and re-enabling the packaged plugin. The harness waits for the first PDF to initialize before popup stress so asynchronous reader focus does not dismiss the menu under test.
+
 ## Version 0.6.6 — 2026-11-19
 
 The packaged UI suite now verifies that disabling ungrouped renaming removes the menu action, immediately resets the heading to the default name, and retains that default after preference reload. Shared modern/Firefox 60 regressions additionally cover old disabled preferences containing a custom name and restoration of a custom-named workspace while renaming is disabled. Saved snapshots and document assignments remain unchanged; restoring with permission enabled still supports custom names.

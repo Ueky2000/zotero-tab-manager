@@ -1,8 +1,8 @@
 # 设置与阅读现场
 
-Zotero 7–10：打开 Zotero 的设置，在左侧选择 **Tab Manager**。
+v1.0.0 起支持 Zotero 7–10：打开 Zotero 的设置，在左侧选择 **Tab Manager**。
 
-Zotero 6：从「工具 → 插件」中找到 **Tab Manager**，点击其「选项 / 首选项」打开兼容设置窗口。
+Zotero 6 用户请下载 [0.6.6](https://github.com/Ueky2000/zotero-tab-manager/releases/tag/v0.6.6)。为减少维护成本，后续版本不再对 Zotero 6 进行更新维护。
 
 修改设置后立即生效，无需重启。
 

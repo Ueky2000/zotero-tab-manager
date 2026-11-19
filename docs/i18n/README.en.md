@@ -23,7 +23,7 @@ Reading often means opening dozens of papers at once. Tabs crowd together, title
 
 Groups and paper tabs share one row. Closing tabs never deletes library items or attachments.
 
-Tab Manager has been adapted for **Zotero 6–10**, supporting multiple versions.
+Starting with **v1.0.0**, Tab Manager supports **Zotero 7–10**.
 
 ## Installation
 
@@ -44,10 +44,11 @@ Install over an older version to keep your settings. Restart Zotero if necessary
 - **Close group tabs:** The group's context menu closes its reading tabs and preserves group assignments.
 
 <details>
-<summary>Latest updates · v0.6.6: Restore the default ungrouped name</summary>
+<summary>Latest updates · v1.0.0 stable release: Focused on Zotero 7–10</summary>
 
-- Disabling ungrouped renaming now immediately hides the Rename menu action and restores the default ungrouped name.
-- With renaming disabled, restarting or restoring an older workspace cannot bring back a custom name. Document assignments and saved workspace snapshots remain unchanged.
+- Remove Zotero 6 runtime code, its standalone settings window and transpilation. Use native Zotero 7–10 interfaces.
+- Existing groups, colors, remarks, settings and saved reading workspaces remain usable when installing over an older version.
+- Zotero 6 users should download [0.6.6](https://github.com/Ueky2000/zotero-tab-manager/releases/tag/v0.6.6). To reduce maintenance costs, no further Zotero 6 updates or maintenance will be provided.
 
 [Download the latest version](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) · [Full changelog](../CHANGELOG.md)
 
@@ -55,7 +56,11 @@ Install over an older version to keep your settings. Restart Zotero if necessary
 
 ## Compatibility
 
-Tab Manager has been adapted for **Zotero 6.0–10.0.x**, supporting multiple versions. On 2026-11-17, isolated Windows profiles passed 34 installation/core checks on 6.0.36 and 38 each on 7.0.32, 8.0.4, 9.0.6, and 10.0.8. Zotero 7.0.32 also passed 130 regression checks. macOS, Linux, and other patch versions have not been tested on actual installations. See the [test record](../COMPATIBILITY.md).
+**v1.0.0 and later support Zotero 7.0–10.0.x.**
+
+> **Zotero 6 users: download [0.6.6](https://github.com/Ueky2000/zotero-tab-manager/releases/tag/v0.6.6).** To reduce maintenance costs, this plugin no longer receives updates or maintenance for Zotero 6.
+
+The v1.0.0 XPI is checked in isolated Windows profiles on Zotero 7.0.32, 8.0.4, 9.0.6 and 10.0.8. macOS, Linux and other patch versions have not been tested on actual installations. See the [test record](../COMPATIBILITY.md) for exact results and coverage.
 
 ## Data and updates
 

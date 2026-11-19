@@ -1,6 +1,6 @@
 // Execute inside Zotero with a preview controller. Caller must restore preferences,
 // selected tab and original plugin after testing (including failures).
-async function testLegacyGroups(Zotero) {
+async function testSavedGroups(Zotero) {
   const w = Zotero.getMainWindow(), doc = w.document, tabs = w.Zotero_Tabs;
   const p = w.__ztgPreview.scope.TabGroups, c = p.windows.get(w);
   const original = tabs._tabs.map(t => t.id).sort().join(',');
@@ -419,8 +419,8 @@ async function runInlineTests(Zotero, Services, bootstrapURL, env) {
     w.__ztgPreview = { scope, cleanup, bootstrapURL };
     result = await testInlineGroups(Zotero);
     if (result.passed) {
-      const legacy = await testLegacyGroups(Zotero);
-      result.results.push(...legacy.results.map(r => ({...r, name: r.name ? 'Regression: ' + r.name : undefined})));
+      const saved = await testSavedGroups(Zotero);
+      result.results.push(...saved.results.map(r => ({...r, name: r.name ? 'Regression: ' + r.name : undefined})));
     }
     if (result.results.every(r=>r.passed===true)) result.results.push(...await testRemarks(Zotero));
     if (result.results.every(r=>r.passed===true)) result.results.push(...await testGroupDisplayAndLayout(Zotero));

@@ -1,14 +1,14 @@
 {
   "manifest_version": 2,
   "name": "Tab Manager",
-  "version": "0.6.6",
+  "version": "1.0.0",
   "description": "Your tabs, in order.",
   "author": "Ueky2000",
   "applications": {
     "zotero": {
       "id": "tab-groups@local.zotero",
       "update_url": "https://raw.githubusercontent.com/Ueky2000/zotero-tab-manager/main/updates.json",
-      "strict_min_version": "6.0",
+      "strict_min_version": "7.0",
       "strict_max_version": "10.0.*"
     }
   },

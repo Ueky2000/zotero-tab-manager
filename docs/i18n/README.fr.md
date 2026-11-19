@@ -23,7 +23,7 @@ Quand on ouvre des dizaines d'articles, les onglets s'accumulent, les titres son
 
 Les groupes et les onglets des documents partagent la même ligne. Fermer des onglets ne supprime ni les références ni les pièces jointes de la bibliothèque.
 
-Tab Manager a été adapté à **Zotero 6–10** et prend en charge plusieurs versions.
+À partir de la **v1.0.0**, Tab Manager prend en charge **Zotero 7–10**.
 
 ## Installation
 
@@ -44,10 +44,11 @@ Vous pouvez installer par-dessus une ancienne version en conservant vos réglage
 - **Fermer les onglets d'un groupe :** le menu du groupe ferme les onglets de lecture en conservant leur appartenance au groupe.
 
 <details>
-<summary>Dernières mises à jour · v0.6.6 : Rétablissement du nom par défaut de la section sans groupe</summary>
+<summary>Dernières mises à jour · v1.0.0 stable : Priorité à Zotero 7–10</summary>
 
-- Désactiver le renommage masque immédiatement la commande du menu contextuel et rétablit le nom par défaut de la section sans groupe.
-- Lorsque le renommage est désactivé, un redémarrage ou la restauration d'un ancien espace de lecture ne rétablit pas le nom personnalisé. L'affectation des documents et les espaces enregistrés restent inchangés.
+- Suppression du code spécifique à Zotero 6, de sa fenêtre de paramètres séparée et de la transpilation. Le plugin utilise les interfaces natives de Zotero 7–10.
+- Une installation par-dessus l'ancienne version conserve les groupes, couleurs, remarques, paramètres et espaces de lecture enregistrés.
+- Les utilisateurs de Zotero 6 doivent télécharger la [0.6.6](https://github.com/Ueky2000/zotero-tab-manager/releases/tag/v0.6.6). Afin de réduire les coûts de maintenance, aucune autre mise à jour ni maintenance ne sera assurée pour Zotero 6.
 
 [Télécharger la dernière version](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) · [Historique complet des modifications](../CHANGELOG.md)
 
@@ -55,7 +56,11 @@ Vous pouvez installer par-dessus une ancienne version en conservant vos réglage
 
 ## Compatibilité
 
-Tab Manager a été adapté à **Zotero 6.0–10.0.x** et prend en charge plusieurs versions. Le 2026-11-17, des profils Windows isolés ont passé 34 vérifications d'installation et de fonctions principales sur 6.0.36, puis 38 chacune sur 7.0.32, 8.0.4, 9.0.6 et 10.0.8. La version 7.0.32 a aussi passé 130 vérifications de non-régression. macOS, Linux et les autres versions correctives n'ont pas été vérifiés sur des installations réelles. Voir le [compte rendu des tests](../COMPATIBILITY.md).
+**La v1.0.0 et les versions suivantes prennent en charge Zotero 7.0–10.0.x.**
+
+> **Utilisateurs de Zotero 6 : téléchargez la [0.6.6](https://github.com/Ueky2000/zotero-tab-manager/releases/tag/v0.6.6).** Afin de réduire les coûts de maintenance, les mises à jour et la maintenance pour Zotero 6 ont pris fin.
+
+L'XPI de la v1.0.0 est vérifié dans des profils Windows isolés avec Zotero 7.0.32, 8.0.4, 9.0.6 et 10.0.8. macOS, Linux et les autres versions correctives n'ont pas été vérifiés sur des installations réelles. Voir le [compte rendu des tests](../COMPATIBILITY.md) pour les résultats exacts et leur portée.
 
 ## Données et mises à jour
 

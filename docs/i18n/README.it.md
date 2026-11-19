@@ -23,7 +23,7 @@ Quando apri decine di articoli, le schede si affollano, i titoli vengono troncat
 
 Gruppi e schede dei documenti occupano la stessa riga. Chiudere le schede non elimina documenti o allegati dalla libreria.
 
-Tab Manager è stato adattato per **Zotero 6–10**, con supporto per più versioni.
+A partire dalla **v1.0.0**, Tab Manager supporta **Zotero 7–10**.
 
 ## Installazione
 
@@ -44,10 +44,11 @@ Puoi installare sopra una versione precedente mantenendo le impostazioni. Riavvi
 - **Chiudi le schede del gruppo:** il menu contestuale chiude le schede di lettura e conserva le assegnazioni.
 
 <details>
-<summary>Novità · v0.6.6: Ripristino del nome predefinito della sezione senza gruppo</summary>
+<summary>Novità · v1.0.0 stabile: Dedicata a Zotero 7–10</summary>
 
-- Disattivare il permesso di rinomina nasconde subito il comando nel menu contestuale e ripristina il nome predefinito della sezione senza gruppo.
-- Con la rinomina disattivata, né il riavvio né il ripristino di uno spazio di lettura precedente riportano il nome personalizzato. Le assegnazioni dei documenti e gli spazi salvati restano invariati.
+- Rimossi il codice specifico per Zotero 6, la sua finestra di impostazioni separata e la transpilazione. Vengono usate le interfacce native di Zotero 7–10.
+- Installando sopra una versione precedente, gruppi, colori, annotazioni, impostazioni e spazi di lettura salvati restano utilizzabili.
+- Gli utenti di Zotero 6 devono scaricare la [0.6.6](https://github.com/Ueky2000/zotero-tab-manager/releases/tag/v0.6.6). Per ridurre i costi di manutenzione, non verranno forniti ulteriori aggiornamenti o manutenzione per Zotero 6.
 
 [Scarica l'ultima versione](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) · [Registro completo delle modifiche](../CHANGELOG.md)
 
@@ -55,7 +56,11 @@ Puoi installare sopra una versione precedente mantenendo le impostazioni. Riavvi
 
 ## Compatibilità
 
-Tab Manager è stato adattato per **Zotero 6.0–10.0.x**, con supporto per più versioni. Il 2026-11-17, su profili Windows isolati, sono stati superati 34 controlli di installazione e funzionalità principali su 6.0.36 e 38 ciascuno su 7.0.32, 8.0.4, 9.0.6 e 10.0.8. Su 7.0.32 sono passati anche 130 controlli di regressione. macOS, Linux e le altre versioni di manutenzione non sono stati verificati su installazioni reali. Consulta il [registro dei test](../COMPATIBILITY.md).
+**La v1.0.0 e le versioni successive supportano Zotero 7.0–10.0.x.**
+
+> **Gli utenti di Zotero 6 devono scaricare la [0.6.6](https://github.com/Ueky2000/zotero-tab-manager/releases/tag/v0.6.6).** Per ridurre i costi di manutenzione, gli aggiornamenti e la manutenzione per Zotero 6 sono terminati.
+
+L'XPI della v1.0.0 viene verificato in profili Windows isolati con Zotero 7.0.32, 8.0.4, 9.0.6 e 10.0.8. macOS, Linux e le altre versioni di manutenzione non sono stati verificati su installazioni reali. Consulta il [registro dei test](../COMPATIBILITY.md) per risultati e ambito esatti.
 
 ## Dati e aggiornamenti
 

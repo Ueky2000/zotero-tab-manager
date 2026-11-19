@@ -1,12 +1,12 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
-async function run(legacy) {
+async function run() {
   let pref;
   const items=[1,2,3].map(id=>({id,libraryID:1,key:'ITEM'+id,isAttachment:()=>true,attachmentFilename:'paper'+id+'.pdf'}));
   let readerCalls=0;
   const tabs={_tabs:[{id:'zotero-pane',type:'library'}],selectedID:'zotero-pane',select(id){this.selectedID=id;},add(options){const tab={id:'restored-'+options.data.itemID,...options};this._tabs.push(tab);return {id:tab.id};},move(id,index){const before=this._tabs.findIndex(t=>t.id===id);const tab=this._tabs.splice(before,1)[0];this._tabs.splice(before<index?index-1:index,0,tab);}};
   const win={Zotero_Tabs:tabs};let p;
-  const sandbox={Zotero:{Prefs:{get:()=>pref,set:(_k,v)=>{pref=v;}},Items:{get:id=>items.find(x=>x.id===id),getByLibraryAndKeyAsync:async(lib,key)=>items.find(x=>x.libraryID===lib&&x.key===key)},Reader:{open:async()=>{readerCalls++;throw new Error('A closed reader must not be reused');}},Utilities:{Internal:{}},logError(){}}};
-  for(const name of ['core','features'])vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/'+name+(legacy?'-legacy':'')+'.js'),'utf8'),sandbox);
+  const sandbox={Zotero:{Prefs:{get:()=>pref,set:(_k,v)=>{pref=v;}},Items:{loadDataTypes:async()=>{},get:id=>items.find(x=>x.id===id),getByLibraryAndKeyAsync:async(lib,key)=>items.find(x=>x.libraryID===lib&&x.key===key)},Reader:{open:async()=>{readerCalls++;throw new Error('A closed reader must not be reused');}},Utilities:{Internal:{}},logError(){}}};
+  for(const name of ['core','features'])vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/'+name+'.js'),'utf8'),sandbox);
   p=sandbox.TabGroups;
   const c={seenTabs:new Map(),initializedTabs:false,cancelHover(){},schedule(){},refresh(){p.syncTabs(win,c);},root:{querySelector:()=>null},collapsed:new Set(),signature:''};p.windows.set(win,c);
   const add=id=>{const tab={id:'tab-'+id,type:'reader',title:'Paper '+id,data:{itemID:id}};tabs._tabs.push(tab);p.syncTabs(win,c);return tab;};
@@ -89,9 +89,9 @@ async function run(legacy) {
   result=await p.restoreWorkspace();assert.equal(result.missing,1);assert.equal(result.opened,1);
   assert.equal(result.failures.length,1);assert.equal(result.ok,false);
   let metadataLoads=0;
-  items[1].deleted=false;items[0].loadAllData=async()=>{metadataLoads++;};items[0].fileExists=async()=>false;tabs._tabs=[tabs._tabs[0]];
+  items[1].deleted=false;sandbox.Zotero.Items.loadDataTypes=async()=>{metadataLoads++;};items[0].fileExists=async()=>false;tabs._tabs=[tabs._tabs[0]];
   result=await p.restoreWorkspace();assert.equal(result.failed,1);assert.match(result.failures[0].reason,/附件文件/);assert.equal(result.opened,1);
-  assert.equal(metadataLoads,1);
+  assert.equal(metadataLoads,2);
   delete items[0].fileExists;
   for(let id=4;id<=22;id++)items.push({id,libraryID:1,key:'ITEM'+id,isAttachment:()=>true,attachmentFilename:'paper'+id+'.pdf'});
   tabs._tabs=[tabs._tabs[0]];p.state.workspace.tabs=items.slice(0,20).map(item=>({key:'1:'+item.key,libraryID:1,itemKey:item.key,kind:'reader',title:item.key,group:'g'}));
@@ -120,6 +120,6 @@ async function run(legacy) {
   p.windows.delete(otherWin);const remaining=add(1);p.assign(remaining,'g');
   p.updateSettings({restoreClosedGroups:false});p.closeGroup(win,'g');assert.ok(!p.state.groups.some(g=>g.id==='g'));
   const plain=add(1);assert.equal(p.groupOf(plain),'');p.closeGroup(win,'');assert.ok(p.state.groups.some(g=>g.id==='other'));
-  console.log((legacy?'legacy':'modern')+': closed-tab memory, settings and workspace restore checks passed');
+  console.log('modern'+': closed-tab memory, settings and workspace restore checks passed');
 }
-(async()=>{await run(false);await run(true);})().catch(e=>{console.error(e);process.exitCode=1;});
+(async()=>{await run();})().catch(e=>{console.error(e);process.exitCode=1;});

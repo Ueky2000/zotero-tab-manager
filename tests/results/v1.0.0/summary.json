@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0",
+  "sha256": "f1dfb7d182f63191e892e301c383df1c515461013cbe2c9d1160d23160dce24d",
+  "runtimes": [
+    {
+      "version": "7.0.32",
+      "suite": "groups",
+      "checks": 50,
+      "passed": true,
+      "report": "7.0.32-groups.json"
+    },
+    {
+      "version": "8.0.4",
+      "suite": "groups",
+      "checks": 50,
+      "passed": true,
+      "report": "8.0.4-groups.json"
+    },
+    {
+      "version": "9.0.6",
+      "suite": "groups",
+      "checks": 50,
+      "passed": true,
+      "report": "9.0.6-groups.json"
+    },
+    {
+      "version": "10.0.8",
+      "suite": "groups",
+      "checks": 50,
+      "passed": true,
+      "report": "10.0.8-groups.json"
+    },
+    {
+      "version": "7.0.32",
+      "suite": "workspace",
+      "checks": 32,
+      "passed": true,
+      "report": "7.0.32-workspace.json"
+    },
+    {
+      "version": "10.0.8",
+      "suite": "workspace",
+      "checks": 32,
+      "passed": true,
+      "report": "10.0.8-workspace.json"
+    },
+    {
+      "version": "7.0.32",
+      "suite": "compat-final",
+      "checks": 47,
+      "passed": true,
+      "report": "7.0.32-compat-final.json"
+    }
+  ],
+  "limits": "Isolated Windows fixture libraries and synthesized input; no physical mouse or other operating system claim."
+}

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0 — 2026-11-19
+
+- Publish the first stable release for Zotero 7–10, retaining the plugin ID and existing local data schema so groups, notes, settings and saved reading workspaces remain usable.
+- Remove Zotero 6 runtime modules, standalone settings window, install.rdf manifests, Firefox 60 transpilation, Babel dependency and old test branches. Use native modern plugin lifecycle and preference panes.
+- Set install/update minimum compatibility to Zotero 7. Old update clients skip the modern-only update entry; Zotero 6 users should download 0.6.6, the final release for that version.
+- End further Zotero 6 updates and maintenance to reduce maintenance costs. Keep historical release downloads and validation records available.
+
 ## 0.6.6 — 2026-11-19
 
 - Reset the ungrouped name to its default immediately when rename permission is disabled, alongside hiding its context-menu rename action.

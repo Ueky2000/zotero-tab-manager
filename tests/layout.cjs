@@ -2,7 +2,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-for (const file of ['core.js', 'core-legacy.js']) {
+for (const file of ['core.js']) {
   let pref;
   const sandbox = { Zotero: { Prefs: { get: () => pref, set: (_key, value) => { pref = value; } }, logError: e => { throw e; } } };
   vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname, '../src', file), 'utf8'), sandbox);

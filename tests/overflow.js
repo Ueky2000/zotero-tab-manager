@@ -27,6 +27,7 @@ async function testOverflow(Zotero, p, w, check, wait, itemID) {
     // Open before selecting unloaded reader fixtures, whose asynchronous load
     // can itself dismiss a popup. Zotero 8 changed this method's signature.
     if(menu&&typeof tabs.showTabsMenu==='function') {
+      w.focus();await wait(150);
       if(parseInt(Zotero.version,10)>=8)tabs.showTabsMenu(true,menu);else tabs.showTabsMenu(menu);
       const nativePanel=tabs.tabsMenuPanel||d.getElementById('zotero-tabs-menu-panel');
       for(let i=0;i<20&&!nativePanel.visible&&nativePanel.state!=='open';i++)await wait(50);

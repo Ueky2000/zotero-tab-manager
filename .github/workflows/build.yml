@@ -13,12 +13,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: npm --prefix scripts install --ignore-scripts --no-audit --no-fund
-      - run: npm --prefix scripts run build
-      - run: node --check src/bootstrap.js && node --check src/core.js && node --check src/core-legacy.js && node --check src/features.js && node --check src/features-legacy.js
+      - run: python scripts/build.py
+      - run: node --check src/bootstrap.js && node --check src/core.js && node --check src/features.js && node --check tests/compat-harness.js
       - run: node tests/layout.cjs
       - run: node tests/features.cjs
-      - run: git diff --exit-code -- src/core-legacy.js src/features-legacy.js tests/harness/run-legacy.js updates.json dist
+      - run: python tests/package.py
+      - run: git diff --exit-code -- updates.json dist
       - uses: actions/upload-artifact@v4
         with:
           name: tab-manager

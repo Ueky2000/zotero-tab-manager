@@ -1,8 +1,6 @@
 /* SPDX-License-Identifier: MIT. Settings, closed-tab memory and reading workspace. */
 Object.assign(TabGroups, {
   settingsViews: new Map(),
-  settingsWindows: new Set(),
-  legacyOptionsWindows: new Map(),
   getSettings() {
     const s = this.state.settings || {};
     return {
@@ -171,8 +169,7 @@ Object.assign(TabGroups, {
         if (entry.remark && typeof entry.remark.note === 'string') this.state.remarks[key]={note:entry.remark.note.slice(0,300),mode:['original','note','both'].includes(entry.remark.mode)?entry.remark.mode:'original'};
         if (this.openDocuments().some(row=>row.key===key)) { result.alreadyOpen++; continue; }
         try {
-          if(typeof Zotero.Items.loadDataTypes==='function')await Zotero.Items.loadDataTypes([item]);
-          else if(typeof item.loadAllData==='function')await item.loadAllData();
+          await Zotero.Items.loadDataTypes([item]);
           const main=typeof Zotero.getMainWindow==='function'?Zotero.getMainWindow():null;
           const target=main&&this.windows.has(main)?main:[...this.windows.keys()].find(w=>!w.closed);
           if(!target||typeof target.Zotero_Tabs.add!=='function')throw new Error('没有可恢复文献的 Zotero 主窗口。');
@@ -232,32 +229,10 @@ Object.assign(TabGroups, {
     this.pluginRoot=root;
     this.pluginVersion=version;
     Zotero.TabManagerPlugin=this;
-    if (Zotero.PreferencePanes && Zotero.PreferencePanes.register) {
-      this.settingsPane=await Zotero.PreferencePanes.register({pluginID:'tab-groups@local.zotero',id:'tab-manager-settings',label:'Tab Manager',src:'preferences.xhtml',image:'icon-32.png'});
-    }
-    if(parseInt(Zotero.version,10)<7){const windows=Services.wm.getEnumerator(null);while(windows.hasMoreElements())this.attachLegacyOptions(windows.getNext());}
-  },
-  attachLegacyOptions(win) {
-    if(parseInt(Zotero.version,10)>=7||typeof win.openOptionsInTab!=='function'||this.legacyOptionsWindows.has(win))return;
-    // Firefox 60 only advertises tab-style options; Zotero has no browser tabs.
-    // Route our own URL to the existing settings dialog, preserving other add-ons.
-    const original=win.openOptionsInTab,plugin=this;
-    const wrapped=function(url){if(url==='chrome://tab-manager/content/preferences-window.xul'){plugin.openSettings(Zotero.getMainWindow());return true;}return original.apply(this,arguments);};
-    win.openOptionsInTab=wrapped;this.legacyOptionsWindows.set(win,{original,wrapped});
-    win.addEventListener('unload',()=>this.legacyOptionsWindows.delete(win),{once:true});
+    this.settingsPane=await Zotero.PreferencePanes.register({pluginID:'tab-groups@local.zotero',id:'tab-manager-settings',label:'Tab Manager',src:'preferences.xhtml',image:'icon-32.png'});
   },
   openSettings(win) {
-    if (this.settingsPane) return Zotero.Utilities.Internal.openPreferences(this.settingsPane);
-    for (const w of this.settingsWindows) if(!w.closed){w.focus();return w;}
-    const dialog=win.openDialog('chrome://tab-manager/content/preferences-window.xul','tab-manager-settings','chrome,centerscreen,resizable,width=660,height=720',this);
-    this.settingsWindows.add(dialog);
-    const loaded=()=>{
-      const root=dialog.document.getElementById('tm-settings-root');if(!root)return;
-      dialog.removeEventListener('load',loaded);this.renderSettings(dialog.document,root);
-      dialog.addEventListener('unload',()=>this.settingsWindows.delete(dialog),{once:true});
-    };
-    dialog.addEventListener('load',loaded);loaded();
-    return dialog;
+    return Zotero.Utilities.Internal.openPreferences(this.settingsPane);
   },
   workspaceIcon(action) {
     const body=action==='save'?'<rect x="3" y="3" width="18" height="18" rx="4" fill="#e8efff" stroke="#527bd7"/><path d="M8 3v7h8V3M8 21v-7h8v7" stroke="#527bd7"/>':'<path d="M4 10a8 8 0 1 1 2 8" stroke="#299b86"/><path d="M4 4v6h6" stroke="#299b86"/><path d="M12 8v5l3 2" stroke="#d59a31"/>';
@@ -346,12 +321,9 @@ Object.assign(TabGroups, {
     this.settingsViews.set(root,update);doc.defaultView.addEventListener('unload',()=>this.settingsViews.delete(root),{once:true});update();
   },
   stopSettings() {
-    for(const [win,{original,wrapped}] of this.legacyOptionsWindows)if(!win.closed&&win.openOptionsInTab===wrapped)win.openOptionsInTab=original;
-    this.legacyOptionsWindows.clear();
     if(this.settingsPane && Zotero.PreferencePanes)Zotero.PreferencePanes.unregister(this.settingsPane);
     this.settingsPane=null;
     if(Zotero.TabManagerPlugin===this)delete Zotero.TabManagerPlugin;
-    for(const win of this.settingsWindows)if(!win.closed)win.close();this.settingsWindows.clear();
     for(const [root] of this.settingsViews)for(const n of root.querySelectorAll('input,select,button'))n.disabled=true;
     this.settingsViews.clear();
   }

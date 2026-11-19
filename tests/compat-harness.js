@@ -1,6 +1,6 @@
 async function runCompatHarness(Zotero, Services, pluginRoot, outputFile, fixtureDir) {
   const results=[];
-  const wait=ms=>new Promise(resolve=>Services.tm.dispatchToMainThread(()=>Zotero.getMainWindow().setTimeout(resolve,ms)));
+  const wait=ms=>new Promise(resolve=>{const timer=Components.classes['@mozilla.org/timer;1'].createInstance(Components.interfaces.nsITimer);timer.initWithCallback(()=>{timer.cancel();resolve();},ms,Components.interfaces.nsITimer.TYPE_ONE_SHOT);});
   const check=(name,passed)=>{results.push({name,passed:!!passed});if(!passed)throw new Error(name);};
   let plugin=null,scope=null;
   try {
@@ -14,7 +14,7 @@ async function runCompatHarness(Zotero, Services, pluginRoot, outputFile, fixtur
     if(typeof plugin.disable==='function')await plugin.disable();else {plugin.userDisabled=true;await wait(100);}
     check('Disable removes UI',!w.document.getElementById('ztg-inline'));
     scope={Zotero,Services};
-    Services.scriptloader.loadSubScript(pluginRoot+'src/'+(major<7?'core-legacy.js':'core.js'),scope,'UTF-8');
+    Services.scriptloader.loadSubScript(pluginRoot+'src/core.js',scope,'UTF-8');
     await scope.startup();
     const p=scope.TabGroups,c=p.windows.get(w),tabs=w.Zotero_Tabs,d=w.document;
     const a=await Zotero.Attachments.linkFromFile({file:fixtureDir+'fixture-a.pdf'});
@@ -51,6 +51,10 @@ async function runCompatHarness(Zotero, Services, pluginRoot, outputFile, fixtur
     p.assign(bTab,'compat-b');p.closeGroup(w,'compat-b');check('Actual group close closes only its member',!tabs._tabs.some(t=>t.id===tb.id)&&tabs._tabs.some(t=>t.id===ta.id)&&tabs._tabs.some(t=>t.type==='library'));
     check('Close preserves assignment',p.state.assignments[p.key(bTab)]==='compat-b');
     p.setCollapsed('compat-a',true);c.reveal(ta.id);await wait(300);check('Search-style reveal selects document and expands group',tabs.selectedID===ta.id&&!c.collapsed.has('compat-a'));
+    const readerReady=()=>{try{return Zotero.Reader.getByTabID(ta.id)?._internalReader?._primaryView?._iframeWindow.PDFViewerApplication.pdfDocument.numPages===1;}catch(e){return false;}};
+    for(let i=0;i<300&&!readerReady();i++)await wait(100);
+    check('Reader initialization finishes before native popup stress',readerReady());
+    tabs.select('zotero-pane');w.focus();await wait(200);
     check('Suggestion toolbar label is visible',d.getElementById('ztg-suggestions').getBoundingClientRect().width>70);
     const stress={};Services.scriptloader.loadSubScript(pluginRoot+'tests/overflow.js',stress,'UTF-8');
     await stress.testOverflow(Zotero,p,w,check,wait,a.id);
@@ -81,25 +85,6 @@ async function runSettingsHarness(Zotero, Services, outputFile, fixtureDir) {
     const w=Zotero.getMainWindow(),p=Zotero.TabManagerPlugin,tabs=w.Zotero_Tabs,c=p.windows.get(w);
     check('Packaged plugin starts with settings support',!!p&&!!c);
     check('Tools menu contains workspace shortcuts',!!w.document.getElementById('ztg-tools-menu'));
-    if(parseInt(Zotero.version,10)<7){
-      // Firefox 60's PDF renderer can wait indefinitely in a hidden window.
-      // Check the real legacy settings window here; shared restore logic is
-      // covered by features.cjs, and full PDF flows by the modern UI runs.
-      await p.openSettings(w);let legacyWin;await wait(500);
-      await until(()=>{legacyWin=[...p.settingsWindows].find(x=>!x.closed);return legacyWin&&legacyWin.document.getElementById('tm-setting-restoreClosedGroups');});
-      const doc=legacyWin.document;
-      check('Legacy settings window renders all nine controls',doc.querySelectorAll('[id^="tm-setting-"]').length===9);
-      checkCompact(doc);
-      const memory=doc.getElementById('tm-setting-restoreClosedGroups');memory.checked=false;memory.dispatchEvent(new legacyWin.Event('change',{bubbles:true}));
-      check('Legacy memory setting applies and persists',!p.getSettings().restoreClosedGroups&&!JSON.parse(Zotero.Prefs.get(p.pref,true)).settings.restoreClosedGroups);
-      const days=doc.getElementById('tm-setting-suggestDays');days.value='14';days.dispatchEvent(new legacyWin.Event('change',{bubbles:true}));
-      check('Legacy suggestion threshold persists',p.state.suggestDays===14);
-      check('Legacy workspace buttons are available',!!doc.getElementById('tm-save-workspace')&&doc.getElementById('tm-restore-workspace').disabled);
-      legacyWin.close();p.stop();check('Legacy cleanup removes settings and Tools menu',!p.settingsWindows.size&&!w.document.getElementById('ztg-tools-menu'));
-      await Zotero.File.putContentsAsync(outputFile,JSON.stringify({version:Zotero.version,platform:'Windows',suite:'legacy-settings-only',passed:true,results},null,2));
-      Services.startup.quit(Components.interfaces.nsIAppStartup.eForceQuit);return;
-    }
-    if(parseInt(Zotero.version,10)>=7)check('Native Zotero preferences pane registered',Zotero.PreferencePanes.pluginPanes.some(pane=>pane.id==='tab-manager-settings'));
     const a=await Zotero.Attachments.linkFromFile({file:fixtureDir+'fixture-a.pdf'}),b=await Zotero.Attachments.linkFromFile({file:fixtureDir+'fixture-b.pdf'});
     await Zotero.Reader.open(a.id);await Zotero.Reader.open(b.id);await wait(400);
     const find=item=>tabs._tabs.find(t=>t.data&&t.data.itemID===item.id);
@@ -108,7 +93,7 @@ async function runSettingsHarness(Zotero, Services, outputFile, fixtureDir) {
     await p.openSettings(w);
     let settingsWin;
     await until(()=>{
-      settingsWin=p.settingsPane?Services.wm.getMostRecentWindow('zotero:pref'):[...p.settingsWindows].find(x=>!x.closed);
+      settingsWin=Services.wm.getMostRecentWindow('zotero:pref');
       return settingsWin&&settingsWin.document.getElementById('tm-setting-restoreClosedGroups');
     });
     const d=settingsWin.document,control=key=>d.getElementById('tm-setting-'+key);
@@ -280,17 +265,9 @@ async function runGroupListHarness(Zotero,Services,outputFile,fixtureDir){
     if(maxColumns>1){const perColumn=Number(c.groupList.dataset.rows);check('Documents fill down each column before the next',many[perColumn].getBoundingClientRect().left>many[0].getBoundingClientRect().right&&Math.abs(many[perColumn].getBoundingClientRect().top-many[0].getBoundingClientRect().top)<2);}
     check('Hover tint uses the group color with high transparency',w.getComputedStyle(c.groupList).getPropertyValue('--ztg-hover').trim()==='rgba(33,134,106,0.14)');
     c.groupPanel.hidePopup();await wait(100);tabs.close(extra);p.updateSettings({verticalThreshold:100});c.refresh();
-    let addons;
-    if(parseInt(Zotero.version,10)<7){
-      addons=w.openDialog('chrome://mozapps/content/extensions/extensions.xul','','chrome,centerscreen,resizable');
-      await until(()=>p.legacyOptionsWindows.has(addons));
-      const manager=ChromeUtils.import('resource://gre/modules/AddonManager.jsm').AddonManager;
-      const addon=await manager.getAddonByID('tab-groups@local.zotero');
-      check('Zotero 6 exposes the plugin preferences action',addon&&addon.isActive&&Number(addon.optionsType)===3);
-      addons.gViewController.commands.cmd_showItemPreferences.doCommand(addon);
-    }else await p.openSettings(w);
+    await p.openSettings(w);
     let preferences;
-    await until(()=>{preferences=p.settingsPane?Services.wm.getMostRecentWindow('zotero:pref'):[...p.settingsWindows].find(x=>!x.closed);return preferences&&preferences.document.getElementById('tm-setting-verticalThreshold');});
+    await until(()=>{preferences=Services.wm.getMostRecentWindow('zotero:pref');return preferences&&preferences.document.getElementById('tm-setting-verticalThreshold');});
     const threshold=preferences.document.getElementById('tm-setting-verticalThreshold');
     check('Settings include all nine compact controls',preferences.document.querySelectorAll('[id^="tm-setting-"]').length===9&&threshold.getBoundingClientRect().left-threshold.previousElementSibling.getBoundingClientRect().right<=16);
     check('Settings use requested labels and omit the hover switch',preferences.document.getElementById('tm-setting-restoreClosedGroups').parentElement.textContent==='重新打开文献时自动进入上一次的分组'&&threshold.parentElement.textContent==='分组内文献超过此数量时竖向排列'&&!preferences.document.getElementById('tm-setting-hoverExpand'));
@@ -316,7 +293,7 @@ async function runGroupListHarness(Zotero,Services,outputFile,fixtureDir){
     check('Disabling rename hides its menu action and immediately restores the default heading',!hasRename(menu)&&p.state.ungroupedName==='未分组'&&c.root.querySelector('.ztg-ungrouped').textContent.includes('未分组')&&!c.root.querySelector('.ztg-ungrouped').textContent.includes('待阅读'));menu.hidePopup();await wait(100);
     p.load();c.refresh();check('The restored default name survives preference reload',p.state.ungroupedName==='未分组'&&c.root.querySelector('.ztg-ungrouped').textContent.includes('未分组'));
     const footer=preferences.document.getElementById('tm-settings-footer'),links=footer?[...footer.querySelectorAll('a')].map(a=>a.getAttribute('href')):[];
-    check('The separated final settings row shows the running plugin version',footer&&footer.parentElement.lastElementChild===footer&&preferences.getComputedStyle(footer).borderTopStyle==='solid'&&p.pluginVersion==='0.6.6'&&footer.textContent.includes('0.6.6'));
+    check('The separated final settings row shows the running plugin version',footer&&footer.parentElement.lastElementChild===footer&&preferences.getComputedStyle(footer).borderTopStyle==='solid'&&p.pluginVersion==='1.0.0'&&footer.textContent.includes('1.0.0'));
     check('Project and feedback links match the supplied destinations',links.includes('https://github.com/Ueky2000/zotero-tab-manager')&&links.includes('https://xhslink.cn/o/5yD58jP6BNV')&&links.includes('mailto:ueky@foxmail.com'));
     const autoDissolve=preferences.document.getElementById('tm-setting-dissolveOnGroupClose');
     check('Auto-dissolve is optional and ungrouped color is absent from settings',autoDissolve&&!autoDissolve.checked&&!preferences.document.getElementById('tm-setting-ungroupedColor'));
@@ -327,7 +304,6 @@ async function runGroupListHarness(Zotero,Services,outputFile,fixtureDir){
     const reopened=tabs.add({type:'reader-unloaded',title:'Reopened paper',data:{itemID:paper.data.itemID},select:false});c.refresh();
     check('Reopening a paper recreates its automatically dissolved group',p.groupOf(tabs._tabs.find(t=>t.id===reopened.id))==='vertical-test'&&p.state.groups.find(g=>g.id==='vertical-test').color==='#21866a');
     preferences.close();
-    if(addons)addons.close();
     p.stop();check('Shutdown removes the popup',!w.document.getElementById('ztg-group-panel'));
   }catch(error){results.push({error:String(error),stack:error.stack});}
   await Zotero.File.putContentsAsync(outputFile,JSON.stringify({version:Zotero.version,platform:'Windows',suite:'groups-unloaded-fixtures',passed:results.every(x=>x.passed===true),results},null,2));
@@ -335,7 +311,7 @@ async function runGroupListHarness(Zotero,Services,outputFile,fixtureDir){
 }
 
 async function runWorkspaceHarness(Zotero,Services,outputFile,fixtureDir){
-  const results=[],errors=[],legacy=parseInt(Zotero.version,10)<7;let restoreResult=null;
+  const results=[],errors=[];let restoreResult=null;
   const wait=ms=>new Promise(resolve=>{const timer=Components.classes['@mozilla.org/timer;1'].createInstance(Components.interfaces.nsITimer);timer.initWithCallback(()=>{timer.cancel();resolve();},ms,Components.interfaces.nsITimer.TYPE_ONE_SHOT);});
   const check=(name,passed)=>{results.push({name,passed:!!passed});Zotero.debug('Workspace test: '+name+' '+!!passed);if(!passed)throw new Error(name);};
   const until=async(test,label)=>{for(let i=0;i<300;i++){if(test())return;await wait(100);}throw new Error('Timed out: '+label);};
@@ -352,8 +328,8 @@ async function runWorkspaceHarness(Zotero,Services,outputFile,fixtureDir){
     }
     const find=item=>tabs._tabs.find(t=>t.data&&t.data.itemID===item.id);
     const ready=item=>{try{const r=Zotero.Reader.getByTabID(find(item).id);return r&&r._internalReader&&r._internalReader._primaryView&&r._internalReader._primaryView._iframeWindow.PDFViewerApplication.pdfDocument.numPages===1;}catch(e){return false;}};
-    if(!legacy){tabs.select(find(items[0]).id);await until(()=>ready(items[0]),'initial real PDF');
-    check('Initial PDF actually renders a page',ready(items[0]));}
+    tabs.select(find(items[0]).id);await until(()=>ready(items[0]),'initial real PDF');
+    check('Initial PDF actually renders a page',ready(items[0]));
     p.setRemark(find(items[0]),'Saved experiment');p.setCollapsed('workspace-b',true);
     check('Save captures twenty documents',p.saveWorkspace(w).ok&&p.state.workspace.tabs.length===20);
     const saved=JSON.stringify(p.state.workspace);
@@ -365,9 +341,9 @@ async function runWorkspaceHarness(Zotero,Services,outputFile,fixtureDir){
     check('Twenty-document restore reports no failures',restoreResult.failed===0&&restoreResult.opened+restoreResult.alreadyOpen===20);
     check('All twenty distinct saved documents are restored',items.every(item=>!!find(item))&&tabs._tabs.filter(t=>t.type!=='library').length===20);
     check('Group assignments, remarks and folding are restored',items.every((item,i)=>p.groupOf(find(item))===(i<10?'workspace-a':'workspace-b'))&&p.remark(find(items[0])).note==='Saved experiment'&&p.state.collapsed.includes('workspace-b'));
-    if(!legacy){await until(()=>ready(items[0]),'restored active PDF');check('Restored active PDF actually renders',ready(items[0]));}
+    await until(()=>ready(items[0]),'restored active PDF');check('Restored active PDF actually renders',ready(items[0]));
     const second=await p.restoreWorkspace();check('Repeated restore creates no duplicates',second.opened===0&&second.alreadyOpen===20&&tabs._tabs.length===21);
-    const visit=legacy?[]:[19,10,1,18,...Array.from({length:20},(_,i)=>i).filter(i=>![0,19,10,1,18].includes(i))];
+    const visit=[19,10,1,18,...Array.from({length:20},(_,i)=>i).filter(i=>![0,19,10,1,18].includes(i))];
     for(const index of visit){tabs.select(find(items[index]).id);await until(()=>ready(items[index]),'restored PDF '+index);check('Restored PDF '+index+' actually renders',ready(items[index]));}
     tabs.select('zotero-pane');tabs.close(tabs._tabs.filter(t=>t.type!=='library'&&t.data.itemID!==items[1].id).map(t=>t.id));await wait(300);c.refresh();
     const extra=await Zotero.Attachments.linkFromFile({file:fixtureDir+'fixture-a.pdf'});
@@ -382,11 +358,11 @@ async function runWorkspaceHarness(Zotero,Services,outputFile,fixtureDir){
     const unavailable=await p.restoreWorkspace();
     check('Unavailable file reports its reason without blocking other papers',unavailable.failed===1&&unavailable.alreadyOpen===20&&unavailable.failures.some(f=>f.reason.includes('附件文件')));
     await p.openSettings(w);let preferences;
-    await until(()=>{preferences=p.settingsPane?Services.wm.getMostRecentWindow('zotero:pref'):[...p.settingsWindows].find(x=>!x.closed);return preferences&&preferences.document.getElementById('tm-restore-failures');},'failure details');
+    await until(()=>{preferences=Services.wm.getMostRecentWindow('zotero:pref');return preferences&&preferences.document.getElementById('tm-restore-failures');},'failure details');
     const details=preferences.document.getElementById('tm-restore-failures');
     check('Settings show the failed paper and actionable reason',!details.hidden&&details.textContent.includes('Missing file fixture')&&details.textContent.includes('附件文件'));
     preferences.close();
   }catch(error){results.push({error:String(error),stack:error.stack});}
-  await Zotero.File.putContentsAsync(outputFile,JSON.stringify({version:Zotero.version,platform:'Windows',suite:legacy?'workspace-native-tabs-20':'workspace-real-pdf-20',passed:results.every(x=>x.passed===true),restoreResult,errors,results},null,2));
+  await Zotero.File.putContentsAsync(outputFile,JSON.stringify({version:Zotero.version,platform:'Windows',suite:'workspace-real-pdf-20',passed:results.every(x=>x.passed===true),restoreResult,errors,results},null,2));
   Services.startup.quit(Components.interfaces.nsIAppStartup.eForceQuit);
 }

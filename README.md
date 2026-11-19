@@ -8,7 +8,6 @@
 <p align="center"><strong>让 Zotero 打开的文献井井有条。</strong></p>
 
 <p align="center">
-  <a href="https://www.zotero.org/"><img src="https://img.shields.io/badge/Zotero-6-e05d66?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 6"></a>
   <a href="https://www.zotero.org/"><img src="https://img.shields.io/badge/Zotero-7-ed8b45?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 7"></a>
   <a href="https://www.zotero.org/"><img src="https://img.shields.io/badge/Zotero-8-d9ab3c?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 8"></a>
   <a href="https://www.zotero.org/"><img src="https://img.shields.io/badge/Zotero-9-6ba753?style=flat-square&amp;logo=zotero&amp;logoColor=CC2936&amp;labelColor=555555" alt="Zotero 9"></a>
@@ -75,7 +74,7 @@ Tab Manager 把顶部拥挤的标签，整理成有主题、有颜色、有阅�
 
 适合经常同时阅读多篇论文、并行推进多个课题，以及习惯把文献一直开着的人。
 
-插件目前面向 **Zotero 6–10** 做了适配性优化，兼容多个版本。
+自 **v1.0.0** 起，插件支持 **Zotero 7–10**。
 
 ## 快速开始
 
@@ -85,13 +84,14 @@ Tab Manager 把顶部拥挤的标签，整理成有主题、有颜色、有阅�
 
 已有旧版可直接覆盖安装；必要时重启 Zotero。
 
-> 同一个安装包面向 Zotero 6–10，具体验证范围见下方兼容性说明。
+> 当前安装包面向 Zotero 7–10，具体验证范围见下方兼容性说明。
 
 <details>
-<summary>最近更新 · v0.6.6：关闭重命名后恢复“未分组”</summary>
+<summary>最近更新 · v1.0.0 正式版：专注 Zotero 7–10</summary>
 
-- 关闭“是否允许未分组重命名”时，立即隐藏右键重命名选项，并将名称恢复为“未分组”。
-- 开关关闭时，重启或恢复旧阅读现场也不会带回自定义名称；文献归属和已保存的阅读现场保持不变。
+- 移除 Zotero 6 专用代码、旧版设置窗口和转译构建流程，统一使用 Zotero 7–10 原生接口。
+- 原有分组、颜色、备注、设置和阅读现场可继续使用，覆盖安装即可升级。
+- Zotero 6 用户请下载 [0.6.6](https://github.com/Ueky2000/zotero-tab-manager/releases/tag/v0.6.6)；为减少维护成本，本插件后续不再对 Zotero 6 进行更新维护。
 
 [下载最新版本](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) · [完整更新日志](docs/CHANGELOG.md)
 
@@ -110,20 +110,21 @@ Tab Manager 把顶部拥挤的标签，整理成有主题、有颜色、有阅�
 
 ## 兼容性
 
-目前已面向 **Zotero 6.0–10.0.x**做了适配性优化，兼容多个版本。
+**v1.0.0 及后续版本支持 Zotero 7.0–10.0.x。**
+
+> **Zotero 6 用户请下载 [0.6.6](https://github.com/Ueky2000/zotero-tab-manager/releases/tag/v0.6.6)。** 为减少维护成本，本插件不再对 Zotero 6 版本进行更新维护。
 
 <details>
 <summary>查看已验证版本与测试范围</summary>
 
-2026-11-17 在 Windows 上，使用独立配置、独立数据库和实际 XPI 完成以下验证：
+2026-11-19 在 Windows 上，使用独立配置、独立数据库和实际 v1.0.0 XPI 进行界面与核心功能检查：
 
-| Zotero | 安装及核心功能检查 | 状态 |
+| Zotero | 检查项目 | 状态 |
 | --- | ---: | --- |
-| 6.0.36 | 34 项 | 通过 |
-| 7.0.32 | 38 项，另有 130 项功能回归检查 | 通过 |
-| 8.0.4 | 38 项 | 通过 |
-| 9.0.6 | 38 项 | 通过 |
-| 10.0.8 | 38 项 | 通过 |
+| 7.0.32 | 50 项 | 通过 |
+| 8.0.4 | 50 项 | 通过 |
+| 9.0.6 | 50 项 | 通过 |
+| 10.0.8 | 50 项 | 通过 |
 
 macOS、Linux 以及未列出的各补丁版本尚未实机验证。完整记录见 [兼容性与测试说明](docs/COMPATIBILITY.md)。
 

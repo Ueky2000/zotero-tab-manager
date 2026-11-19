@@ -27,8 +27,9 @@ for label in ['a','b']:fixture(fixtures/f'fixture-{label}.pdf',label)
 manifest=json.loads((root/'src/manifest.json').read_text(encoding='utf-8'))
 shutil.copyfile(root/'dist'/f'tab-manager-{manifest["version"]}.xpi',extensions/(manifest['applications']['zotero']['id']+'.xpi'))
 with zipfile.ZipFile(extensions/'test-harness@tab-manager.local.xpi','w',zipfile.ZIP_DEFLATED) as archive:
-    for name in ['bootstrap.js','manifest.json','install.rdf','run-legacy.js']:
+    for name in ['bootstrap.js','manifest.json']:
         archive.write(root/'tests/harness'/name,name)
+    archive.write(root/'tests/compat-harness.js','run.js')
 prefs={'extensions.zotero.dataDir':str(data),'extensions.zotero.useDataDir':True,
     'extensions.zotero.firstRun':False,'extensions.zotero.firstRun2':False,
     'extensions.zotero.sync.autoSync':False,'extensions.autoDisableScopes':0,'extensions.enabledScopes':15,

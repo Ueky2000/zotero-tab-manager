@@ -1,12 +1,9 @@
 /* SPDX-License-Identifier: MIT */
 var TabGroups = {
   mainWindows() {
-    if (typeof Zotero.getMainWindows === 'function') return Zotero.getMainWindows();
-    const windows=[], list=Services.wm.getEnumerator(null);
-    while(list.hasMoreElements()) { const win=list.getNext(); if(win.Zotero_Tabs)windows.push(win); }
-    return windows;
+    return Zotero.getMainWindows();
   },
-  xul(doc, tag) { return doc.createXULElement ? doc.createXULElement(tag) : doc.createElementNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul',tag); },
+  xul(doc, tag) { return doc.createXULElement(tag); },
   fromEntries(entries) { const object={}; for(const [key,value] of entries) if(key!=='__proto__')object[key]=value; return object; },
   clear(node) { node.textContent=''; },
   setLabel(node, label) { node.setAttribute('label', label); if('label' in node)node.label=label; },
@@ -281,7 +278,6 @@ var TabGroups = {
       return n;
     };
     const root = h('div'); root.id = 'ztg-inline'; root.setAttribute('role', 'tablist'); root.setAttribute('aria-label', '文献标签分组');
-    const legacyActions = h('div'); legacyActions.id = 'ztg-actions';
     const suggestions = this.xul(doc, 'toolbarbutton');
     suggestions.id = 'ztg-suggestions'; suggestions.classList.add('zotero-tb-button');
     suggestions.setAttribute('aria-label', '建议关闭的文献');
@@ -321,7 +317,6 @@ var TabGroups = {
       #tab-bar-container[data-ztg-inline] .pinned-tabs { display:flex !important; align-items:center; flex:0 0 auto !important; min-width:100px; max-width:180px; }
       #tab-bar-container[data-ztg-inline] .pinned-tabs .tabs { display:flex; position:static; overflow:visible; }
       #tab-bar-container[data-ztg-inline] .pinned-tabs .tab { flex:0 1 160px; min-width:100px; max-width:172px; }
-      #ztg-actions { display:flex; align-items:center; flex:0 0 auto; -moz-window-dragging:no-drag; }
       #tab-bar-container[data-ztg-inline] .tabs-wrapper,
       #tab-bar-container[data-ztg-inline] .scroll-start-arrow,
       #tab-bar-container[data-ztg-inline] .scroll-end-arrow { display:none !important; }
@@ -357,7 +352,6 @@ var TabGroups = {
       .ztg-color-option .menu-iconic-icon { display:flex !important; visibility:visible !important; width:14px !important; height:14px !important; margin:1px; border-radius:3px; background-color:var(--ztg-swatch) !important; border:1px solid #8885; list-style-image:none !important; }
       #ztg-inline :focus { outline:none; }
       #ztg-inline :focus-visible { outline:2px solid var(--ztg-color,currentColor); outline-offset:-2px; }
-      #ztg-inline :-moz-focusring { outline:2px solid var(--ztg-color,currentColor); outline-offset:-2px; }
       #ztg-inline [data-ztg-drop="join"] { outline:2px solid var(--ztg-color,#3977d5); outline-offset:-2px; box-shadow:inset 0 0 0 3px #ffffff88; }
       #ztg-inline [data-ztg-drop="before"], #ztg-inline [data-ztg-drop="group-before"] { border-left:4px solid #267dff; }
       #ztg-inline [data-ztg-drop="after"], #ztg-inline [data-ztg-drop="group-after"] { border-right:4px solid #267dff; }
@@ -370,7 +364,6 @@ var TabGroups = {
       #ztg-group-panel .ztg-close:hover { background:#8883; }
       #ztg-group-panel :focus { outline:none; }
       #ztg-group-panel :focus-visible { outline:2px solid var(--ztg-color,currentColor);outline-offset:-2px; }
-      #ztg-group-panel :-moz-focusring { outline:2px solid var(--ztg-color,currentColor);outline-offset:-2px; }
       #ztg-inline .ztg-document[data-pointer-focus], #ztg-group-panel .ztg-document[data-pointer-focus] { outline:none !important; }
       #ztg-inline .ztg-document[data-keyboard-focus], #ztg-group-panel .ztg-document[data-keyboard-focus] { outline:2px solid var(--ztg-color,currentColor);outline-offset:-2px; }
       #ztg-group-panel [data-ztg-drop="join"] { outline:2px solid var(--ztg-color);outline-offset:-2px; }
@@ -420,9 +413,7 @@ var TabGroups = {
         const current = host.querySelector('.tab-bar-inner-container');
         if (current && root.parentElement !== current) current.insertBefore(root, current.querySelector('.tabs-wrapper'));
         host.setAttribute('data-ztg-inline', 'true');
-        const nativeToolbar = doc.getElementById('zotero-tabs-toolbar');
-        if (!nativeToolbar && current && legacyActions.parentElement !== current) current.append(legacyActions);
-        const toolbar = nativeToolbar || legacyActions;
+        const toolbar = doc.getElementById('zotero-tabs-toolbar');
         if (suggestions.parentElement !== toolbar || toolbar.lastElementChild !== suggestions) toolbar.append(suggestions);
         if (searchButton.parentElement !== toolbar || searchButton.nextElementSibling !== suggestions) toolbar.insertBefore(searchButton, suggestions);
       },
@@ -837,7 +828,7 @@ var TabGroups = {
       doc.querySelectorAll('.ztg-menu').forEach(n => n.remove());
       searchPanel.hidePopup(); searchPanel.remove(); searchButton.remove();
       groupPanel.hidePopup();groupPanel.remove();
-      host.removeAttribute('data-ztg-inline'); root.remove(); suggestions.remove(); legacyActions.remove(); style.remove(); this.windows.delete(win);
+      host.removeAttribute('data-ztg-inline'); root.remove(); suggestions.remove(); style.remove(); this.windows.delete(win);
       if (c.toolsMenu) c.toolsMenu.remove();
     };
     this.windows.set(win, c);
