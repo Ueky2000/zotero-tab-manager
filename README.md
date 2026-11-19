@@ -161,6 +161,7 @@ macOS、Linux 以及未列出的各补丁版本尚未实机验证。完整记录
 - [构建与目录说明](docs/DEVELOPMENT.md)
 
 欢迎通过 [Issues](https://github.com/Ueky2000/zotero-tab-manager/issues) 反馈问题或提出建议。报告问题时，请附上 Zotero 版本、操作系统、复现步骤和截图。
+也可以在小红书帖子https://xhslink.cn/o/5yD58jP6BNV下留言或email: ueky@foxmail.com
 
 ---
 
