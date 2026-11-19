@@ -21,7 +21,10 @@ async function run(legacy) {
   p.updateSettings({allowUngroupedRename:true});
   assert.equal(p.renameGroup('','  待阅读  '),true);assert.equal(p.renameGroup('',' '),false);assert.equal(p.renameGroup('','x'.repeat(61)),false);
   p.load();assert.equal(p.getSettings().allowUngroupedRename,true);assert.equal(p.orderedGroups().find(g=>g.id==='').name,'待阅读');
-  p.updateSettings({allowUngroupedRename:false});assert.equal(p.renameGroup('','Changed'),false);assert.equal(p.state.ungroupedName,'待阅读');
+  p.updateSettings({allowUngroupedRename:false});assert.equal(p.renameGroup('','Changed'),false);assert.equal(p.state.ungroupedName,'未分组');
+  p.load();assert.equal(p.state.ungroupedName,'未分组');
+  p.state.ungroupedName='Legacy disabled name';p.save();p.load();assert.equal(p.state.ungroupedName,'未分组');
+  p.updateSettings({allowUngroupedRename:true});assert.equal(p.state.ungroupedName,'未分组');p.renameGroup('','待阅读');
   assert.equal(p.updateSettings({dissolveOnGroupClose:'true'}),false);
   assert.equal(p.getSettings().verticalThreshold,7);
   assert.equal(p.getSettings().groupCountThreshold,7);
@@ -72,6 +75,9 @@ async function run(legacy) {
   assert.equal(readerCalls,0);assert.equal(tabs._tabs.find(t=>t.data&&t.data.itemID===2).type,'reader-unloaded');
   assert.equal(p.groupOf(ungrouped),'g');assert.equal(p.state.groups[0].color,'#3977d5');
   assert.equal(p.state.ungroupedName,'待阅读');
+  p.updateSettings({allowUngroupedRename:false});await p.restoreWorkspace();assert.equal(p.state.ungroupedName,'未分组');
+  assert.equal(JSON.stringify(p.state.workspace),snapshot);
+  p.updateSettings({allowUngroupedRename:true});await p.restoreWorkspace();assert.equal(p.state.ungroupedName,'待阅读');
   assert.equal(p.state.groups[0].name,'研究主题');assert.equal(p.remark(ungrouped).note,'重点实验');
   assert.ok(tabs._tabs.some(t=>t.id===extra.id));assert.ok(p.state.collapsed.includes('g'));
   assert.deepEqual(tabs._tabs.slice(1,3).map(t=>t.data.itemID),[1,2]);

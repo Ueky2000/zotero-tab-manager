@@ -1,0 +1,23 @@
+{
+  "version": "0.6.6",
+  "sha256": "5bb5dbf93164f9285ff322afe3a5670bfa9c411a2ba082224e3c6ce18fcdc0b0",
+  "suite": "groups-unloaded-fixtures",
+  "runtimes": [
+    {
+      "version": "6.0.36",
+      "checks": 51,
+      "passed": true
+    },
+    {
+      "version": "7.0.32",
+      "checks": 50,
+      "passed": true
+    },
+    {
+      "version": "10.0.8",
+      "checks": 50,
+      "passed": true
+    }
+  ],
+  "limits": "Isolated Windows fixture UI and shared state tests; no physical input, other OS or full-PDF claim."
+}

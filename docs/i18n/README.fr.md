@@ -44,12 +44,10 @@ Vous pouvez installer par-dessus une ancienne version en conservant vos réglage
 - **Fermer les onglets d'un groupe :** le menu du groupe ferme les onglets de lecture en conservant leur appartenance au groupe.
 
 <details>
-<summary>Dernières mises à jour · v0.6.5 : Renommage de la section sans groupe et informations</summary>
+<summary>Dernières mises à jour · v0.6.6 : Rétablissement du nom par défaut de la section sans groupe</summary>
 
-- **Renommage facultatif de la section sans groupe :** L'autorisation est désactivée par défaut. Activez-la pour afficher Renommer dans le menu contextuel. Le nom est enregistré ; désactiver l'autorisation masque uniquement la commande, sans réinitialiser le nom ni modifier l'affectation des documents.
-- **Informations en bas des paramètres :** Une ligne séparée affiche la version du plugin en cours d'exécution, le site du projet, la publication de retours sur Xiaohongshu et le lien email.
-
-Les versions récentes ont aussi ajouté la dissolution facultative des groupes vides, un second clic pour fermer la recherche et les suggestions, l'enregistrement et la restauration de l'espace de lecture en un clic, ainsi que des listes numérotées sur plusieurs colonnes.
+- Désactiver le renommage masque immédiatement la commande du menu contextuel et rétablit le nom par défaut de la section sans groupe.
+- Lorsque le renommage est désactivé, un redémarrage ou la restauration d'un ancien espace de lecture ne rétablit pas le nom personnalisé. L'affectation des documents et les espaces enregistrés restent inchangés.
 
 [Télécharger la dernière version](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) · [Historique complet des modifications](../CHANGELOG.md)
 

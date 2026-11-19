@@ -313,9 +313,10 @@ async function runGroupListHarness(Zotero,Services,outputFile,fixtureDir){
     check('Ungrouped rename immediately updates the tab-strip heading',c.root.querySelector('.ztg-ungrouped').textContent.includes('待阅读'));
     p.load();c.refresh();check('Custom ungrouped name survives preference reload',p.state.ungroupedName==='待阅读'&&c.root.querySelector('.ztg-ungrouped').textContent.includes('待阅读'));
     rename.checked=false;rename.dispatchEvent(new preferences.Event('change',{bubbles:true}));menu=ungroupedMenu();
-    check('Disabling rename removes the menu action and retains the saved name',!hasRename(menu)&&p.state.ungroupedName==='待阅读');menu.hidePopup();await wait(100);
+    check('Disabling rename hides its menu action and immediately restores the default heading',!hasRename(menu)&&p.state.ungroupedName==='未分组'&&c.root.querySelector('.ztg-ungrouped').textContent.includes('未分组')&&!c.root.querySelector('.ztg-ungrouped').textContent.includes('待阅读'));menu.hidePopup();await wait(100);
+    p.load();c.refresh();check('The restored default name survives preference reload',p.state.ungroupedName==='未分组'&&c.root.querySelector('.ztg-ungrouped').textContent.includes('未分组'));
     const footer=preferences.document.getElementById('tm-settings-footer'),links=footer?[...footer.querySelectorAll('a')].map(a=>a.getAttribute('href')):[];
-    check('The separated final settings row shows the running plugin version',footer&&footer.parentElement.lastElementChild===footer&&preferences.getComputedStyle(footer).borderTopStyle==='solid'&&p.pluginVersion==='0.6.5'&&footer.textContent.includes('0.6.5'));
+    check('The separated final settings row shows the running plugin version',footer&&footer.parentElement.lastElementChild===footer&&preferences.getComputedStyle(footer).borderTopStyle==='solid'&&p.pluginVersion==='0.6.6'&&footer.textContent.includes('0.6.6'));
     check('Project and feedback links match the supplied destinations',links.includes('https://github.com/Ueky2000/zotero-tab-manager')&&links.includes('https://xhslink.cn/o/5yD58jP6BNV')&&links.includes('mailto:ueky@foxmail.com'));
     const autoDissolve=preferences.document.getElementById('tm-setting-dissolveOnGroupClose');
     check('Auto-dissolve is optional and ungrouped color is absent from settings',autoDissolve&&!autoDissolve.checked&&!preferences.document.getElementById('tm-setting-ungroupedColor'));

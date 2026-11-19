@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.6 — 2026-11-19
+
+- Reset the ungrouped name to its default immediately when rename permission is disabled, alongside hiding its context-menu rename action.
+- Apply the same rule when loading older preferences or restoring a saved workspace, so a disabled setting cannot bring back a custom name. Preserve workspace snapshots and document assignments.
+
 ## 0.6.5 — 2026-11-19
 
 - Add an optional permission to rename the ungrouped section, disabled by default. Its context-menu action appears only when enabled; names persist across restarts, update immediately and keep the section's identity and document assignments.

@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Tab Manager",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "description": "Your tabs, in order.",
   "author": "Ueky2000",
   "applications": {

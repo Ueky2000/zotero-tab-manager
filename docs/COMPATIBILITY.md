@@ -1,5 +1,17 @@
 # Compatibility record
 
+## Version 0.6.6 — 2026-11-19
+
+The packaged UI suite now verifies that disabling ungrouped renaming removes the menu action, immediately resets the heading to the default name, and retains that default after preference reload. Shared modern/Firefox 60 regressions additionally cover old disabled preferences containing a custom name and restoration of a custom-named workspace while renaming is disabled. Saved snapshots and document assignments remain unchanged; restoring with permission enabled still supports custom names.
+
+Reports and the tested XPI digest are stored in `tests/results/v0.6.6/`. The suite uses isolated Windows profiles, synthetic fixture attachments and synthesized input; it does not claim physical input, other operating systems or new full-PDF rendering tests.
+
+| Runtime | Checks | Result |
+| --- | ---: | --- |
+| Zotero 6.0.36 | 51 | PASS |
+| Zotero 7.0.32 | 50 | PASS |
+| Zotero 10.0.8 | 50 | PASS |
+
 ## Version 0.6.5 — 2026-11-19
 
 The isolated packaged UI suite checks that ungrouped renaming is disabled by default, its menu action follows the setting, renamed headings update immediately, names survive preference reload, and disabling permission preserves the custom name while hiding the action. It also checks that the settings footer is separated, occupies the final position, shows the running add-on version, and contains the exact project, feedback-post and mailto destinations. External links are inspected without opening them or sending feedback.

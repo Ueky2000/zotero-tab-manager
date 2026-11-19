@@ -44,12 +44,10 @@ Install over an older version to keep your settings. Restart Zotero if necessary
 - **Close group tabs:** The group's context menu closes its reading tabs and preserves group assignments.
 
 <details>
-<summary>Latest updates · v0.6.5: Ungrouped renaming and settings information</summary>
+<summary>Latest updates · v0.6.6: Restore the default ungrouped name</summary>
 
-- **Optional ungrouped renaming:** The new permission is off by default. Enable it to show Rename in the ungrouped context menu. Names persist; turning permission off hides the action without resetting the name or changing document assignments.
-- **Settings footer:** A separate row shows the running plugin version, project website, Xiaohongshu feedback post and email links.
-
-Recent versions also added optional empty-group removal, click-again-to-close search and suggestions, one-click reading-workspace save/restore and numbered multi-column document lists.
+- Disabling ungrouped renaming now immediately hides the Rename menu action and restores the default ungrouped name.
+- With renaming disabled, restarting or restoring an older workspace cannot bring back a custom name. Document assignments and saved workspace snapshots remain unchanged.
 
 [Download the latest version](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) · [Full changelog](../CHANGELOG.md)
 

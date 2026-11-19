@@ -44,12 +44,10 @@ Puoi installare sopra una versione precedente mantenendo le impostazioni. Riavvi
 - **Chiudi le schede del gruppo:** il menu contestuale chiude le schede di lettura e conserva le assegnazioni.
 
 <details>
-<summary>Novità · v0.6.5: Rinomina della sezione senza gruppo e informazioni</summary>
+<summary>Novità · v0.6.6: Ripristino del nome predefinito della sezione senza gruppo</summary>
 
-- **Rinomina facoltativa della sezione senza gruppo:** Il permesso è disattivato per impostazione predefinita. Attivalo per mostrare Rinomina nel menu contestuale. Il nome viene salvato; disattivare il permesso nasconde solo il comando, senza ripristinare il nome o cambiare le assegnazioni dei documenti.
-- **Informazioni in fondo alle impostazioni:** Una riga separata mostra la versione del plugin in uso, il sito del progetto, il post per i commenti su Xiaohongshu e il collegamento email.
-
-Le versioni recenti hanno aggiunto anche lo scioglimento facoltativo dei gruppi vuoti, un secondo clic per chiudere ricerca e suggerimenti, il salvataggio e ripristino dello spazio di lettura con un clic ed elenchi numerati su più colonne.
+- Disattivare il permesso di rinomina nasconde subito il comando nel menu contestuale e ripristina il nome predefinito della sezione senza gruppo.
+- Con la rinomina disattivata, né il riavvio né il ripristino di uno spazio di lettura precedente riportano il nome personalizzato. Le assegnazioni dei documenti e gli spazi salvati restano invariati.
 
 [Scarica l'ultima versione](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) · [Registro completo delle modifiche](../CHANGELOG.md)
 

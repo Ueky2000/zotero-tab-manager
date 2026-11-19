@@ -60,7 +60,7 @@ var TabGroups = {
       if (s.orderVersion !== 2) order = [...order.filter(id => id !== ''), ''];
       this.state = { version: 1, orderVersion: 2, groups, assignments: { ...s.assignments },
         ungroupedColor: this.normalizeColor(s.ungroupedColor || '') || '#737373',
-        ungroupedName: typeof s.ungroupedName==='string'&&s.ungroupedName.trim()?s.ungroupedName.trim().slice(0,60):'未分组',
+        ungroupedName: s.settings&&s.settings.allowUngroupedRename===true&&typeof s.ungroupedName==='string'&&s.ungroupedName.trim()?s.ungroupedName.trim().slice(0,60):'未分组',
         collapsed: [...new Set(Array.isArray(s.collapsed) ? s.collapsed.filter(id => valid.has(id)) : [])],
         order,
         history: s.history && typeof s.history === 'object' && !Array.isArray(s.history) ? { ...s.history } : {},

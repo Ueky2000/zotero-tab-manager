@@ -39,6 +39,7 @@ Object.assign(TabGroups, {
       dissolveOnGroupClose:next.dissolveOnGroupClose,
       allowUngroupedRename:next.allowUngroupedRename,
       showSuggestions:next.showSuggestions, defaultDisplay:next.defaultDisplay,verticalThreshold:next.verticalThreshold,groupCountThreshold:next.groupCountThreshold };
+    if(!next.allowUngroupedRename)this.state.ungroupedName='未分组';
     this.state.suggestDays = next.suggestDays;
     this.state.ungroupedColor = this.normalizeColor(next.ungroupedColor);
     if (Object.prototype.hasOwnProperty.call(patch, 'defaultDisplay')) {
@@ -192,7 +193,8 @@ Object.assign(TabGroups, {
       const restoredIDs=new Set(mapping.values());
       this.state.collapsed=[...this.state.collapsed.filter(id=>!restoredIDs.has(id)),...(snapshot.collapsed||[]).map(id=>mapping.get(id)).filter(id=>id!==undefined)];
       const color=this.normalizeColor(snapshot.ungroupedColor||'');if(color)this.state.ungroupedColor=color;
-      if(typeof snapshot.ungroupedName==='string'&&snapshot.ungroupedName.trim())this.state.ungroupedName=snapshot.ungroupedName.trim().slice(0,60);
+      if(!this.getSettings().allowUngroupedRename)this.state.ungroupedName='未分组';
+      else if(typeof snapshot.ungroupedName==='string'&&snapshot.ungroupedName.trim())this.state.ungroupedName=snapshot.ungroupedName.trim().slice(0,60);
       // Reuse native moves so restored members retain their saved reading order,
       // even when some were already open. Leave unrelated documents open.
       for (const [win] of this.windows) {
