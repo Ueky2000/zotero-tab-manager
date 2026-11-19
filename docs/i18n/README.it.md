@@ -44,13 +44,12 @@ Puoi installare sopra una versione precedente mantenendo le impostazioni. Riavvi
 - **Chiudi le schede del gruppo:** il menu contestuale chiude le schede di lettura e conserva le assegnazioni.
 
 <details>
-<summary>Novità · v0.6.4: Chiusura dei gruppi e barra degli strumenti</summary>
+<summary>Novità · v0.6.5: Rinomina della sezione senza gruppo e informazioni</summary>
 
-- **Scioglimento automatico facoltativo:** Una nuova impostazione elimina un gruppo vuoto dopo la chiusura di tutte le sue schede con un solo comando. È disattivata per impostazione predefinita; la sezione senza gruppo rimane. Se il ripristino dei gruppi è attivo, riaprire un documento può ricreare il gruppo originale.
-- **Un secondo clic chiude:** Ricerca e suggerimenti di chiusura si aprono al primo clic e si chiudono al secondo. Aprire uno chiude il pannello dell'altro.
-- **Impostazioni più semplici:** Il colore della sezione senza gruppo si modifica dal suo menu contestuale, senza un controllo duplicato nelle impostazioni.
+- **Rinomina facoltativa della sezione senza gruppo:** Il permesso è disattivato per impostazione predefinita. Attivalo per mostrare Rinomina nel menu contestuale. Il nome viene salvato; disattivare il permesso nasconde solo il comando, senza ripristinare il nome o cambiare le assegnazioni dei documenti.
+- **Informazioni in fondo alle impostazioni:** Una riga separata mostra la versione del plugin in uso, il sito del progetto, il post per i commenti su Xiaohongshu e il collegamento email.
 
-Le versioni recenti hanno aggiunto anche salvataggio e ripristino dello spazio di lettura con un clic, un pannello nelle impostazioni di Zotero, elenchi numerati a due o tre colonne e soglie regolabili per la disposizione verticale. In modalità verticale, il documento attivo rimane una scheda orizzontale in alto.
+Le versioni recenti hanno aggiunto anche lo scioglimento facoltativo dei gruppi vuoti, un secondo clic per chiudere ricerca e suggerimenti, il salvataggio e ripristino dello spazio di lettura con un clic ed elenchi numerati su più colonne.
 
 [Scarica l'ultima versione](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) · [Registro completo delle modifiche](../CHANGELOG.md)
 
@@ -70,6 +69,8 @@ L'ID `tab-groups@local.zotero` e la preferenza `extensions.tabGroups.state` rima
 
 [Registro modifiche](../CHANGELOG.md) · [Istruzioni di compilazione](../DEVELOPMENT.md) · [Segnala un problema](https://github.com/Ueky2000/zotero-tab-manager/issues)
 
-Includi versione di Zotero, sistema operativo, passaggi per riprodurre il problema e uno screenshot. I documenti tecnici collegati sono nelle lingue originali.
+**Includi versione di Zotero, sistema operativo, passaggi per riprodurre il problema e uno screenshot.** I documenti tecnici collegati sono nelle lingue originali.
+
+Puoi anche lasciare un commento al [post su Xiaohongshu](https://xhslink.cn/o/5yD58jP6BNV) o scrivere a [ueky@foxmail.com](mailto:ueky@foxmail.com).
 
 [Licenza MIT](../../LICENSE).

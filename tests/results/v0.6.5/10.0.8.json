@@ -1,0 +1,211 @@
+{
+  "version": "10.0.8",
+  "platform": "Windows",
+  "suite": "groups-unloaded-fixtures",
+  "passed": true,
+  "results": [
+    {
+      "name": "Tools submenu has exactly the two workspace actions",
+      "passed": true
+    },
+    {
+      "name": "Tools menu and both actions have colored icons",
+      "passed": true
+    },
+    {
+      "name": "Threshold defaults to seven",
+      "passed": true
+    },
+    {
+      "name": "Search button opens on first click and closes on second click",
+      "passed": true
+    },
+    {
+      "name": "Suggestions button opens on first click and closes on second click",
+      "passed": true
+    },
+    {
+      "name": "Opening suggestions closes search",
+      "passed": true
+    },
+    {
+      "name": "Opening search closes suggestions",
+      "passed": true
+    },
+    {
+      "name": "Eight papers switch to a vertical group",
+      "passed": true
+    },
+    {
+      "name": "Popup lists all eight papers vertically",
+      "passed": true
+    },
+    {
+      "name": "Vertical papers are numbered in group order",
+      "passed": true
+    },
+    {
+      "name": "Top tab strip remains a single row",
+      "passed": true
+    },
+    {
+      "name": "Rows retain right-click and drag actions",
+      "passed": true
+    },
+    {
+      "name": "Pointer focus adds no outline to popup rows",
+      "passed": true
+    },
+    {
+      "name": "Keyboard focus follows the green group color (rgb(33, 134, 106), connected=true)",
+      "passed": true
+    },
+    {
+      "name": "Vertical drag insertion uses the row height",
+      "passed": true
+    },
+    {
+      "name": "Selecting a vertical row exposes one horizontal active tab without replacing its popup row",
+      "passed": true
+    },
+    {
+      "name": "Reading a vertical entry closes its popup",
+      "passed": true
+    },
+    {
+      "name": "Keyboard selection replaces the horizontal active paper",
+      "passed": true
+    },
+    {
+      "name": "Closing an entry at the boundary restores horizontal tabs",
+      "passed": true
+    },
+    {
+      "name": "A configured threshold changes the presentation",
+      "passed": true
+    },
+    {
+      "name": "Clicking the same heading closes its list",
+      "passed": true
+    },
+    {
+      "name": "Raising the threshold restores horizontal presentation",
+      "passed": true
+    },
+    {
+      "name": "More than seven named groups switches every group to vertical mode",
+      "passed": true
+    },
+    {
+      "name": "The group-count threshold is strict and immediately adjustable",
+      "passed": true
+    },
+    {
+      "name": "Removing excess groups restores per-group document thresholds",
+      "passed": true
+    },
+    {
+      "name": "Large groups adapt to two columns when the window permits",
+      "passed": true
+    },
+    {
+      "name": "Multi-column layout measurements",
+      "passed": true,
+      "columns": 3,
+      "expectedColumns": 3,
+      "width": 960,
+      "height": 420,
+      "windowWidth": 1001,
+      "scrollHeight": 430,
+      "clientHeight": 420
+    },
+    {
+      "name": "Very large groups cap at three columns and remain scrollable within the window",
+      "passed": true
+    },
+    {
+      "name": "Multi-column numbering stays in document order",
+      "passed": true
+    },
+    {
+      "name": "Documents fill down each column before the next",
+      "passed": true
+    },
+    {
+      "name": "Hover tint uses the group color with high transparency",
+      "passed": true
+    },
+    {
+      "name": "Settings include all nine compact controls",
+      "passed": true
+    },
+    {
+      "name": "Settings use requested labels and omit the hover switch",
+      "passed": true
+    },
+    {
+      "name": "Both settings workspace buttons render matching colored icons",
+      "passed": true
+    },
+    {
+      "name": "Threshold can be changed from the settings UI",
+      "passed": true
+    },
+    {
+      "name": "The group-count threshold can be changed from settings",
+      "passed": true
+    },
+    {
+      "name": "Changing default display immediately overrides existing group and paper display settings",
+      "passed": true
+    },
+    {
+      "name": "Ungrouped rename is off by default and absent from its menu",
+      "passed": true
+    },
+    {
+      "name": "Enabling the setting adds ungrouped rename to the context menu",
+      "passed": true
+    },
+    {
+      "name": "Ungrouped rename immediately updates the tab-strip heading",
+      "passed": true
+    },
+    {
+      "name": "Custom ungrouped name survives preference reload",
+      "passed": true
+    },
+    {
+      "name": "Disabling rename removes the menu action and retains the saved name",
+      "passed": true
+    },
+    {
+      "name": "The separated final settings row shows the running plugin version",
+      "passed": true
+    },
+    {
+      "name": "Project and feedback links match the supplied destinations",
+      "passed": true
+    },
+    {
+      "name": "Auto-dissolve is optional and ungrouped color is absent from settings",
+      "passed": true
+    },
+    {
+      "name": "Group close removes the empty group when enabled",
+      "passed": true
+    },
+    {
+      "name": "Auto-dissolve preserves reading workspace and paper group memory",
+      "passed": true
+    },
+    {
+      "name": "Reopening a paper recreates its automatically dissolved group",
+      "passed": true
+    },
+    {
+      "name": "Shutdown removes the popup",
+      "passed": true
+    }
+  ]
+}

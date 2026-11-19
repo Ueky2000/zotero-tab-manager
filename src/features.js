@@ -8,6 +8,7 @@ Object.assign(TabGroups, {
     return {
       restoreClosedGroups: s.restoreClosedGroups !== false,
       dissolveOnGroupClose: s.dissolveOnGroupClose === true,
+      allowUngroupedRename: s.allowUngroupedRename === true,
       showGroupCounts: s.showGroupCounts !== false,
       showSuggestions: s.showSuggestions !== false,
       defaultDisplay: ['original','note','both'].includes(s.defaultDisplay) ? s.defaultDisplay : 'original',
@@ -21,7 +22,7 @@ Object.assign(TabGroups, {
     if (this.readOnly) return false;
     const next = { ...this.getSettings() };
     for (const [key, value] of Object.entries(patch)) {
-      if (['restoreClosedGroups','dissolveOnGroupClose','showGroupCounts','showSuggestions'].includes(key)) {
+      if (['restoreClosedGroups','dissolveOnGroupClose','allowUngroupedRename','showGroupCounts','showSuggestions'].includes(key)) {
         if (typeof value !== 'boolean') return false;
       } else if (key === 'defaultDisplay') {
         if (!['original','note','both'].includes(value)) return false;
@@ -36,6 +37,7 @@ Object.assign(TabGroups, {
     }
     this.state.settings = { restoreClosedGroups:next.restoreClosedGroups, showGroupCounts:next.showGroupCounts,
       dissolveOnGroupClose:next.dissolveOnGroupClose,
+      allowUngroupedRename:next.allowUngroupedRename,
       showSuggestions:next.showSuggestions, defaultDisplay:next.defaultDisplay,verticalThreshold:next.verticalThreshold,groupCountThreshold:next.groupCountThreshold };
     this.state.suggestDays = next.suggestDays;
     this.state.ungroupedColor = this.normalizeColor(next.ungroupedColor);
@@ -122,7 +124,7 @@ Object.assign(TabGroups, {
     const selected = win && win.Zotero_Tabs._tabs.find(t => t.id === win.Zotero_Tabs.selectedID);
     const snapshot = { version:1,savedAt:Date.now(),groups:this.state.groups.map(g=>({...g})),
       order:this.orderedGroups().map(g=>g.id),collapsed:[...this.state.collapsed],
-      ungroupedColor:this.state.ungroupedColor,groupDisplay:{...this.state.groupDisplay},selectedKey:this.key(selected),
+      ungroupedColor:this.state.ungroupedColor,ungroupedName:this.state.ungroupedName,groupDisplay:{...this.state.groupDisplay},selectedKey:this.key(selected),
       tabs:[...unique.values()].map(({tab,key})=>{
         const item=Zotero.Items.get(tab.data.itemID);
         return {key,libraryID:item.libraryID,itemKey:item.key,kind:tab.type.indexOf('note')===0?'note':'reader',
@@ -190,6 +192,7 @@ Object.assign(TabGroups, {
       const restoredIDs=new Set(mapping.values());
       this.state.collapsed=[...this.state.collapsed.filter(id=>!restoredIDs.has(id)),...(snapshot.collapsed||[]).map(id=>mapping.get(id)).filter(id=>id!==undefined)];
       const color=this.normalizeColor(snapshot.ungroupedColor||'');if(color)this.state.ungroupedColor=color;
+      if(typeof snapshot.ungroupedName==='string'&&snapshot.ungroupedName.trim())this.state.ungroupedName=snapshot.ungroupedName.trim().slice(0,60);
       // Reuse native moves so restored members retain their saved reading order,
       // even when some were already open. Leave unrelated documents open.
       for (const [win] of this.windows) {
@@ -223,8 +226,9 @@ Object.assign(TabGroups, {
       return result;
     } finally { this.restoring=false; this.updateSettingsViews(); }
   },
-  async registerSettings(root) {
+  async registerSettings(root, version) {
     this.pluginRoot=root;
+    this.pluginVersion=version;
     Zotero.TabManagerPlugin=this;
     if (Zotero.PreferencePanes && Zotero.PreferencePanes.register) {
       this.settingsPane=await Zotero.PreferencePanes.register({pluginID:'tab-groups@local.zotero',id:'tab-manager-settings',label:'Tab Manager',src:'preferences.xhtml',image:'icon-32.png'});
@@ -299,6 +303,7 @@ Object.assign(TabGroups, {
     const groups=section('分组');
     field(groups,'restoreClosedGroups','重新打开文献时自动进入上一次的分组','checkbox','原组不存在时自动重建；关闭此项不移动当前文献。');
     field(groups,'dissolveOnGroupClose','关闭组内所有文献后自动解散分组','checkbox');
+    field(groups,'allowUngroupedRename','是否允许未分组重命名','checkbox');
     field(groups,'showGroupCounts','显示文献数量','checkbox');
     field(groups,'verticalThreshold','分组内文献超过此数量时竖向排列','number');
     field(groups,'groupCountThreshold','分组数量超过此值时全部竖向排列','number','按自建分组数量计算，不含未分组；当前阅读的文献仍横向显示。');
@@ -324,6 +329,10 @@ Object.assign(TabGroups, {
     const failureSummary=h('summary'),failureList=h('ul');failureList.style.cssText='font-size:12px;max-height:180px;overflow:auto;padding-inline-start:20px;';
     failures.append(failureSummary,failureList);workspace.append(failures);
     const note=h('p','仅保存在本机；再次保存会覆盖上次记录。');note.style.cssText='font-size:12px;opacity:.7;';workspace.append(note);
+    const footer=h('footer');footer.id='tm-settings-footer';footer.style.cssText='border-top:1px solid #8884;margin-top:20px;padding-top:12px;font-size:12px;line-height:1.8;display:flex;flex-wrap:wrap;gap:4px 12px;';
+    const link=(label,url)=>{const a=h('a',label);a.href=url;a.title=url;a.addEventListener('click',event=>{event.preventDefault();Zotero.launchURL(url);});return a;};
+    footer.append(h('span',`当前版本：${this.pluginVersion||'未知'}`),link('项目网站','https://github.com/Ueky2000/zotero-tab-manager'));
+    const feedback=h('span','反馈 Bug 与功能建议：可在 ');feedback.append(link('小红书帖子','https://xhslink.cn/o/5yD58jP6BNV'),doc.createTextNode(' 下留言或 Email：'),link('ueky@foxmail.com','mailto:ueky@foxmail.com'));footer.append(feedback);panel.append(footer);
     const update=()=>{
       const s=this.getSettings();for(const [key,{input,type}] of controls){if(type==='checkbox')input.checked=s[key];else input.value=String(s[key]);input.disabled=!!this.readOnly;}
       const saved=this.state.workspace;

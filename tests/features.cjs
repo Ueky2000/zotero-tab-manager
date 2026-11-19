@@ -15,6 +15,13 @@ async function run(legacy) {
   p.state.groups.push({id:'g',name:'研究主题',color:'#3977d5'});p.assign(a,'g');p.assign(b,'g');p.setRemark(a,'重点实验');p.setGroupDisplay('g','both');p.setCollapsed('g',true);
   assert.equal(p.getSettings().restoreClosedGroups,true);
   assert.equal(p.getSettings().dissolveOnGroupClose,false);
+  assert.equal(p.getSettings().allowUngroupedRename,false);
+  assert.equal(p.renameGroup('','待阅读'),false);
+  assert.equal(p.updateSettings({allowUngroupedRename:'yes'}),false);
+  p.updateSettings({allowUngroupedRename:true});
+  assert.equal(p.renameGroup('','  待阅读  '),true);assert.equal(p.renameGroup('',' '),false);assert.equal(p.renameGroup('','x'.repeat(61)),false);
+  p.load();assert.equal(p.getSettings().allowUngroupedRename,true);assert.equal(p.orderedGroups().find(g=>g.id==='').name,'待阅读');
+  p.updateSettings({allowUngroupedRename:false});assert.equal(p.renameGroup('','Changed'),false);assert.equal(p.state.ungroupedName,'待阅读');
   assert.equal(p.updateSettings({dissolveOnGroupClose:'true'}),false);
   assert.equal(p.getSettings().verticalThreshold,7);
   assert.equal(p.getSettings().groupCountThreshold,7);
@@ -45,6 +52,7 @@ async function run(legacy) {
   assert.equal(p.state.suggestDays,14);
   assert.equal(p.saveWorkspace(win).ok,true);
   const snapshot=JSON.stringify(p.state.workspace);
+  p.state.ungroupedName='Changed after saving';
   close(a.id);close(b.id);
   assert.equal(p.state.closedGroups['1:ITEM1'].name,'研究主题');
   assert.equal(JSON.stringify(p.state.workspace),snapshot); // Closing never overwrites a save.
@@ -63,6 +71,7 @@ async function run(legacy) {
   assert.equal(result.ok,true);assert.equal(result.opened,1);assert.equal(result.alreadyOpen,1);
   assert.equal(readerCalls,0);assert.equal(tabs._tabs.find(t=>t.data&&t.data.itemID===2).type,'reader-unloaded');
   assert.equal(p.groupOf(ungrouped),'g');assert.equal(p.state.groups[0].color,'#3977d5');
+  assert.equal(p.state.ungroupedName,'待阅读');
   assert.equal(p.state.groups[0].name,'研究主题');assert.equal(p.remark(ungrouped).note,'重点实验');
   assert.ok(tabs._tabs.some(t=>t.id===extra.id));assert.ok(p.state.collapsed.includes('g'));
   assert.deepEqual(tabs._tabs.slice(1,3).map(t=>t.data.itemID),[1,2]);

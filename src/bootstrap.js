@@ -70,7 +70,7 @@ async function startup(data) {
   TMServices.scriptloader.loadSubScript(TMRoot + (major < 7 ? 'features-legacy.js' : 'features.js'), TMCore, 'UTF-8');
   TabGroups = TMCore.TabGroups;
   TabGroups.load();
-  try { await TabGroups.registerSettings(TMRoot); } catch(error) { zotero.logError(error); }
+  try { await TabGroups.registerSettings(TMRoot,data.version); } catch(error) { zotero.logError(error); }
   TMWindowListener = {
     onOpenWindow:function(xulWindow) {
       var window = tmDOMWindow(xulWindow);

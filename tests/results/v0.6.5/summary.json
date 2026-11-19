@@ -1,0 +1,23 @@
+{
+  "version": "0.6.5",
+  "sha256": "e87c75b8233299f2d6c5d07634c943a42ca4eb95849f77053c2e43c692ab53fd",
+  "suite": "groups-unloaded-fixtures",
+  "runtimes": [
+    {
+      "version": "6.0.36",
+      "checks": 50,
+      "passed": true
+    },
+    {
+      "version": "7.0.32",
+      "checks": 49,
+      "passed": true
+    },
+    {
+      "version": "10.0.8",
+      "checks": 49,
+      "passed": true
+    }
+  ],
+  "limits": "Isolated Windows UI/state tests; feedback destinations inspected without opening links or sending messages; no physical input, other OS or full-PDF claim."
+}

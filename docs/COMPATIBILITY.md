@@ -1,5 +1,17 @@
 # Compatibility record
 
+## Version 0.6.5 — 2026-11-19
+
+The isolated packaged UI suite checks that ungrouped renaming is disabled by default, its menu action follows the setting, renamed headings update immediately, names survive preference reload, and disabling permission preserves the custom name while hiding the action. It also checks that the settings footer is separated, occupies the final position, shows the running add-on version, and contains the exact project, feedback-post and mailto destinations. External links are inspected without opening them or sending feedback.
+
+Shared modern and Firefox 60 state tests cover permission validation, whitespace/length validation, name persistence and restoring a saved reading-workspace name. Existing group identities, assignments and older snapshots remain compatible. Reports in `tests/results/v0.6.5/` use isolated Windows profiles and synthetic fixture attachments; they do not claim physical input, other operating systems or new full-PDF rendering coverage.
+
+| Runtime | Checks | Result |
+| --- | ---: | --- |
+| Zotero 6.0.36 | 50 | PASS |
+| Zotero 7.0.32 | 49 | PASS |
+| Zotero 10.0.8 | 49 | PASS |
+
 ## Version 0.6.4 — 2026-11-18
 
 The isolated packaged UI suite adds native synthesized mouse-event checks for both toolbar buttons: first-click open, second-click close, and mutual exclusion. It also changes the new auto-dissolve checkbox through the settings UI, closes the actual group's tabs, verifies group removal and persisted settings, checks retained closed-paper memory, and reopens an attachment to recreate the group. The removed ungrouped-color control is checked as absent.

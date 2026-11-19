@@ -44,13 +44,12 @@ Install over an older version to keep your settings. Restart Zotero if necessary
 - **Close group tabs:** The group's context menu closes its reading tabs and preserves group assignments.
 
 <details>
-<summary>Latest updates · v0.6.4: Group closing and toolbar improvements</summary>
+<summary>Latest updates · v0.6.5: Ungrouped renaming and settings information</summary>
 
-- **Optional automatic group removal:** A new setting dissolves an empty group after its one-click close action; it is off by default. Ungrouped tabs keep their section. If group restoration is enabled, reopening a paper can recreate its original group.
-- **Click again to close:** Search and suggested closures now open on the first click and close on the second. Opening one closes the other popup.
-- **Simpler settings:** Ungrouped color is now adjusted through its context menu instead of a duplicate control in settings.
+- **Optional ungrouped renaming:** The new permission is off by default. Enable it to show Rename in the ungrouped context menu. Names persist; turning permission off hides the action without resetting the name or changing document assignments.
+- **Settings footer:** A separate row shows the running plugin version, project website, Xiaohongshu feedback post and email links.
 
-Recent versions also added one-click reading-workspace save/restore, a Zotero settings pane, numbered two- and three-column document lists, and adjustable vertical-layout thresholds. In vertical mode, the active paper remains a horizontal tab at the top.
+Recent versions also added optional empty-group removal, click-again-to-close search and suggestions, one-click reading-workspace save/restore and numbered multi-column document lists.
 
 [Download the latest version](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) · [Full changelog](../CHANGELOG.md)
 
@@ -70,6 +69,8 @@ The plugin ID remains `tab-groups@local.zotero` and the preference key remains `
 
 [Changelog](../CHANGELOG.md) · [Build instructions](../DEVELOPMENT.md) · [Issues](https://github.com/Ueky2000/zotero-tab-manager/issues)
 
-For bug reports, include your Zotero version, operating system, reproduction steps, and a screenshot. The linked technical documents are currently in their original languages.
+**For bug reports, include your Zotero version, operating system, reproduction steps, and a screenshot.** The linked technical documents are currently in their original languages.
+
+You can also leave a comment on the [Xiaohongshu post](https://xhslink.cn/o/5yD58jP6BNV) or email [ueky@foxmail.com](mailto:ueky@foxmail.com).
 
 [MIT License](../../LICENSE).

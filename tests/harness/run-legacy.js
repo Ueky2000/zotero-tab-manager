@@ -196,7 +196,7 @@ async function runSettingsHarness(Zotero, Services, outputFile, fixtureDir) {
         return legacyWin && legacyWin.document.getElementById('tm-setting-restoreClosedGroups');
       });
       const doc = legacyWin.document;
-      check('Legacy settings window renders all eight controls', doc.querySelectorAll('[id^="tm-setting-"]').length === 8);
+      check('Legacy settings window renders all nine controls', doc.querySelectorAll('[id^="tm-setting-"]').length === 9);
       checkCompact(doc);
       const memory = doc.getElementById('tm-setting-restoreClosedGroups');
       memory.checked = false;
@@ -252,7 +252,7 @@ async function runSettingsHarness(Zotero, Services, outputFile, fixtureDir) {
     });
     const d = settingsWin.document,
       control = key => d.getElementById('tm-setting-' + key);
-    check('Settings page renders all eight controls', d.querySelectorAll('[id^="tm-setting-"]').length === 8);
+    check('Settings page renders all nine controls', d.querySelectorAll('[id^="tm-setting-"]').length === 9);
     checkCompact(d);
     const change = (key, value) => {
       const n = control(key);
@@ -669,7 +669,7 @@ async function runGroupListHarness(Zotero, Services, outputFile, fixtureDir) {
       return preferences && preferences.document.getElementById('tm-setting-verticalThreshold');
     });
     const threshold = preferences.document.getElementById('tm-setting-verticalThreshold');
-    check('Settings include all eight compact controls', preferences.document.querySelectorAll('[id^="tm-setting-"]').length === 8 && threshold.getBoundingClientRect().left - threshold.previousElementSibling.getBoundingClientRect().right <= 16);
+    check('Settings include all nine compact controls', preferences.document.querySelectorAll('[id^="tm-setting-"]').length === 9 && threshold.getBoundingClientRect().left - threshold.previousElementSibling.getBoundingClientRect().right <= 16);
     check('Settings use requested labels and omit the hover switch', preferences.document.getElementById('tm-setting-restoreClosedGroups').parentElement.textContent === '重新打开文献时自动进入上一次的分组' && threshold.parentElement.textContent === '分组内文献超过此数量时竖向排列' && !preferences.document.getElementById('tm-setting-hoverExpand'));
     await until(() => [...preferences.document.querySelectorAll('#tm-save-workspace img,#tm-restore-workspace img')].every(n => n.naturalWidth === 16));
     check('Both settings workspace buttons render matching colored icons', preferences.document.querySelectorAll('#tm-save-workspace img,#tm-restore-workspace img').length === 2);
@@ -694,6 +694,41 @@ async function runGroupListHarness(Zotero, Services, outputFile, fixtureDir) {
       bubbles: true
     }));
     check('Changing default display immediately overrides existing group and paper display settings', p.remark(paper).mode === 'note' && c.root.querySelector('[data-id="' + paper.id + '"] .ztg-title').textContent === 'Reading note' && p.state.groupDisplay[''] === 'note');
+    const rename = preferences.document.getElementById('tm-setting-allowUngroupedRename');
+    const ungroupedMenu = () => c.groupMenu({
+      screenX: w.screenX + 120,
+      screenY: w.screenY + 160
+    }, p.orderedGroups().find(g => g.id === ''));
+    const hasRename = menu => [...menu.children].some(n => n.getAttribute('label') === '重命名此分组');
+    let menu = ungroupedMenu();
+    check('Ungrouped rename is off by default and absent from its menu', rename && !rename.checked && !hasRename(menu));
+    menu.hidePopup();
+    await wait(100);
+    rename.checked = true;
+    rename.dispatchEvent(new preferences.Event('change', {
+      bubbles: true
+    }));
+    menu = ungroupedMenu();
+    check('Enabling the setting adds ungrouped rename to the context menu', hasRename(menu));
+    menu.hidePopup();
+    await wait(100);
+    p.renameGroup('', '待阅读');
+    check('Ungrouped rename immediately updates the tab-strip heading', c.root.querySelector('.ztg-ungrouped').textContent.includes('待阅读'));
+    p.load();
+    c.refresh();
+    check('Custom ungrouped name survives preference reload', p.state.ungroupedName === '待阅读' && c.root.querySelector('.ztg-ungrouped').textContent.includes('待阅读'));
+    rename.checked = false;
+    rename.dispatchEvent(new preferences.Event('change', {
+      bubbles: true
+    }));
+    menu = ungroupedMenu();
+    check('Disabling rename removes the menu action and retains the saved name', !hasRename(menu) && p.state.ungroupedName === '待阅读');
+    menu.hidePopup();
+    await wait(100);
+    const footer = preferences.document.getElementById('tm-settings-footer'),
+      links = footer ? [...footer.querySelectorAll('a')].map(a => a.getAttribute('href')) : [];
+    check('The separated final settings row shows the running plugin version', footer && footer.parentElement.lastElementChild === footer && preferences.getComputedStyle(footer).borderTopStyle === 'solid' && p.pluginVersion === '0.6.5' && footer.textContent.includes('0.6.5'));
+    check('Project and feedback links match the supplied destinations', links.includes('https://github.com/Ueky2000/zotero-tab-manager') && links.includes('https://xhslink.cn/o/5yD58jP6BNV') && links.includes('mailto:ueky@foxmail.com'));
     const autoDissolve = preferences.document.getElementById('tm-setting-dissolveOnGroupClose');
     check('Auto-dissolve is optional and ungrouped color is absent from settings', autoDissolve && !autoDissolve.checked && !preferences.document.getElementById('tm-setting-ungroupedColor'));
     const workspaceBefore = JSON.stringify(p.state.workspace);

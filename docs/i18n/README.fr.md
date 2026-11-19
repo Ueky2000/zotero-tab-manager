@@ -44,13 +44,12 @@ Vous pouvez installer par-dessus une ancienne version en conservant vos réglage
 - **Fermer les onglets d'un groupe :** le menu du groupe ferme les onglets de lecture en conservant leur appartenance au groupe.
 
 <details>
-<summary>Dernières mises à jour · v0.6.4 : Fermeture des groupes et barre d'outils</summary>
+<summary>Dernières mises à jour · v0.6.5 : Renommage de la section sans groupe et informations</summary>
 
-- **Dissolution automatique facultative :** Un nouveau réglage supprime un groupe vide après la fermeture de tous ses onglets en une seule action. Il est désactivé par défaut ; la section sans groupe reste disponible. Si la restauration des groupes est activée, rouvrir un document peut recréer son groupe d'origine.
-- **Un second clic referme :** La recherche et les suggestions de fermeture s'ouvrent au premier clic et se ferment au second. Ouvrir l'un ferme la fenêtre de l'autre.
-- **Des réglages plus simples :** La couleur de la section sans groupe se règle dans son menu contextuel, sans commande en double dans les paramètres.
+- **Renommage facultatif de la section sans groupe :** L'autorisation est désactivée par défaut. Activez-la pour afficher Renommer dans le menu contextuel. Le nom est enregistré ; désactiver l'autorisation masque uniquement la commande, sans réinitialiser le nom ni modifier l'affectation des documents.
+- **Informations en bas des paramètres :** Une ligne séparée affiche la version du plugin en cours d'exécution, le site du projet, la publication de retours sur Xiaohongshu et le lien email.
 
-Les versions récentes ont aussi ajouté l'enregistrement et la restauration de l'espace de lecture en un clic, un panneau dans les paramètres de Zotero, des listes numérotées sur deux ou trois colonnes et des seuils réglables pour l'affichage vertical. En mode vertical, le document actif reste un onglet horizontal en haut.
+Les versions récentes ont aussi ajouté la dissolution facultative des groupes vides, un second clic pour fermer la recherche et les suggestions, l'enregistrement et la restauration de l'espace de lecture en un clic, ainsi que des listes numérotées sur plusieurs colonnes.
 
 [Télécharger la dernière version](https://github.com/Ueky2000/zotero-tab-manager/releases/latest) · [Historique complet des modifications](../CHANGELOG.md)
 
@@ -70,6 +69,8 @@ L'identifiant `tab-groups@local.zotero` et la préférence `extensions.tabGroups
 
 [Historique des modifications](../CHANGELOG.md) · [Instructions de compilation](../DEVELOPMENT.md) · [Signaler un problème](https://github.com/Ueky2000/zotero-tab-manager/issues)
 
-Précisez la version de Zotero, le système d'exploitation, les étapes de reproduction et joignez une capture d'écran. Les documents techniques liés sont dans leurs langues d'origine.
+**Précisez la version de Zotero, le système d'exploitation, les étapes de reproduction et joignez une capture d'écran.** Les documents techniques liés sont dans leurs langues d'origine.
+
+Vous pouvez aussi laisser un commentaire sur la [publication Xiaohongshu](https://xhslink.cn/o/5yD58jP6BNV) ou écrire à [ueky@foxmail.com](mailto:ueky@foxmail.com).
 
 [Licence MIT](../../LICENSE).

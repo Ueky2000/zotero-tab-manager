@@ -37,6 +37,7 @@ var TabGroups = {
     groups: [],
     assignments: {},
     ungroupedColor: '#737373',
+    ungroupedName: '未分组',
     collapsed: [],
     order: [],
     history: {},
@@ -101,6 +102,7 @@ var TabGroups = {
           ...s.assignments
         },
         ungroupedColor: this.normalizeColor(s.ungroupedColor || '') || '#737373',
+        ungroupedName: typeof s.ungroupedName === 'string' && s.ungroupedName.trim() ? s.ungroupedName.trim().slice(0, 60) : '未分组',
         collapsed: [...new Set(Array.isArray(s.collapsed) ? s.collapsed.filter(id => valid.has(id)) : [])],
         order,
         history: s.history && typeof s.history === 'object' && !Array.isArray(s.history) ? {
@@ -133,7 +135,7 @@ var TabGroups = {
   orderedGroups() {
     const all = [...this.state.groups, {
       id: '',
-      name: '未分组',
+      name: this.state.ungroupedName || '未分组',
       color: this.state.ungroupedColor || '#737373'
     }];
     const order = [...new Set((this.state.order || []).filter(id => all.some(g => g.id === id)))];
@@ -152,6 +154,19 @@ var TabGroups = {
     ids.splice(ids.indexOf(target) + (after ? 1 : 0), 0, id);
     this.state.order = ids;
     this.save();
+  },
+  renameGroup(id, value) {
+    if (this.readOnly || typeof value !== 'string' || !value.trim() || value.trim().length > 60) return false;
+    if (id === '') {
+      if (!this.getSettings || !this.getSettings().allowUngroupedRename) return false;
+      this.state.ungroupedName = value.trim();
+    } else {
+      const group = this.state.groups.find(g => g.id === id);
+      if (!group) return false;
+      group.name = value.trim();
+    }
+    this.save();
+    return true;
   },
   setCollapsed(id, collapsed) {
     if (this.readOnly) return;
@@ -791,14 +806,11 @@ var TabGroups = {
         return popup;
       },
       groupMenu: (event, g) => c.popup(event, popup => {
-        if (g.id) c.item(popup, '重命名此分组', () => {
+        if (g.id || this.getSettings && this.getSettings().allowUngroupedRename) c.item(popup, '重命名此分组', () => {
           const v = {
             value: g.name
           };
-          if (Services.prompt.prompt(win, '重命名分组', '分组名称：', v, null, {}) && v.value.trim()) {
-            g.name = v.value.trim().slice(0, 60);
-            this.save();
-          }
+          if (Services.prompt.prompt(win, '重命名分组', '分组名称：', v, null, {})) this.renameGroup(g.id, v.value.trim().slice(0, 60));
         }, {
           disabled: !!this.readOnly
         });
@@ -1122,7 +1134,7 @@ var TabGroups = {
         };
         suggestions.hidden = !options.showSuggestions;
         const activeVertical = documents.find(t => t.id === tabs.selectedID && c.isVertical(this.groupOf(t)));
-        const signature = JSON.stringify([activeVertical === null || activeVertical === void 0 ? void 0 : activeVertical.id, documents.map(t => [t.id, t.title, this.originalName(t), this.remark(t), this.groupOf(t)]), this.state.groups, this.state.ungroupedColor, this.state.order, [...c.collapsed], options]);
+        const signature = JSON.stringify([activeVertical === null || activeVertical === void 0 ? void 0 : activeVertical.id, documents.map(t => [t.id, t.title, this.originalName(t), this.remark(t), this.groupOf(t)]), this.state.groups, this.state.ungroupedName, this.state.ungroupedColor, this.state.order, [...c.collapsed], options]);
         if (searchPanel.state === 'open') c.renderSearch();
         suggestions.setAttribute('tooltiptext', `建议关闭 (${suggested})：${this.state.suggestDays} 天未查看的文献`);
         this.setLabel(suggestions, `建议关闭 (${suggested})`);
@@ -1156,7 +1168,7 @@ var TabGroups = {
           heading.className = 'ztg-heading' + (!g.id ? ' ztg-ungrouped' : '');
           heading.dataset.group = g.id;
           heading.style.width = this.headingWidth(g) + 'px';
-          heading.title = g.id ? `${g.name}：点击折叠/展开，拖入文献加入，右键管理和设置颜色` : '未分组：点击折叠/展开，把文献拖到这里移出分组';
+          heading.title = g.id ? `${g.name}：点击折叠/展开，拖入文献加入，右键管理和设置颜色` : `${g.name}：点击折叠/展开，把文献拖到这里移出分组`;
           const vertical = c.isVertical(g.id);
           const expanded = vertical ? c.groupListID === g.id && (groupPanel.state === 'open' || groupPanel.state === 'showing') : !c.collapsed.has(g.id);
           if (vertical) {

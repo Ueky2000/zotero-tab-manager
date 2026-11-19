@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.5 — 2026-11-19
+
+- Add an optional permission to rename the ungrouped section, disabled by default. Its context-menu action appears only when enabled; names persist across restarts, update immediately and keep the section's identity and document assignments.
+- Include the custom ungrouped name in new reading-workspace snapshots; older snapshots remain compatible. Turning off rename permission retains the saved name.
+- Add a separated settings footer with the actual running add-on version, project website, Xiaohongshu feedback post and email links.
+
 ## 0.6.4 — 2026-11-18
 
 - Toggle search and suggestions popups with repeated toolbar clicks; opening one closes the other. Use anchored native popups to avoid rollup immediately reopening a just-closed popup.
